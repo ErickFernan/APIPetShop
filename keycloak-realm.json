@@ -1,0 +1,113 @@
+{
+  "realm": "dev",
+  "enabled": true,
+  "smtpServer": {
+    "host": "172.18.0.1",
+    "port": "1025",
+    "from": "noreply@apipetshop.com.br",
+    "fromDisplayName": "DevKeycloak",
+    "replyTo": "suporte@apipetshop.com.br",
+    "replyToDisplayName": "SuportDevAPIPetshop",
+    "ssl": false,
+    "starttls": true,
+    "auth": false
+  },
+  "roles": {
+    "realm": [
+      { "name": "saude-total" },
+      { "name": "saude-partial" },
+      { "name": "saude-basic" },
+      { "name": "banhotosa-total" },
+      { "name": "banhotosa-partial" },
+      { "name": "banhotosa-basic" },
+      { "name": "pet-total" },
+      { "name": "pet-partial" },
+      { "name": "pet-basic" },
+      { "name": "hotel-total" },
+      { "name": "hotel-partial" },
+      { "name": "hotel-basic" },
+      { "name": "loja-total" },
+      { "name": "loja-partial" },
+      { "name": "loja-basic" },
+      { "name": "produtos-total" },
+      { "name": "produtos-partial" },
+      { "name": "produtos-basic" },
+      { "name": "usuarios-total" },
+      { "name": "usuarios-partial" },
+      { "name": "usuarios-basic" }
+    ]
+  },
+  "groups": [
+    {
+      "name": "Tutor",
+      "realmRoles": ["usuarios-basic", "produtos-basic", "loja-basic", "hotel-basic", "pet-basic", "banhotosa-basic", "saude-basic"]
+    },
+    {
+      "name": "Medico",
+      "realmRoles": ["usuarios-partial", "produtos-partial", "pet-partial", "saude-total"]
+    },
+    {
+      "name": "SuperUser",
+      "realmRoles": ["usuarios-total", "produtos-total", "loja-total", "hotel-total", "pet-total", "banhotosa-total", "saude-total"]
+    }
+  ],
+  "users": [
+    {
+      "username": "admin",
+      "enabled": true,
+      "email": "admin@teste.com.br",
+      "firstName": "Admin",
+      "lastName": "Teste",
+      "createdTimestamp": 1686494678000,
+      "credentials": [{ "type": "password", "value": "password" }],
+      "groups": ["SuperUser"],
+      "clientRoles": {
+        "realm-management": ["realm-admin"]
+      },
+      "realmRoles": ["default-roles-dev"],
+      "requiredActions": ["UPDATE_PASSWORD"]
+    },
+    {
+      "username": "user",
+      "enabled": true,
+      "email": "user@example.com",
+      "firstName": "User",
+      "lastName": "Example",
+      "createdTimestamp": 1686494678000,
+      "credentials": [{ "type": "password", "value": "password" }],
+      "groups": ["Tutor"],
+      "realmRoles": ["saude-admin", "educacao-user","default-roles-dev"]
+    },
+    {
+      "username": "medico",
+      "enabled": true,
+      "email": "medico@example.com",
+      "firstName": "medico",
+      "lastName": "Example",
+      "createdTimestamp": 1686494678000,
+      "credentials": [{ "type": "password", "value": "password" }],
+      "groups": ["Tutor", "Medico"],
+      "realmRoles": ["usuarios-total", "produtos-total"]
+    }
+  ],
+  "clients": [
+    {
+      "clientId": "rest-client",
+      "enabled": true,
+      "publicClient": true,
+      "standardFlowEnabled": false,
+      "directAccessGrantsEnabled": true,
+      "clientAuthenticatorType": "none",
+      "frontchannelLogout": true
+    },
+    {
+      "clientId": "admin-rest-client",
+      "enabled": true,
+      "publicClient": false,
+      "standardFlowEnabled": false,
+      "serviceAccountsEnabled": true,
+      "clientAuthenticatorType": "client-secret",
+      "frontchannelLogout": true
+    }
+  ]
+}

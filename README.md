@@ -67,7 +67,7 @@ Definido como o projeto será iniciado, vou detalhar algumas funções e particu
 * Bot de Preços:
 
 <p align="justify">
-O funcionamento do bot ainda não está completamente definido, mas a ideia básica é que ele será desenvolvido como um serviço em Flask. Ele terá uma rota REST onde o usuário, que precisa estar autenticado e autorizado, enviará as especificações e detalhes do que deseja buscar em formato JSON. O bot processará essas informações, executará a busca e gerará uma planilha Excel com os dados coletados.
+O funcionamento do bot ainda não está completamente definido, mas a ideia básica é que ele será desenvolvido como um serviço em Flask juntamente com o BeautifulSoup. Ele terá uma rota REST onde o usuário, que precisa estar autenticado e autorizado, enviará as especificações e detalhes do que deseja buscar em formato JSON. O bot processará essas informações, executará a busca e gerará uma planilha Excel com os dados coletados.
 </p>
 
 <p align="justify">
@@ -114,6 +114,11 @@ Como mencionado anteriormente, o PetshopAPI será uma API desenvolvida utilizand
 - Centraliza as informações dos produtos vendidos ou utilizados nos serviços, funcionando como um banco de dados compartilhado entre as outras aplicações.
 </p> 
 
+![UML API](readme_images/PETSHOPAPIUML.svg)
+<p align="center"> 
+figura 3 - Diagrama UML
+</p> 
+
 <p align="justify">
 Você pode estar se perguntando por que existe uma aplicação dedicada apenas para os produtos. A razão é que, para garantir a modularidade e a flexibilidade do sistema, as aplicações que compartilham serviços comuns, como Banho/Tosa e Loja, precisam de um intermediário central. Ao separar os dados dos produtos em uma aplicação própria, é possível integrar diferentes serviços que utilizam essas mesmas informações, evitando redundâncias e facilitando a manutenção.
 </p> 
@@ -148,10 +153,6 @@ Outro ponto importante é que a APP Usuários contém tabelas relacionadas a fot
 Em relação à autenticação e autorização, será utilizado o Keycloak para gerenciar as credenciais dos usuários de maneira eficiente e segura. Quando um usuário é criado, ele é registrado tanto no Keycloak quanto no banco de dados próprio do projeto. No Keycloak, são armazenadas apenas informações básicas, como nome, e-mail e funções (roles). Todas as demais informações relacionadas ao usuário são armazenadas no banco de dados da API, garantindo uma separação clara entre os dados de autenticação e os dados específicos da aplicação.
 </p> 
 
-![UML API](readme_images/PETSHOPAPIUML.svg)
-<p align="center"> 
-figura 3 - Diagrama UML
-</p> 
 
 <p align="justify">
 Como mencionei anteriormente, este projeto de portfólio será utilizado para explorar e estudar novas ferramentas. Por esse motivo, ele será constantemente aprimorado e receberá novas funcionalidades com frequência. Para manter a organização do desenvolvimento, adotarei um TO DO separado em duas categorias: Ideias de Melhorias Futuras e Tarefas em Andamento.
@@ -168,6 +169,7 @@ Esse TO DO funcionará como uma versão simplificada de sprint e backlog. Como e
 - [x] Criar o readme
 
 ### Tarefas em execução:
+- [ ] Inicializar projeto DJANGO da API
 - [ ] Criar o docker-compose do projeto geral e Dockerfile do serviço DRF.
 - [ ] Cria json com configurações iniciais do keycloak
 
@@ -177,7 +179,6 @@ Esse TO DO funcionará como uma versão simplificada de sprint e backlog. Como e
 - [ ] Implementar os serializers
 - [ ] Implementar as views
 - [ ] Implementar autenticação e autorização com o keycloak
-- [ ] 
 
 ### Upgrades:
 Em upgrades vou separar tarefas grande que precisarão ser dividas em outras subtarefas.
@@ -201,3 +202,10 @@ Apenas para fins de anotações, vou deixar uma lista de tecnologias que desejo 
 - [ ] RabbitMQ
 - [ ] Spark
 - [ ] FastAPI
+
+
+
+Na parte de grupos vou definir a seguinte logica: → Pensar melhor depois
+basic - Pode ver informaçãoes do banco relacionados a si mesmo
+partial - Pode ver todas as informações do banco
+total - Pode ver e editar todas as informações do banco

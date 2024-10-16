@@ -1,0 +1,97 @@
+version: '3.8'
+
+services:
+  # PostgreSQL
+  psql:
+    image: postgres:17.0
+    restart: always
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+
+    ports:
+      - "${POSTGRES_PORT}:${POSTGRES_PORT}"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init_db.sql:/docker-entrypoint-initdb.d/init_db.sql
+    container_name: postgres_container
+
+  # Keycloak
+  keycloak:
+    image: quay.io/keycloak/keycloak:24.0.4
+    restart: always
+    environment:
+      KC_DB: ${KC_DB}
+      KC_DB_URL: ${KC_DB_URL}
+      KC_DB_USERNAME: ${KC_DB_USERNAME}
+      KC_DB_PASSWORD: ${KC_DB_PASSWORD}
+      KC_HOSTNAME: ${KC_HOSTNAME}
+      KC_HOSTNAME_STRICT: ${KC_HOSTNAME_STRICT}
+      KC_HOSTNAME_STRICT_HTTPS: ${KC_HOSTNAME_STRICT_HTTPS}
+      KC_LOG_LEVEL: ${KC_LOG_LEVEL}
+      KC_METRICS_ENABLED: ${KC_METRICS_ENABLED}
+      KC_HEALTH_ENABLED: ${KC_HEALTH_ENABLED}
+      KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN}
+      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
+    volumes:
+      - ./keycloak-realm.json:/opt/keycloak/data/import/keycloak-realm.json
+    command: ["start-dev", "--import-realm"]
+    ports:
+      - "${KC_PORT}:${KC_PORT}"
+    depends_on:
+      - psql
+    container_name: keycloak_container
+
+  # Mailhog
+  mailhog:
+    restart: always
+    image: mailhog/mailhog
+    ports:
+      - "${MAILHOG_SMTP_PORT}:${MAILHOG_SMTP_PORT}"
+      - "${MAILHOG_WEB_UI_PORT}:${MAILHOG_WEB_UI_PORT}"
+    container_name: mailhog_container
+
+  # MinIO
+  minio:
+    image: minio/minio:RELEASE.2024-10-13T13-34-11Z.fips
+    restart: always
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER} 
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD} 
+    ports:
+      - "${MINIO_API_PORT}:${MINIO_API_PORT}"
+      - "${MINIO_CONSOLE_PORT}:${MINIO_CONSOLE_PORT}"
+    volumes:
+      - minio_data:/data 
+    command: server /data 
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://${MINIO_BASE_URL}:${MINIO_API_PORT}/minio/health/live"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    container_name: minIO_container
+
+  # Django App
+  django-app:
+    restart: always
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: >
+      sh -c "python manage.py migrate &&
+      python manage.py runserver ${DJANGO_BASE_URL}:${DJANGO_PORT}"
+    ports:
+      - "${DJANGO_PORT}:${DJANGO_PORT}"
+    depends_on:
+      - psql
+      - mailhog
+      - minio
+      - keycloak
+    container_name: django_api_container
+    volumes:
+      - .:/usr/src/app
+
+volumes:
+  postgres_data:
+  minio_data:
