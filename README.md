@@ -167,17 +167,19 @@ Esse TO DO funcionará como uma versão simplificada de sprint e backlog. Como e
 - [x] Modelar serviços do projeto
 - [x] Modelar banco de dados
 - [x] Criar o readme
+- [x] Inicializar projeto DJANGO da API
+- [x] Criar o docker-compose do projeto geral e Dockerfile do serviço DRF.
+- [x] Criar json com configurações iniciais do keycloak
+- [x] Criar .env e envexample.txt
 
 ### Tarefas em execução:
-- [ ] Inicializar projeto DJANGO da API
-- [ ] Criar o docker-compose do projeto geral e Dockerfile do serviço DRF.
-- [ ] Cria json com configurações iniciais do keycloak
+- [ ] Configurações iniciais do projeto DRF
+- [ ] Criar configuração do minIO
+- [ ] Implementar os modelos de banco de dados no projeto
 
 ### Backlog:
-- [ ] Configurações iniciais do projeto DRF
-- [ ] Implementar os modelos de banco de dados no projeto
 - [ ] Implementar os serializers
-- [ ] Implementar as views
+- [ ] Implementar as views - básicas, sem a personalização de rotas ainda (CRUD - padrão do DJANGO)
 - [ ] Implementar autenticação e autorização com o keycloak
 
 ### Upgrades:
@@ -186,13 +188,32 @@ Em upgrades vou separar tarefas grande que precisarão ser dividas em outras sub
 - [ ] Adicionar o Kong ao projeto
 - [ ] Criar uma aplicação extra completa (front e back) com um serviço de chat por texto e voz.
 
-Aqui terá a parte de código explicando como isntalar e executar o projeto
+### IMPORTANTE:
+<p align="justify">
+Para facilitar a organização e testar o uso de squash commits, o projeto seguirá a estrutura de branches descrita abaixo. A branch main será onde a versão mais recente e estável do projeto será mergeada e ficará disponível publicamente no GitHub.
+</p> 
 
-Preciso comentar como vão funcionar as branchs neste projeto, no caso vou sair da main e fazer a versão simplificada e apos concluido irei fazer o merge na main, depois disso abrirei outra branch e irei adicionar o kong, a mesma ideia vai se aplicar a criação do bot
+<p align="justify">
+No entanto, cada atualização ou melhoria será feita em branches separadas, permitindo manter um histórico das versões anteriores. Se você deseja testar uma versão estável, use a branch main ou uma branch já concluida. Para executar melhorias em andamento ou acessar uma versão anterior estável, será necessário selecionar a branch correspondente. Abaixo estão as branches disponíveis e suas descrições:
+</p> 
 
-Além disso pretendo adicionar algumas documentações do projeto, como o link das rotas testadas pelo postman assim como o swagger
+#### Branchs:
+- main: No momento possui apenas arquivos básicos e o readme sem nenhuma configuração
+- apisimplificada: Onde estou desenvolvendo o projeto simplificado da figura 2.
+
+### Executando o projeto:
+Para testar e executar o projeto em sua máquina local, siga o passo a passo abaixo:
+
+```
+Código explicativo aqui:
+faça o clone deste repositório
+selecione a branch que deseja executar
+...
+```
 
 Quando pronto colocar um vídeo demonstrativo
+
+Além disso pretendo adicionar algumas documentações do projeto, como o link das rotas testadas pelo postman assim como o swagger
 
 <p align="justify">
 Apenas para fins de anotações, vou deixar uma lista de tecnologias que desejo estudar, embora nem todas se encaixem necessariamente neste projeto. Mantendo essa lista aqui, servirá como um lembrete, uma vez que pretendo revisitar este projeto com certa frequência:
@@ -206,6 +227,11 @@ Apenas para fins de anotações, vou deixar uma lista de tecnologias que desejo 
 
 
 Na parte de grupos vou definir a seguinte logica: → Pensar melhor depois
+
 basic - Pode ver informaçãoes do banco relacionados a si mesmo
+
 partial - Pode ver todas as informações do banco
+
 total - Pode ver e editar todas as informações do banco
+
+OBS.: É MUITO IMPORTANTE FALAR NO README SOBRE AS BRANCHS, POIS NÃO VOU TRABALHAR NA MAIN POR ENQUANTO ENTÃO ELA VAI FICAR DESATUALIZADA E É A QUE APARECE NO GITHUB, MUDAR A PADRÃO NÃO COMPENSA POR ENQUANTO, ENTÃO É MELHOR ESCREVER ATÉ QUE A PRIMEIRA PARTE DO PROJETO ESTEJA PRONTA!!!!!!!!!
