@@ -171,10 +171,14 @@ Esse TO DO funcionará como uma versão simplificada de sprint e backlog. Como e
 - [x] Criar o docker-compose do projeto geral e Dockerfile do serviço DRF.
 - [x] Criar json com configurações iniciais do keycloak
 - [x] Criar .env e envexample.txt
+- [x] Criar configuração do minIO
+- [x] Função upload_file minIO
+- [x] Configurações iniciais do projeto DRF
+- [x] Criar validação de imagem
 
 ### Tarefas em execução:
-- [ ] Configurações iniciais do projeto DRF
-- [ ] Criar configuração do minIO
+
+- [ ] Função delete_file minIO
 - [ ] Implementar os modelos de banco de dados no projeto
 
 ### Backlog:
@@ -187,6 +191,7 @@ Em upgrades vou separar tarefas grande que precisarão ser dividas em outras sub
 - [ ] Criação do bot
 - [ ] Adicionar o Kong ao projeto
 - [ ] Criar uma aplicação extra completa (front e back) com um serviço de chat por texto e voz.
+- [ ] Criar um sistema que irá preencher caracteristicas (hábitos, alimentação, etc) das especies dos pets usando o llama3 com o lmstudio, detalhes pensar futuramente.
 
 ### IMPORTANTE:
 <p align="justify">

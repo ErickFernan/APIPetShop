@@ -25,7 +25,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = config('DJANGO_SECRET_KEY', default='django-insecure-wff1!a5@3_73@@waa+bwuz+c7#qzmttleb9u58nz&f_p)nnise')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = config('DJANGO_DEBUG', default=False, cast=bool)
+DEBUG = config('DJANGO_DEBUG', default=True, cast=bool)
 
 ALLOWED_HOSTS = ['0.0.0.0', '127.0.0.1', 'localhost']
 # ALLOWED_HOSTS = ['*']
@@ -42,6 +42,12 @@ INSTALLED_APPS = [
     # EXTERNO
     'rest_framework',
     # MEU
+    'banhotosa',
+    'hotel',
+    'loja',
+    'pet',
+    'produtos',
+    'saude',
     'usuarios',
 ]
 
@@ -133,3 +139,12 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Configuração MINIO
+# MINIO_ENDPOINT = 'localhost:9000' # Para desenvolvimento local
+# MINIO_ENDPOINT = 'minio:9000' # Para ambientes Docker
+MINIO_ENDPOINT = config('MINIO_ENDPOINT')
+MINIO_ACCESS_KEY = config('MINIO_ACCESS_KEY')
+MINIO_SECRET_KEY = config('MINIO_SECRET_KEY')
+MINIO_USE_SSL = DEBUG = config('MINIO_USE_SSL', default=False, cast=bool)
+MINIO_BUCKET_NAME = config('MINIO_BUCKET_NAME')
