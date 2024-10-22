@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'produtos',
     'saude',
     'usuarios',
+    'utils',
 ]
 
 MIDDLEWARE = [

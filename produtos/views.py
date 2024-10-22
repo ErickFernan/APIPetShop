@@ -9,7 +9,7 @@ from produtos.serializers import ProductSerializer
 
 from bucket.minio_client import upload_file
 
-from utils.validacoes import image_validation
+from utils.validations import image_validation
 
 class ProductViewSet(ModelViewSet):
     queryset = Product.objects.all()

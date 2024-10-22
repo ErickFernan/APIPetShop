@@ -1,24 +1,38 @@
+import uuid
+
 from django.db import models
 
+from utils.models import Base
 from usuarios.models import User
-class Pet(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
-    name = models.CharField(max_length=50)
-    birthday = models.DateField()
-    photo_path = models.CharField(max_length=100, blank=True, null=True)
-    weight = models.PositiveSmallIntegerField()
-    pet_owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='pets')
-    breed = models.ForeignKey(Breed, on_delete=models.CASCADE)
 
-class Species(models.Model):
+
+class Specie(Base):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
     name = models.CharField(max_length=50, unique=True)
-    recommended_environment = models.TextField(blank=True, null=True)
 
-class Breed(models.Model):
+    def __str__(self):
+        return f'{self.name}'
+
+class Breed(Base):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
     name = models.CharField(max_length=50, unique=True)
     habits = models.TextField(blank=True, null=True)
     nutrition =  models.TextField(blank=True, null=True)
-    average_lifespan_years = models.PositiveIntegerField(blank=True, null=True) 
-    species = models.ForeignKey(Species, on_delete=models.CASCADE, related_name='breeds')
+    recommended_environment = models.TextField(blank=True, null=True)
+    average_lifespan_years = models.PositiveSmallIntegerField(blank=True, null=True) 
+    species_id = models.ForeignKey(Specie, on_delete=models.CASCADE, related_name='breeds', editable=False)
+    
+    def __str__(self):
+        return f'{self.name}'
+
+class Pet(Base):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
+    name = models.CharField(max_length=50)
+    birthday = models.DateField()
+    photo_path = models.CharField(max_length=100, blank=True, null=True)
+    weight = models.DecimalField(max_digits=4, decimal_places=2)
+    pet_owner_id = models.ForeignKey(User, on_delete=models.CASCADE, related_name='pets_owned', editable=False)
+    breed_id = models.ForeignKey(Breed, on_delete=models.CASCADE, related_name='pets', editable=False)
+
+    def __str__(self):
+        return f'{self.name} ({self.breed_id.name})'

@@ -142,7 +142,11 @@ Para concluir a análise do diagrama UML apresentado na Figura 3, vou comentar a
 -: Informações restritas, que só podem ser modificadas por métodos internos ou agentes específicos.
 
 <p align="justify">
-Se você observar o UML, notará que algumas variáveis possuem um *. Esse asterisco indica que as opções para essas variáveis serão uma lista pré-definida, permitindo ao usuário apenas selecionar valores dentre os já estabelecidos. Adotei essa abordagem para garantir maior consistência nos dados, evitando duplicidades ou erros de digitação. Todas as variáveis com * são relativamente estáveis e não exigem mudanças frequentes, então definir listas prévias não será um problema. No entanto, caso seja necessário, essas listas poderão ser transformadas em tabelas editáveis, permitindo aos usuários adicionar ou remover valores. Inicialmente, optei por essa abordagem mais rígida por considerar que ela é suficiente para o contexto.
+Se você observar o UML, notará que algumas variáveis possuem um *. Esse asterisco indica que as opções para essas variáveis serão uma lista pré-definida, permitindo ao usuário apenas selecionar valores dentre os já estabelecidos. Adotei essa abordagem para garantir maior consistência nos dados, evitando duplicidades ou erros de digitação. Todas as variáveis com * são relativamente estáveis e não exigem mudanças frequentes, então definir listas prévias não será um problema. No entanto, caso seja necessário, essas listas poderão ser transformadas em tabelas editáveis, permitindo aos usuários adicionar ou remover valores. Inicialmente, optei por essa abordagem mais rígida por considerar que ela é suficiente para o contexto. 
+</p> 
+
+<p align="justify">
+A única exceção a essa regra será no app de pet shop, pois a quantidade de espécies e raças de animais atendidos pode ser extensa. Tentando criar uma lista pré-definida, correria-se o risco de omitir muitas opções importantes. Por isso, adotei uma abordagem mais flexível, criando tabelas editáveis. Dessa forma, é possível começar com uma base inicial e, ao longo do tempo, os usuários podem complementar e expandir as informações conforme necessário, garantindo mais precisão e abrangência.
 </p> 
 
 <p align="justify">
@@ -153,16 +157,19 @@ Outro ponto importante é que a APP Usuários contém tabelas relacionadas a fot
 Em relação à autenticação e autorização, será utilizado o Keycloak para gerenciar as credenciais dos usuários de maneira eficiente e segura. Quando um usuário é criado, ele é registrado tanto no Keycloak quanto no banco de dados próprio do projeto. No Keycloak, são armazenadas apenas informações básicas, como nome, e-mail e funções (roles). Todas as demais informações relacionadas ao usuário são armazenadas no banco de dados da API, garantindo uma separação clara entre os dados de autenticação e os dados específicos da aplicação.
 </p> 
 
-
 <p align="justify">
-Como mencionei anteriormente, este projeto de portfólio será utilizado para explorar e estudar novas ferramentas. Por esse motivo, ele será constantemente aprimorado e receberá novas funcionalidades com frequência. Para manter a organização do desenvolvimento, adotarei um TO DO separado em duas categorias: Ideias de Melhorias Futuras e Tarefas em Andamento.
+Uma outra melhoria planejada é a integração da API com o Llama 3 no LMStudio para gerar textos automaticamente com IA. A ideia é criar uma rota com um prompt predefinido, onde o usuário insere apenas informações-chave. Assim, os dados sobre as características de cada raça serão gerados automaticamente, permitindo o preenchimento dessas informações de forma mais rápida e eficiente. Se a resposta da IA não for satisfatória, o administrador poderá ajustá-la manualmente para garantir a qualidade das informações. Além disso, outra funcionalidade será oferecer ao usuário comum a possibilidade de acessar informações e dicas relacionadas ao seu pet, tornando a experiência mais personalizada e acolhedora.
+</p> 
+
+## TO DO:
+<p align="justify">
+Como mencionei anteriormente, este projeto de portfólio será utilizado para explorar e estudar novas ferramentas. Por esse motivo, ele será constantemente aprimorado e receberá novas funcionalidades com frequência. Para manter a organização do desenvolvimento, adotarei um TO DO separado em algumas categorias categorias: Tarefas concluidas, Tarefas em execução, Backlog e Upgrades.
 </p> 
 
 <p align="justify">
 Esse TO DO funcionará como uma versão simplificada de sprint e backlog. Como estou desenvolvendo este projeto de forma independente e não pretendo utilizar ferramentas de SCRUM, optei por essa abordagem prática para garantir a organização e não perder de vista as ideias que surgirem ao longo do processo.
 </p> 
 
-## TO DO:
 ### Tarefas concluidas:
 - [x] Modelar serviços do projeto
 - [x] Modelar banco de dados
@@ -175,15 +182,16 @@ Esse TO DO funcionará como uma versão simplificada de sprint e backlog. Como e
 - [x] Função upload_file minIO
 - [x] Configurações iniciais do projeto DRF
 - [x] Criar validação de imagem
+- [x] Implementar os modelos de banco de dados no projeto
+- [x] Implementar os serializers
+- [x] Implementar as views - básicas, sem a personalização de rotas ainda (CRUD - padrão do DJANGO)
 
 ### Tarefas em execução:
-
+- [ ] Criar função para mudar o nome do arquivo salvo no banco para um uuid
+- [ ] Adiconar o swagger
 - [ ] Função delete_file minIO
-- [ ] Implementar os modelos de banco de dados no projeto
 
 ### Backlog:
-- [ ] Implementar os serializers
-- [ ] Implementar as views - básicas, sem a personalização de rotas ainda (CRUD - padrão do DJANGO)
 - [ ] Implementar autenticação e autorização com o keycloak
 
 ### Upgrades:
@@ -191,7 +199,7 @@ Em upgrades vou separar tarefas grande que precisarão ser dividas em outras sub
 - [ ] Criação do bot
 - [ ] Adicionar o Kong ao projeto
 - [ ] Criar uma aplicação extra completa (front e back) com um serviço de chat por texto e voz.
-- [ ] Criar um sistema que irá preencher caracteristicas (hábitos, alimentação, etc) das especies dos pets usando o llama3 com o lmstudio, detalhes pensar futuramente.
+- [ ] Criar um sistema que irá preencher caracteristicas (hábitos, alimentação, etc) das raças dos pets usando o llama3 com o lmstudio, detalhes pensar futuramente.
 
 ### IMPORTANTE:
 <p align="justify">
@@ -240,3 +248,20 @@ partial - Pode ver todas as informações do banco
 total - Pode ver e editar todas as informações do banco
 
 OBS.: É MUITO IMPORTANTE FALAR NO README SOBRE AS BRANCHS, POIS NÃO VOU TRABALHAR NA MAIN POR ENQUANTO ENTÃO ELA VAI FICAR DESATUALIZADA E É A QUE APARECE NO GITHUB, MUDAR A PADRÃO NÃO COMPENSA POR ENQUANTO, ENTÃO É MELHOR ESCREVER ATÉ QUE A PRIMEIRA PARTE DO PROJETO ESTEJA PRONTA!!!!!!!!!
+
+
+ANOTAÇÕES:
+- verificar seta para o bot(vai depender de como vou salvar os arquivos no minIO)
+- colocar uma condição que o cpf pode ser null se outro documento for informado (fazer no models?)
+- fazer validação de formato com o regex nos outros documentos
+
+
+SUBISTIUIR O created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    por uma classe em comum pra tirar a repetição, pensar se faço isso no utils ou em cada app
+
+### Melhorias
+- no app saúde verificar se o responsivel de um serviço é válido, por exemplo, um zelador não pode ser o resnponsável por uma cirurgia, então quando for criado o dado deve-se verificar isso
+- automatizar o tetment_cycle status de acordo com o serviço, por exemplo, uma vacina é aplicada e o ciclo já é finalizado
+- na hora de salvar a imagem colocar um uuid no lugar do nome original.
+- as funções para lidar com o time no agendamento estão pronta e estão em functions e validations da app utils, quando for fazer a views lembrar de usar.
