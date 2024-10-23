@@ -12,6 +12,7 @@ class ServiceSerializer(serializers.ModelSerializer):
     class Meta:
         model = Service
         fields = '__all__'
+        ref_name = 'HotelService'
 
 class ReservationServiceSerializer(serializers.ModelSerializer):
     class Meta:

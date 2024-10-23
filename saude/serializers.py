@@ -12,6 +12,7 @@ class ServiceSerializer(serializers.ModelSerializer):
     class Meta:
         model = Service
         fields = '__all__'
+        ref_name = 'SaudeService'
 
 class ExamTypeSerializer(serializers.ModelSerializer):
     class Meta:

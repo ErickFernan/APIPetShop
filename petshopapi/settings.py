@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     # EXTERNO
     'rest_framework',
+    'drf_yasg',
     # MEU
     'banhotosa',
     'hotel',

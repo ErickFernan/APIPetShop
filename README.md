@@ -185,10 +185,10 @@ Esse TO DO funcionará como uma versão simplificada de sprint e backlog. Como e
 - [x] Implementar os modelos de banco de dados no projeto
 - [x] Implementar os serializers
 - [x] Implementar as views - básicas, sem a personalização de rotas ainda (CRUD - padrão do DJANGO)
+- [x] Adiconar o swagger
 
 ### Tarefas em execução:
 - [ ] Criar função para mudar o nome do arquivo salvo no banco para um uuid
-- [ ] Adiconar o swagger
 - [ ] Função delete_file minIO
 
 ### Backlog:
