@@ -252,13 +252,8 @@ OBS.: É MUITO IMPORTANTE FALAR NO README SOBRE AS BRANCHS, POIS NÃO VOU TRABAL
 
 ANOTAÇÕES:
 - verificar seta para o bot(vai depender de como vou salvar os arquivos no minIO)
-- colocar uma condição que o cpf pode ser null se outro documento for informado (fazer no models?)
+- ver se consigo obrigar que o usuário só seja criado se um documento for adicionado junto, mesmo sendo tabelas separadas, tem a operação atomica, mas queria fazer no próprio models.
 - fazer validação de formato com o regex nos outros documentos
-
-
-SUBISTIUIR O created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    por uma classe em comum pra tirar a repetição, pensar se faço isso no utils ou em cada app
 
 ### Melhorias
 - no app saúde verificar se o responsivel de um serviço é válido, por exemplo, um zelador não pode ser o resnponsável por uma cirurgia, então quando for criado o dado deve-se verificar isso

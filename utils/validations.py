@@ -15,7 +15,6 @@ def image_validation(file):
     except (IOError, SyntaxError) as e:
         return False, "The uploaded file is not a valid image."
 
-
 def appointment_time_validation(appointment_time, execution_time):
     closing_time = time(22, 0)
 

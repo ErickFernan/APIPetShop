@@ -147,5 +147,5 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 MINIO_ENDPOINT = config('MINIO_ENDPOINT')
 MINIO_ACCESS_KEY = config('MINIO_ACCESS_KEY')
 MINIO_SECRET_KEY = config('MINIO_SECRET_KEY')
-MINIO_USE_SSL = DEBUG = config('MINIO_USE_SSL', default=False, cast=bool)
+MINIO_USE_SSL = config('MINIO_USE_SSL', default=False, cast=bool)
 MINIO_BUCKET_NAME = config('MINIO_BUCKET_NAME')

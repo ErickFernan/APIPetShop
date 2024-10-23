@@ -1,4 +1,3 @@
-from rest_framework import viewsets
 from rest_framework.viewsets import ModelViewSet
 
 from pet.models import Specie, Breed, Pet
