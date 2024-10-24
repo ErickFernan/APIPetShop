@@ -26,6 +26,7 @@ def upload_file(file_data, file_name, content_type, folder_prefix):
             # part_size=10*1024*1024,
             content_type=content_type,
         )
+        print(f"{folder_prefix}/{file_name}")
         return True
 
     except S3Error as e:
@@ -34,4 +35,21 @@ def upload_file(file_data, file_name, content_type, folder_prefix):
 
     except Exception as e:
         print(f"An unexpected error occurred: {e}")
+        return False
+
+def delete_file(full_path):
+    print(full_path)
+    try:
+        minio_client.remove_object(
+            settings.MINIO_BUCKET_NAME,
+            f"{full_path}",
+        )
+        return True
+    
+    except S3Error as e:
+        print(f"S3Error occurred: {e.code} - {e.message}")
+        return False
+
+    except Exception as e:
+        print(f"An unexpected error occurred11: {e}")
         return False

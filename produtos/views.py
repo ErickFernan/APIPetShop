@@ -1,3 +1,6 @@
+from django.shortcuts import get_object_or_404
+from django.db import transaction
+
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
@@ -6,13 +9,16 @@ from rest_framework.response import Response
 from produtos.models import Product
 from produtos.serializers import ProductSerializer
 
-from bucket.minio_client import upload_file
+from bucket.minio_client import upload_file, delete_file
 
 from utils.validations import image_validation
+from utils.functions import change_file_name
+
 
 class ProductViewSet(ModelViewSet):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
+    folder_prefix = 'products'
 
     def create(self, request):
         try:
@@ -24,14 +30,13 @@ class ProductViewSet(ModelViewSet):
                 if not is_valid:
                     return Response({"detail": message}, status=status.HTTP_400_BAD_REQUEST)
 
-                folder_prefix = 'products'
-                file_name = file.name
+                file_name = change_file_name(file.name)
                 content_type = file.content_type
 
-                upload_success = upload_file(file, file_name, content_type, folder_prefix)
+                upload_success = upload_file(file, file_name, content_type, self.folder_prefix)
 
                 if upload_success:
-                    data['photo_path'] = f"{folder_prefix}/{file_name}"
+                    data['photo_path'] = f"{self.folder_prefix}/{file_name}"
                 else:
                     return Response({"detail": "Failed to upload file to MinIO"}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -47,4 +52,23 @@ class ProductViewSet(ModelViewSet):
         except Exception as e:
             print("An unexpected error occurred:", e)
             return Response({"detail": "An unexpected error occurred."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    def destroy(self, request, *args, **kwargs):
+        try:
+            with transaction.atomic():
+                pk = kwargs.get('pk')
+                product = self.queryset.get(id=pk)
+
+                if product.photo_path:
+                    delete_success = delete_file(product.photo_path)
+                    if not delete_success:
+                        raise Exception("Failed to delete the photo file.")
+
+                product.delete()
+
+                return Response({'message': 'Deleted successful!'}, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            print("An unexpected error occurred:", e)
+            return Response({"detail": "An unexpected error occurred22."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
             

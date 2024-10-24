@@ -25,5 +25,5 @@ class Product(Base):
     purchase_price = models.DecimalField(max_digits=10, decimal_places=2)
 
     def __str__(self):
-        return f'{self.name}'
+        return f'{self.name}, ({self.sale_price})'
         

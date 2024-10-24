@@ -186,10 +186,11 @@ Esse TO DO funcionará como uma versão simplificada de sprint e backlog. Como e
 - [x] Implementar os serializers
 - [x] Implementar as views - básicas, sem a personalização de rotas ainda (CRUD - padrão do DJANGO)
 - [x] Adiconar o swagger
+- [x] Criar função para mudar o nome do arquivo salvo no banco para um uuid
+- [x] Função delete_file minIO + view delete em produtos
 
 ### Tarefas em execução:
-- [ ] Criar função para mudar o nome do arquivo salvo no banco para um uuid
-- [ ] Função delete_file minIO
+- [x] Função update_file minIO + view update em produtos
 
 ### Backlog:
 - [ ] Implementar autenticação e autorização com o keycloak
@@ -260,3 +261,4 @@ ANOTAÇÕES:
 - automatizar o tetment_cycle status de acordo com o serviço, por exemplo, uma vacina é aplicada e o ciclo já é finalizado
 - na hora de salvar a imagem colocar um uuid no lugar do nome original.
 - as funções para lidar com o time no agendamento estão pronta e estão em functions e validations da app utils, quando for fazer a views lembrar de usar.
+- editar para que o path do arquivo não seja retornado na resposta, uma vez que não é necessario na resposta

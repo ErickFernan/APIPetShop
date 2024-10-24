@@ -17,5 +17,4 @@ class PetSerializer(serializers.ModelSerializer):
     class Meta:
         model = Pet
         fields = '__all__'
-        read_only_fields = ['photo_path']
         
