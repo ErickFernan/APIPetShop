@@ -37,12 +37,11 @@ def upload_file(file_data, file_name, content_type, folder_prefix):
         print(f"An unexpected error occurred: {e}")
         return False
 
-def delete_file(full_path):
-    print(full_path)
+def delete_file(full_name):
     try:
         minio_client.remove_object(
             settings.MINIO_BUCKET_NAME,
-            f"{full_path}",
+            f"{full_name}",
         )
         return True
     

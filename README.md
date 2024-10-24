@@ -188,15 +188,17 @@ Esse TO DO funcionará como uma versão simplificada de sprint e backlog. Como e
 - [x] Adiconar o swagger
 - [x] Criar função para mudar o nome do arquivo salvo no banco para um uuid
 - [x] Função delete_file minIO + view delete em produtos
-
-### Tarefas em execução:
 - [x] Função update_file minIO + view update em produtos
 
-### Backlog:
+### Tarefas em execução:
 - [ ] Implementar autenticação e autorização com o keycloak
+
+### Backlog:
+- [ ] Editar as views dos bancos que trabalham com arquivos em geral (pet e usuários)
 
 ### Upgrades:
 Em upgrades vou separar tarefas grande que precisarão ser dividas em outras subtarefas.
+- [ ] criação de testes unitários com pytest
 - [ ] Criação do bot
 - [ ] Adicionar o Kong ao projeto
 - [ ] Criar uma aplicação extra completa (front e back) com um serviço de chat por texto e voz.
@@ -209,6 +211,10 @@ Para facilitar a organização e testar o uso de squash commits, o projeto segui
 
 <p align="justify">
 No entanto, cada atualização ou melhoria será feita em branches separadas, permitindo manter um histórico das versões anteriores. Se você deseja testar uma versão estável, use a branch main ou uma branch já concluida. Para executar melhorias em andamento ou acessar uma versão anterior estável, será necessário selecionar a branch correspondente. Abaixo estão as branches disponíveis e suas descrições:
+</p> 
+
+<p align="justify">
+Além disso, observe que usei, na maioria das views, o ModelViewSet do Django. No entanto, essa pode não ser a melhor prática. Caso você decida utilizá-lo, certifique-se de que todas as rotas disponibilizadas estão funcionando conforme o planejado. Se não estiverem, considere o uso de mixins para garantir a disponibilidade apenas das rotas que você escolher. Eu estou usando o ModelViewSet porque este é um ambiente de testes e desenvolvimento para mim; em produção, é importante estar atento a esse detalhe.
 </p> 
 
 #### Branchs:
@@ -259,6 +265,6 @@ ANOTAÇÕES:
 ### Melhorias
 - no app saúde verificar se o responsivel de um serviço é válido, por exemplo, um zelador não pode ser o resnponsável por uma cirurgia, então quando for criado o dado deve-se verificar isso
 - automatizar o tetment_cycle status de acordo com o serviço, por exemplo, uma vacina é aplicada e o ciclo já é finalizado
-- na hora de salvar a imagem colocar um uuid no lugar do nome original.
 - as funções para lidar com o time no agendamento estão pronta e estão em functions e validations da app utils, quando for fazer a views lembrar de usar.
 - editar para que o path do arquivo não seja retornado na resposta, uma vez que não é necessario na resposta
+- verificar melhorias na views de produtos, eu fiz para testar o minio, depois voltar pra ver tem algum potencial bug

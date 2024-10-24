@@ -38,16 +38,16 @@ class ProductViewSet(ModelViewSet):
                 if upload_success:
                     data['photo_path'] = f"{self.folder_prefix}/{file_name}"
                 else:
-                    return Response({"detail": "Failed to upload file to MinIO"}, status=status.HTTP_400_BAD_REQUEST)
+                    return Response({"detail": "Failed to update file to MinIO"}, status=status.HTTP_400_BAD_REQUEST)
 
             serializer = ProductSerializer(data=data)
 
             if serializer.is_valid():
                 serializer.save()
-                return Response({'message': 'Upload successful!', 'data': serializer.data}, status=status.HTTP_201_CREATED)
+                return Response({'message': 'Update successful!', 'data': serializer.data}, status=status.HTTP_201_CREATED)
             else:
                 print("Serializer errors:", serializer.errors)
-                return Response({'message': 'Upload failed!', 'errors': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({'message': 'Update failed!', 'errors': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
         
         except Exception as e:
             print("An unexpected error occurred:", e)
@@ -72,3 +72,40 @@ class ProductViewSet(ModelViewSet):
             print("An unexpected error occurred:", e)
             return Response({"detail": "An unexpected error occurred22."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
             
+    def partial_update(self, request, *args, **kwargs):
+        try:
+            data = request.data
+            file = request.FILES.get('photo')
+            pk = kwargs.get('pk')
+            product = self.queryset.get(id=pk)
+
+            if file:
+                is_valid, message = image_validation(file=file)
+                if not is_valid:
+                    return Response({"detail": message}, status=status.HTTP_400_BAD_REQUEST)
+
+                if product.photo_path:
+                    file_name = product.photo_path.split('/')[-1]
+                else:
+                    file_name = change_file_name(file.name)
+
+                content_type = file.content_type
+                upload_success = upload_file(file, file_name, content_type, self.folder_prefix)
+
+                if upload_success:
+                    data['photo_path'] = f"{self.folder_prefix}/{file_name}"
+                else:
+                    return Response({"detail": "Failed to upload file to MinIO"}, status=status.HTTP_400_BAD_REQUEST)
+
+            serializer = ProductSerializer(product, data=data, partial=True)
+
+            if serializer.is_valid():
+                serializer.save()
+                return Response({'message': 'Upload successful!', 'data': serializer.data}, status=status.HTTP_200_OK)
+            else:
+                print("Serializer errors:", serializer.errors)
+                return Response({'message': 'Upload failed!', 'errors': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+        
+        except Exception as e:
+            print("An unexpected error occurred:", e)
+            return Response({"detail": "An unexpected error occurred."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
