@@ -3,7 +3,7 @@ from keycloak_config.authentication import KeyCloakAuthentication
 from keycloak_config.permissions import HasRolePermission
 
 class BaseViewSet(viewsets.ModelViewSet):
-    # authentication_classes = [KeyCloakAuthentication]
-    # permission_classes = [HasRolePermission]
+    authentication_classes = [KeyCloakAuthentication]
+    permission_classes = [HasRolePermission]
     ...
    

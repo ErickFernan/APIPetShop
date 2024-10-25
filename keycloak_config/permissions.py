@@ -10,7 +10,10 @@ class HasRolePermission(permissions.BasePermission):
         user_roles = getattr(request, 'roles', [])
 
         for action, roles in roles_required.items():
+            print(action)
             if view.action == action:
+                if roles == []:
+                    return True
                 for role in roles:
                     if role in user_roles:
                         return True

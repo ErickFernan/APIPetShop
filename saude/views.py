@@ -24,4 +24,6 @@ class ExamViewSet(BaseViewSet):
     queryset = Exam.objects.all()
     serializer_class = ExamSerializer
     roles_required = PRODUCTS_ROLES
+
+    folder_prefix = 'exams'
     

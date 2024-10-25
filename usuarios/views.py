@@ -20,7 +20,11 @@ class UserPhotoViewSet(BaseViewSet):
     serializer_class = UserPhotoSerializer
     roles_required = PRODUCTS_ROLES
 
+    folder_prefix = 'usersphotos'
+
 class UserAudioViewSet(BaseViewSet):
     queryset = UserAudio.objects.all()
     serializer_class = UserAudioSerializer
     roles_required = PRODUCTS_ROLES
+
+    folder_prefix = 'usersaudios'

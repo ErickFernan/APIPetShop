@@ -19,3 +19,5 @@ class PetViewSet(BaseViewSet):
     queryset = Pet.objects.all()
     serializer_class = PetSerializer
     roles_required = PRODUCTS_ROLES
+
+    folder_prefix = 'pets'

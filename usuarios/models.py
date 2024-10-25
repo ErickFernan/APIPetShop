@@ -7,14 +7,19 @@ from utils.validations import StructureValidators
 
 class User(BaseModel):
     class Role(models.TextChoices):
-        MEDICO_VET = 'médico veterinário'
+        MEDICO_VET = 'médico_veterinário'
         GROOMER = 'groomer'
-        ATENDENTE = 'atendente'
-        ASSIS_VET = 'assistente veterinario'
+        ATENDENTE_SAUDE = 'atendente_saude'
+        ATENDENTE_HOTEL = 'atendente_hotel'
+        ATENDENTE_LOJA = 'atendente_loja'
+        ATENDENTE_BANHOTOSA = 'atendente_banhotosa'
+        ASSIST_VET = 'assistente_veterinario'
         ESTAGIARIO = 'estagiario'
         CAIXA = 'caixa'
         ZELADOR = 'zelador'
         ENTREGADOR = 'entregador'
+        SUPERUSER = 'superuser'
+        USER = 'user'
         OUTRO = 'outro'
 
     class Area(models.TextChoices):

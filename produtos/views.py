@@ -111,3 +111,8 @@ class ProductViewSet(BaseViewSet):
         except Exception as e:
             print("An unexpected error occurred:", e)
             return Response({"detail": "An unexpected error occurred."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            
+    def list(self, request):
+        if any(role in ['superuser'] for role in request.roles):
+            return Response({'message': 'Upload successful1!'}, status=status.HTTP_200_OK)
+        return Response({'message': 'Upload successful2!'}, status=status.HTTP_200_OK)
