@@ -3,8 +3,6 @@ from django.db import transaction
 
 from rest_framework import status
 from rest_framework.response import Response
-from rest_framework.viewsets import ModelViewSet
-from rest_framework.response import Response
 
 from produtos.models import Product
 from produtos.serializers import ProductSerializer
@@ -13,24 +11,14 @@ from bucket.minio_client import upload_file, delete_file
 
 from utils.validations import image_validation
 from utils.functions import change_file_name
+from utils.views import BaseViewSet
+from utils.roles import PRODUCTS_ROLES
 
-from keycloak_config.authentication import KeyCloakAuthentication
-from keycloak_config.permissions import HasRolePermission
 
-
-class ProductViewSet(ModelViewSet):
+class ProductViewSet(BaseViewSet):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
-
-    authentication_classes = [KeyCloakAuthentication]
-    permission_classes = [HasRolePermission]
-    roles_required = {
-        'list': ['produtos-basic', 'produtos-total'],
-        'retrieve': ['person-admin', 'person-user'],
-        'create': ['produtos-total'],
-        'update': ['produtos-total'],
-        'destroy': ['produtos-total']
-    }
+    roles_required = PRODUCTS_ROLES
 
     folder_prefix = 'products'
 

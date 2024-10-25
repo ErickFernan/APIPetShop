@@ -2,10 +2,10 @@ import uuid
 
 from django.db import models
 
-from utils.models import Base
+from utils.models import BaseModel
 from pet.models import Pet
 
-class Reservation(Base):
+class Reservation(BaseModel):
     class Status(models.TextChoices):
         CANCELADO = 'cancelado'
         CONCLUIDO = 'concluido'
@@ -21,7 +21,7 @@ class Reservation(Base):
     def __str__(self):
         return f'{self.pet_id.name} ({self.role})'
 
-class Service(Base):
+class Service(BaseModel):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
     name = models.CharField(max_length=50, unique=True)
     price_per_day = models.DecimalField(max_digits=4, decimal_places=2)
@@ -30,7 +30,7 @@ class Service(Base):
     def __str__(self):
         return f'{self.name}'
 
-class ReservationService(Base):
+class ReservationService(BaseModel):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
     reservation_id = models.ForeignKey(Reservation, on_delete=models.CASCADE, related_name='reservation_services', editable=False)
     service_id = models.ForeignKey(Service, on_delete=models.CASCADE, related_name='services', editable=False)

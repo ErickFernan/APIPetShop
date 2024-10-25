@@ -1,9 +1,9 @@
 import uuid
 
-from utils.models import Base
+from utils.models import BaseModel
 from django.db import models
 
-class Product(Base):
+class Product(BaseModel):
     class Type(models.TextChoices):
         REMEDIO = 'remedio'
         PERFUMARIA = 'perfumaria'

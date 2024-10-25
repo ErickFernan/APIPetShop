@@ -2,18 +2,18 @@ import uuid
 
 from django.db import models
 
-from utils.models import Base
+from utils.models import BaseModel
 from usuarios.models import User
 
 
-class Specie(Base):
+class Specie(BaseModel):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
     name = models.CharField(max_length=50, unique=True)
 
     def __str__(self):
         return f'{self.name}'
 
-class Breed(Base):
+class Breed(BaseModel):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
     name = models.CharField(max_length=50, unique=True)
     habits = models.TextField(blank=True, null=True)
@@ -25,7 +25,7 @@ class Breed(Base):
     def __str__(self):
         return f'{self.name}'
 
-class Pet(Base):
+class Pet(BaseModel):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
     name = models.CharField(max_length=50)
     birthday = models.DateField()

@@ -2,12 +2,12 @@ import uuid
 
 from django.db import models
 
-from utils.models import Base
+from utils.models import BaseModel
 from usuarios.models import User
 from pet.models import Pet
 
 
-class TreatmentCycle(Base):
+class TreatmentCycle(BaseModel):
     class Status(models.TextChoices):
         CANCELADO = 'cancelado'
         CONCLUIDO = 'concluido'
@@ -24,7 +24,7 @@ class TreatmentCycle(Base):
     def __str__(self):
         return f'{self.pet_id.name} ({self.status})'
 
-class Service(Base):
+class Service(BaseModel):
     class Type(models.TextChoices):
         CONSULTA = 'consulta'
         EXAME = 'exame'
@@ -45,14 +45,14 @@ class Service(Base):
     def __str__(self):
         return f'{self.service_type} ({self.responsible_id})'
 
-class ExamType(Base):
+class ExamType(BaseModel):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
     name = models.CharField(max_length=50, unique=True)
 
     def __str__(self):
         return f'{self.name}'
 
-class Exam(Base):
+class Exam(BaseModel):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
     exam_type_id = models.ForeignKey(ExamType, on_delete=models.CASCADE, related_name='exams', editable=False)
     result_path = models.CharField(max_length=100, blank=True, null=True)

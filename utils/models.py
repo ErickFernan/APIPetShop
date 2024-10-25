@@ -3,7 +3,7 @@ from datetime import time
 from django.db import models
 
 
-class Base(models.Model):
+class BaseModel(models.Model):
     """
     Base modelo criada para já conter o campos created_at e updated_at que estão presentes em todas as tabelas.
     """

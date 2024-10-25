@@ -215,7 +215,7 @@ No entanto, cada atualização ou melhoria será feita em branches separadas, pe
 </p> 
 
 <p align="justify">
-Além disso, observe que usei, na maioria das views, o ModelViewSet do Django. No entanto, essa pode não ser a melhor prática. Caso você decida utilizá-lo, certifique-se de que todas as rotas disponibilizadas estão funcionando conforme o planejado. Se não estiverem, considere o uso de mixins para garantir a disponibilidade apenas das rotas que você escolher. Eu estou usando o ModelViewSet porque este é um ambiente de testes e desenvolvimento para mim; em produção, é importante estar atento a esse detalhe.
+Além disso, observe que usei, na maioria das views, o BaseViewSet (que é basicamente uma ModelViewSet do django). No entanto, essa pode não ser a melhor prática. Caso você decida utilizá-lo, certifique-se de que todas as rotas disponibilizadas estão funcionando conforme o planejado. Se não estiverem, considere o uso de mixins para garantir a disponibilidade apenas das rotas que você escolher. Eu estou usando o ModelViewSet porque este é um ambiente de testes e desenvolvimento para mim; em produção, é importante estar atento a esse detalhe.
 </p> 
 
 #### Branchs:

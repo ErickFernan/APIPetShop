@@ -2,10 +2,10 @@ import uuid
 
 from django.db import models
 
-from utils.models import Base
+from utils.models import BaseModel
 from utils.validations import StructureValidators
 
-class User(Base):
+class User(BaseModel):
     class Role(models.TextChoices):
         MEDICO_VET = 'médico veterinário'
         GROOMER = 'groomer'
@@ -35,7 +35,7 @@ class User(Base):
     def __str__(self):
         return f'{self.name} ({self.role})'
 
-class UserDocument(Base):
+class UserDocument(BaseModel):
     class Type(models.TextChoices):
         CNPJ = 'cnpj'
         CPF = 'cpf'
@@ -57,12 +57,12 @@ class UserDocument(Base):
         self.clean()  # Chama a validação antes de salvar
         super().save(*args, **kwargs)
 
-class UserPhoto(Base):
+class UserPhoto(BaseModel):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
     photo_path = models.CharField(max_length=100)
     user_id = models.ForeignKey(User, on_delete=models.CASCADE, related_name='photos', editable=False)
 
-class UserAudio(Base):
+class UserAudio(BaseModel):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
     audio_path = models.CharField(max_length=100)
     user_id = models.ForeignKey(User, on_delete=models.CASCADE, related_name='audios', editable=False)
