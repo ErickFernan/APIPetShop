@@ -14,10 +14,24 @@ from bucket.minio_client import upload_file, delete_file
 from utils.validations import image_validation
 from utils.functions import change_file_name
 
+from keycloak_config.authentication import KeyCloakAuthentication
+from keycloak_config.permissions import HasRolePermission
+
 
 class ProductViewSet(ModelViewSet):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
+
+    authentication_classes = [KeyCloakAuthentication]
+    permission_classes = [HasRolePermission]
+    roles_required = {
+        'list': ['produtos-basic', 'produtos-total'],
+        'retrieve': ['person-admin', 'person-user'],
+        'create': ['produtos-total'],
+        'update': ['produtos-total'],
+        'destroy': ['produtos-total']
+    }
+
     folder_prefix = 'products'
 
     def create(self, request):

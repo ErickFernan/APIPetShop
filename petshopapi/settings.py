@@ -150,3 +150,9 @@ MINIO_ACCESS_KEY = config('MINIO_ACCESS_KEY')
 MINIO_SECRET_KEY = config('MINIO_SECRET_KEY')
 MINIO_USE_SSL = config('MINIO_USE_SSL', default=False, cast=bool)
 MINIO_BUCKET_NAME = config('MINIO_BUCKET_NAME')
+
+# Configuração Keycloak
+DJ_KC_SERVER_URL = config('DJ_KC_SERVER_URL')
+DJ_KC_REALM = config('DJ_KC_REALM')
+DJ_KC_CLIENT_ID = config('DJ_KC_CLIENT_ID')
+DJ_KC_CLIENT_SECRET = config('DJ_KC_CLIENT_SECRET')

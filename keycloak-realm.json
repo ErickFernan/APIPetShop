@@ -76,7 +76,7 @@
       "createdTimestamp": 1686494678000,
       "credentials": [{ "type": "password", "value": "password" }],
       "groups": ["Tutor"],
-      "realmRoles": ["saude-admin", "educacao-user","default-roles-dev"]
+      "realmRoles": ["saude-total", "produtos-basic","default-roles-dev"]
     },
     {
       "username": "medico",

@@ -4,7 +4,7 @@ services:
   # PostgreSQL
   psql:
     image: postgres:17.0
-    restart: always
+    # restart: always
     environment:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER}
@@ -20,7 +20,7 @@ services:
   # Keycloak
   keycloak:
     image: quay.io/keycloak/keycloak:24.0.4
-    restart: always
+    # restart: always
     environment:
       KC_DB: ${KC_DB}
       KC_DB_URL: ${KC_DB_URL}
@@ -45,7 +45,7 @@ services:
 
   # Mailhog
   mailhog:
-    restart: always
+    # restart: always
     image: mailhog/mailhog
     ports:
       - "${MAILHOG_SMTP_PORT}:${MAILHOG_SMTP_PORT}"
@@ -55,7 +55,7 @@ services:
   # MinIO
   minio:
     image: minio/minio:RELEASE.2024-10-13T13-34-11Z.fips
-    restart: always
+    # restart: always
     environment:
       MINIO_ROOT_USER: ${MINIO_ROOT_USER} 
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD} 
@@ -74,7 +74,7 @@ services:
 
   # Django App
   django-app:
-    restart: always
+    # restart: always
     build:
       context: .
       dockerfile: Dockerfile

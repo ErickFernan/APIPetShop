@@ -189,9 +189,10 @@ Esse TO DO funcionará como uma versão simplificada de sprint e backlog. Como e
 - [x] Criar função para mudar o nome do arquivo salvo no banco para um uuid
 - [x] Função delete_file minIO + view delete em produtos
 - [x] Função update_file minIO + view update em produtos
+- [x] Implementar autenticação e autorização com o keycloak
 
 ### Tarefas em execução:
-- [ ] Implementar autenticação e autorização com o keycloak
+- [ ] Aplicar regras de autenticação e autorização nas views
 
 ### Backlog:
 - [ ] Editar as views dos bancos que trabalham com arquivos em geral (pet e usuários)
