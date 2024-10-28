@@ -8,4 +8,9 @@ class ProductSerializer(serializers.ModelSerializer):
         model = Product
         fields = '__all__'
         # exclude = ['photo_path']
+
+class ProductSerializerLimited(serializers.ModelSerializer):
+    class Meta:
+        model = Product
+        fields = ['id', 'name', 'brand', 'sale_price', 'stock', 'product_type', 'expiration_date']
         

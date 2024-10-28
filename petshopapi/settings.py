@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     # EXTERNO
     'rest_framework',
     'drf_yasg',
+    'django_filters',
     # MEU
     'banhotosa',
     'hotel',
@@ -156,3 +157,8 @@ DJ_KC_SERVER_URL = config('DJ_KC_SERVER_URL')
 DJ_KC_REALM = config('DJ_KC_REALM')
 DJ_KC_CLIENT_ID = config('DJ_KC_CLIENT_ID')
 DJ_KC_CLIENT_SECRET = config('DJ_KC_CLIENT_SECRET')
+
+# Configuração DRF
+REST_FRAMEWORK = {
+    'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
+}

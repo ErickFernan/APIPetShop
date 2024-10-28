@@ -190,9 +190,11 @@ Esse TO DO funcionará como uma versão simplificada de sprint e backlog. Como e
 - [x] Função delete_file minIO + view delete em produtos
 - [x] Função update_file minIO + view update em produtos
 - [x] Implementar autenticação e autorização com o keycloak
+- [x] Implementar o django-filter em list de produtos
 
 ### Tarefas em execução:
 - [ ] Aplicar regras de autenticação e autorização nas views
+- [ ] Aplicar filtros nos lists das outras views
 
 ### Backlog:
 - [ ] Editar as views dos bancos que trabalham com arquivos em geral (pet e usuários)
@@ -262,6 +264,7 @@ ANOTAÇÕES:
 - verificar seta para o bot(vai depender de como vou salvar os arquivos no minIO)
 - ver se consigo obrigar que o usuário só seja criado se um documento for adicionado junto, mesmo sendo tabelas separadas, tem a operação atomica, mas queria fazer no próprio models.
 - fazer validação de formato com o regex nos outros documentos
+- Os campos de documento estão sendo criado na views e enviado para o serializer validar e salvar, analisar se devo fazer esta operação no models?
 
 ### Melhorias
 - no app saúde verificar se o responsivel de um serviço é válido, por exemplo, um zelador não pode ser o resnponsável por uma cirurgia, então quando for criado o dado deve-se verificar isso
