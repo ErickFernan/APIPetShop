@@ -191,12 +191,14 @@ Esse TO DO funcionará como uma versão simplificada de sprint e backlog. Como e
 - [x] Função update_file minIO + view update em produtos
 - [x] Implementar autenticação e autorização com o keycloak
 - [x] Implementar o django-filter em list de produtos
+- [x] Bug: Na view de produtos existia a possibilidade de a imagem ser salva sem o produto ser salvo no banco
 
 ### Tarefas em execução:
 - [ ] Aplicar regras de autenticação e autorização nas views
 - [ ] Aplicar filtros nos lists das outras views
 
 ### Backlog:
+- [ ] Adicionar descrição das funções criadas em utils, bucket, keycloak etc
 - [ ] Editar as views dos bancos que trabalham com arquivos em geral (pet e usuários)
 
 ### Upgrades:
@@ -248,14 +250,9 @@ Apenas para fins de anotações, vou deixar uma lista de tecnologias que desejo 
 - [ ] FastAPI
 
 
+Na parte de grupos vou definir a seguinte logica:
 
-Na parte de grupos vou definir a seguinte logica: → Pensar melhor depois
-
-basic - Pode ver informaçãoes do banco relacionados a si mesmo
-
-partial - Pode ver todas as informações do banco
-
-total - Pode ver e editar todas as informações do banco
+Cada role do keycloak recebe a função do usuário e os filtros das tabelas são feitos de acordo com essas roles. Na parte de grupos do keycloak eu criei de modelo para um atentente que seja responsável por todos os setores e outro grupo para alguns setores, está de exemplo mas neste projeto os grupos não serão muuito utilizados.
 
 OBS.: É MUITO IMPORTANTE FALAR NO README SOBRE AS BRANCHS, POIS NÃO VOU TRABALHAR NA MAIN POR ENQUANTO ENTÃO ELA VAI FICAR DESATUALIZADA E É A QUE APARECE NO GITHUB, MUDAR A PADRÃO NÃO COMPENSA POR ENQUANTO, ENTÃO É MELHOR ESCREVER ATÉ QUE A PRIMEIRA PARTE DO PROJETO ESTEJA PRONTA!!!!!!!!!
 
@@ -265,10 +262,16 @@ ANOTAÇÕES:
 - ver se consigo obrigar que o usuário só seja criado se um documento for adicionado junto, mesmo sendo tabelas separadas, tem a operação atomica, mas queria fazer no próprio models.
 - fazer validação de formato com o regex nos outros documentos
 - Os campos de documento estão sendo criado na views e enviado para o serializer validar e salvar, analisar se devo fazer esta operação no models?
+- criar alguns dados para serem gerados junto com o docker-compose up, vai servir para facilitar se alguma pessoa quiser testar o projeto. As que devem receber estes valores são:
+
+saude: exam_type
+pet: breed, specie
+banho/tosa: product_used, service_type
+hotel: service
+produtos: product
 
 ### Melhorias
 - no app saúde verificar se o responsivel de um serviço é válido, por exemplo, um zelador não pode ser o resnponsável por uma cirurgia, então quando for criado o dado deve-se verificar isso
 - automatizar o tetment_cycle status de acordo com o serviço, por exemplo, uma vacina é aplicada e o ciclo já é finalizado
 - as funções para lidar com o time no agendamento estão pronta e estão em functions e validations da app utils, quando for fazer a views lembrar de usar.
-- editar para que o path do arquivo não seja retornado na resposta, uma vez que não é necessario na resposta
-- verificar melhorias na views de produtos, eu fiz para testar o minio, depois voltar pra ver tem algum potencial bug
+- Criar um arquivo de log

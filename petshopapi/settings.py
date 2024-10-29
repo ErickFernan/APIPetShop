@@ -158,7 +158,7 @@ DJ_KC_REALM = config('DJ_KC_REALM')
 DJ_KC_CLIENT_ID = config('DJ_KC_CLIENT_ID')
 DJ_KC_CLIENT_SECRET = config('DJ_KC_CLIENT_SECRET')
 
-# Configuração DRF
+# Configuração django-filter DRF
 REST_FRAMEWORK = {
     'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
 }
