@@ -193,14 +193,20 @@ Esse TO DO funcionará como uma versão simplificada de sprint e backlog. Como e
 - [x] Implementar o django-filter em list de produtos
 - [x] Bug: Na view de produtos existia a possibilidade de a imagem ser salva sem o produto ser salvo no banco
 - [x] Arquivo de roles devidamente configurado
+- [x] Aplicar regras de autenticação e autorização geral em todas as views
+- [x] Personalização das rotas da app produtos
+- [x] Adicionar descrição das funções criadas em utils, bucket, keycloak etc
 
 ### Tarefas em execução:
-- [ ] Aplicar regras de autenticação e autorização nas views
-- [ ] Aplicar filtros nos lists das outras views
+- [ ] Personalização nas rotas da app usuarios
 
 ### Backlog:
-- [ ] Adicionar descrição das funções criadas em utils, bucket, keycloak etc
-- [ ] Editar as views dos bancos que trabalham com arquivos em geral (pet e usuários)
+- [ ] Personalização das rotas da app banhotosa
+- [ ] Personalização das rotas da app hotel
+- [ ] Personalização das rotas da app loja
+- [ ] Personalização das rotas da app pet
+- [ ] Personalização das rotas da app saude
+- [ ] Aplicar filtros nos lists das outras views
 
 ### Upgrades:
 Em upgrades vou separar tarefas grande que precisarão ser dividas em outras subtarefas.

@@ -11,6 +11,9 @@ minio_client = Minio(
 )
 
 def upload_file(file_data, file_name, content_type, folder_prefix):
+    """
+    Função responsável pelo envio de arquivos para o Minio
+    """
     try:
         if not minio_client.bucket_exists(settings.MINIO_BUCKET_NAME):
             minio_client.make_bucket(settings.MINIO_BUCKET_NAME)
@@ -38,6 +41,9 @@ def upload_file(file_data, file_name, content_type, folder_prefix):
         return False
 
 def delete_file(full_name):
+    """
+    Função responsável pela deleção de arquivos no Minio
+    """
     try:
         minio_client.remove_object(
             settings.MINIO_BUCKET_NAME,

@@ -7,6 +7,10 @@ from keycloak_config.keycloak_client import keycloak_openid
 
 
 class KeyCloakAuthentication(authentication.BaseAuthentication):
+    """
+    Função com a lógica necessária para fazer a validação do token fornecido na
+    requisição, utilizando a rota de introspecção do keycloak
+    """
     def authenticate(self, request):
         token = request.META.get('HTTP_AUTHORIZATION')
 

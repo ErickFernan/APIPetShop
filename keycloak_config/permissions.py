@@ -1,6 +1,10 @@
 from rest_framework import permissions
 
 class HasRolePermission(permissions.BasePermission):
+    """
+    Função para verificar se o token relacioado ao usuário possui permissão
+    para acessar alguma recurso.
+    """
     def has_permission(self, request, view):
         roles_required = getattr(view, 'roles_required', None)
 
