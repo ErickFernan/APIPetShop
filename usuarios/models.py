@@ -7,7 +7,7 @@ from utils.validations import StructureValidators
 
 class User(BaseModel):
     class Role(models.TextChoices):
-        MEDICO_VET = 'médico_veterinário'
+        MEDICO_VET = 'medico_veterinario'
         GROOMER = 'groomer'
         ATENDENTE_SAUDE = 'atendente_saude'
         ATENDENTE_HOTEL = 'atendente_hotel'
@@ -27,6 +27,7 @@ class User(BaseModel):
         HOTEL = 'hotel'
         BANHOTOSA = 'banho/tosa'
         LOJA = 'loja'
+        USER = 'user'
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
     first_name = models.CharField(max_length=50)

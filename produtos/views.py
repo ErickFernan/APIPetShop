@@ -16,7 +16,7 @@ from bucket.minio_client import delete_file
 from utils.validations import image_validation, validate_serializer_and_upload_file
 from utils.functions import extract_file_details
 from utils.views import BaseViewSet
-from utils.roles import PRODUCTS_ROLES
+from utils.roles import ProdutosRoles
 from utils.exceptions import ImageValidationError
 
 
@@ -25,7 +25,7 @@ class ProductViewSet(BaseViewSet):
     filterset_class = ProductFilter
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
-    roles_required = PRODUCTS_ROLES
+    roles_required = ProdutosRoles.PRODUCT_ROLES
 
     folder_prefix = 'products'
 
@@ -131,7 +131,7 @@ class ProductViewSet(BaseViewSet):
         try:
             list_products = self.filter_queryset(self.queryset)
 
-            if any(role in self.roles_required['list_total'] for role in request.roles):
+            if any(role in self.roles_required['list_retrive_total'] for role in request.roles):
                 list_serializer = self.serializer_class(list_products, many=True)
                 return Response({'produtos': list_serializer.data}, status=status.HTTP_200_OK)
 
@@ -147,7 +147,7 @@ class ProductViewSet(BaseViewSet):
             pk = kwargs.get('pk')
             product = get_object_or_404(self.queryset, id=pk)
 
-            if any(role in self.roles_required['list_total']  for role in request.roles):
+            if any(role in self.roles_required['list_retrive_total']  for role in request.roles):
                 list_serializer = self.serializer_class(product)
                 return Response({'produtos': list_serializer.data}, status=status.HTTP_200_OK)
 

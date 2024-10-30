@@ -14,13 +14,13 @@
   },
   "roles": {
     "realm": [
-      { "name": "medico_vet" },
+      { "name": "medico_veterinario" },
       { "name": "groomer" },
       { "name": "atendente_saude" },
       { "name": "atendente_hotel" },
       { "name": "atendente_loja" },
       { "name": "atendente_banhotosa" },
-      { "name": "assist_vet" },
+      { "name": "assistente_veterinario" },
       { "name": "estagiario" },
       { "name": "caixa" },
       { "name": "zelador" },

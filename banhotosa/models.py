@@ -25,7 +25,6 @@ class ServiceType(BaseModel):
     name = models.CharField(max_length=50, unique=True)
     execution_time = models.TimeField()
     price = models.DecimalField(max_digits=5, decimal_places=2)
-    product_used_id = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='service_types', editable=False)
 
     def __str__(self):
         return f'{self.name}'
