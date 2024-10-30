@@ -192,6 +192,7 @@ Esse TO DO funcionará como uma versão simplificada de sprint e backlog. Como e
 - [x] Implementar autenticação e autorização com o keycloak
 - [x] Implementar o django-filter em list de produtos
 - [x] Bug: Na view de produtos existia a possibilidade de a imagem ser salva sem o produto ser salvo no banco
+- [x] Arquivo de roles devidamente configurado
 
 ### Tarefas em execução:
 - [ ] Aplicar regras de autenticação e autorização nas views
@@ -252,7 +253,7 @@ Apenas para fins de anotações, vou deixar uma lista de tecnologias que desejo 
 
 Na parte de grupos vou definir a seguinte logica:
 
-Cada role do keycloak recebe a função do usuário e os filtros das tabelas são feitos de acordo com essas roles. Na parte de grupos do keycloak eu criei de modelo para um atentente que seja responsável por todos os setores e outro grupo para alguns setores, está de exemplo mas neste projeto os grupos não serão muito utilizados. Outro ponto importante será a regra a ser seguida: Informações relacionadas à vendas ou informativas serão públicas, por exemplo serviços oferecidos em geral(excluido médicos, pois exames ou tarefas médicas precisam passar por avaliação de um veterinario antes) e informações bonus como as contidas em breed e specie e product(só que neste caso alguns campos devem ser filtrados como preço de compra, photo_path e storage_location). Em user a logica é um pouco diferente, o superuser terá acesso a todos os recursos, o estagiários aos gets, mas na criação cada usuário só poderá modificar seus próprios dados
+Cada role do keycloak recebe a função do usuário e os filtros das tabelas são feitos de acordo com essas roles. Na parte de grupos do keycloak eu criei de modelo para um atentente que seja responsável por todos os setores e outro grupo para alguns setores, está de exemplo mas neste projeto os grupos não serão muito utilizados. Outro ponto importante será a regra a ser seguida: Informações relacionadas à vendas ou informativas serão públicas, por exemplo serviços oferecidos em geral(excluido médicos, pois exames ou tarefas médicas precisam passar por avaliação de um veterinario antes) e informações bonus como as contidas em breed e specie e product(só que neste caso alguns campos devem ser filtrados como preço de compra, photo_path e storage_location). Em user a logica é um pouco diferente, o superuser terá acesso a todos os recursos, o estagiários aos gets, mas na criação cada usuário só poderá modificar seus próprios dados. No geral os lists terão acesso publico mas limitado, ou seja, se fazer sentido o usuário terá acesso à aqueles dados que se relacionam de alguma forma com ele, e superusuarios ou outras funções definidas terão acesso total à todos os dados daquela tabela, se o token do usuario não tiver nenhum dado relacionado a lista retorada será vazia, e se por um acaso um usuario comum tentar acessar algum id que não seja relacionado ao dele uma mensagem de permissão negada será retornada
 
 OBS.: É MUITO IMPORTANTE FALAR NO README SOBRE AS BRANCHS, POIS NÃO VOU TRABALHAR NA MAIN POR ENQUANTO ENTÃO ELA VAI FICAR DESATUALIZADA E É A QUE APARECE NO GITHUB, MUDAR A PADRÃO NÃO COMPENSA POR ENQUANTO, ENTÃO É MELHOR ESCREVER ATÉ QUE A PRIMEIRA PARTE DO PROJETO ESTEJA PRONTA!!!!!!!!!
 
@@ -263,8 +264,6 @@ ANOTAÇÕES:
 - fazer validação de formato com o regex nos outros documentos
 - Os campos de documento estão sendo criado na views e enviado para o serializer validar e salvar, analisar se devo fazer esta operação no models?
 - criar alguns dados para serem gerados junto com o docker-compose up, vai servir para facilitar se alguma pessoa quiser testar o projeto. As que devem receber estes valores são:
-- vou deixar para generalizar o arquivo de roles depois de ver como todos vao ficar.
-- não quero deixar esse monte de migrations, pois foram ajustes e não melhorias, depois limpar no arquivo final e deixar uma única.
 
 saude: exam_type
 pet: breed, specie
@@ -272,7 +271,7 @@ banho/tosa: product_used, service_type
 hotel: service
 produtos: product
 
-- Lembrar de retirar o product_role de roles depois que acabar de configurar as views
+- não quero deixar esse monte de migrations, pois foram ajustes e não melhorias, depois limpar no arquivo final e deixar uma única.
 
 ### Melhorias
 - no app saúde verificar se o responsivel de um serviço é válido, por exemplo, um zelador não pode ser o resnponsável por uma cirurgia, então quando for criado o dado deve-se verificar isso

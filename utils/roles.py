@@ -1,241 +1,136 @@
-# Vou manter aqui por todas as views ta importando ele kkkk quando eu atualizar todas eu retiro
-# produtos 
+class RolesUtils:
+    BANHOTOSA_COMMON_ROLES = ['atendente_banhotosa', 'superuser']
+    BANHOTOSA_GROOMER_ROLES = ['groomer'] + BANHOTOSA_COMMON_ROLES
+    HOTEL_COMMON_ROLES = ['atendente_hotel', 'superuser']
+    LOJA_COMMON_ROLES = ['atendente_loja', 'superuser']
+    PET_COMMON_ROLES = ['atendente_saude', 'atendente_hotel', 'atendente_loja', 'atendente_banhotosa', 'superuser']
+    PRODUTO_COMMON_ROLES = LOJA_COMMON_ROLES
+    SAUDE_COMMON_ROLES = ['medico_veterinario', 'atendente_saude', 'superuser']
+    USER_COMMON_ROLES = PET_COMMON_ROLES
+    
+    @staticmethod
+    def get_roles(base_roles, additional_roles=None):
+        return base_roles if not additional_roles else base_roles + additional_roles
 
-# ainda não decidi o list e o retrieve se vai ser aberto a todos ou se crio algumas exceções especificas
-PRODUCTS_ROLES = {
-    'list': [],
-    'list_total': ['atendente_loja', 'superuser', 'estagiario'],
-    'retrieve': [],
-    'partial_update' : ['atendente_loja', 'superuser'],
-    'create': ['atendente_loja', 'superuser'],
-    'update': ['atendente_loja', 'superuser'],
-    'destroy': ['atendente_loja', 'superuser']
-}
 
-class BanhotosaRoles: #OK
+class BanhotosaRoles: # Adicionar doc string
     APPOINTMENT_ROLES = {
         'list': [],
         'retrieve': [],
-        'list_retrive_total': ['atendente_banhotosa', 'superuser', 'estagiario'],
-        'partial_update': ['atendente_banhotosa', 'superuser'],
-        'create': ['atendente_banhotosa', 'superuser'],
-        'update': ['atendente_banhotosa', 'superuser'],
-        'destroy': ['atendente_banhotosa', 'superuser']
+        'list_retrive_total': RolesUtils.get_roles(RolesUtils.BANHOTOSA_COMMON_ROLES, ['estagiario']),
+        'partial_update': RolesUtils.BANHOTOSA_COMMON_ROLES,
+        'create': RolesUtils.BANHOTOSA_COMMON_ROLES,
+        'update': RolesUtils.BANHOTOSA_COMMON_ROLES,
+        'destroy': RolesUtils.BANHOTOSA_COMMON_ROLES,
     }
-
     SERVICETYPE_ROLES = {
         'list': [],
         'retrieve': [],
-        'partial_update': ['groomer', 'atendente_banhotosa', 'superuser'],
-        'create': ['groomer', 'atendente_banhotosa', 'superuser'],
-        'update': ['groomer', 'atendente_banhotosa', 'superuser'],
-        'destroy': ['groomer', 'atendente_banhotosa', 'superuser']
+        'partial_update': RolesUtils.BANHOTOSA_GROOMER_ROLES,
+        'create': RolesUtils.BANHOTOSA_GROOMER_ROLES,
+        'update': RolesUtils.BANHOTOSA_GROOMER_ROLES,
+        'destroy': RolesUtils.BANHOTOSA_GROOMER_ROLES,
     }
-
-    PRODUCTUSED_ROLES = {
-        'list': [],
-        'retrieve': [],
-        'partial_update': ['groomer', 'atendente_banhotosa', 'superuser'],
-        'create': ['groomer', 'atendente_banhotosa', 'superuser'],
-        'update': ['groomer', 'atendente_banhotosa', 'superuser'],
-        'destroy': ['groomer', 'atendente_banhotosa', 'superuser']
-    }
+    PRODUCTUSED_ROLES = SERVICETYPE_ROLES
 
 
-class HotelRoles: #OK
+class HotelRoles:
     RESERVATION_ROLES = {
         'list': [],
         'retrieve': [],
-        'list_retrive_total': ['atendente_hotel', 'superuser', 'estagiario'],
-        'partial_update': ['atendente_hotel', 'superuser'],
-        'create': ['atendente_hotel', 'superuser'],
-        'update': ['atendente_hotel', 'superuser'],
-        'destroy': ['atendente_hotel', 'superuser']
+        'list_retrive_total': RolesUtils.get_roles(RolesUtils.HOTEL_COMMON_ROLES, ['estagiario']),
+        'partial_update': RolesUtils.HOTEL_COMMON_ROLES,
+        'create': RolesUtils.HOTEL_COMMON_ROLES,
+        'update': RolesUtils.HOTEL_COMMON_ROLES,
+        'destroy': RolesUtils.HOTEL_COMMON_ROLES,
     }
-
     SERVICE_ROLES = {
         'list': [],
         'retrieve': [],
-        'partial_update': ['atendente_hotel', 'superuser'],
-        'create': ['atendente_hotel', 'superuser'],
-        'update': ['atendente_hotel', 'superuser'],
-        'destroy': ['atendente_hotel', 'superuser']
+        'partial_update': RolesUtils.HOTEL_COMMON_ROLES,
+        'create': RolesUtils.HOTEL_COMMON_ROLES,
+        'update': RolesUtils.HOTEL_COMMON_ROLES,
+        'destroy': RolesUtils.HOTEL_COMMON_ROLES,
     }
-
-    RESERVATIONSERVICE_ROLES = {
-        'list': [],
-        'retrieve': [],
-        'list_retrive_total': ['atendente_hotel', 'superuser', 'estagiario'],
-        'partial_update': ['atendente_hotel', 'superuser'],
-        'create': ['atendente_hotel', 'superuser'],
-        'update': ['atendente_hotel', 'superuser'],
-        'destroy': ['atendente_hotel', 'superuser']
-    }
+    RESERVATIONSERVICE_ROLES = RESERVATION_ROLES
 
 
-class LojaRoles: #Ok
+class LojaRoles:
     SALE_ROLES = {
         'list': [],
         'retrieve': [],
-        'list_retrive_total': ['atendente_loja', 'superuser', 'estagiario'],
-        'partial_update': ['atendente_loja', 'superuser'],
-        'create': ['atendente_loja', 'superuser'],
-        'update': ['atendente_loja', 'superuser'],
-        'destroy': ['atendente_loja', 'superuser']
+        'list_retrive_total': RolesUtils.get_roles(RolesUtils.LOJA_COMMON_ROLES, ['estagiario']),
+        'partial_update': RolesUtils.LOJA_COMMON_ROLES,
+        'create': RolesUtils.LOJA_COMMON_ROLES,
+        'update': RolesUtils.LOJA_COMMON_ROLES,
+        'destroy': RolesUtils.LOJA_COMMON_ROLES,
     }
-
-    SALEPRODUCT_ROLES = {
-        'list': [],
-        'retrieve': [],
-        'list_retrive_total': ['atendente_loja', 'superuser', 'estagiario'],
-        'partial_update': ['atendente_loja', 'superuser'],
-        'create': ['atendente_loja', 'superuser'],
-        'update': ['atendente_loja', 'superuser'],
-        'destroy': ['atendente_loja', 'superuser']
-    }
+    SALEPRODUCT_ROLES = SALE_ROLES
 
 
-class PetRoles: #OK
+class PetRoles:
     SPECIE_ROLES = {
         'list': [],
         'retrieve': [],
-        'partial_update': ['atendente_saude', 'atendente_hotel', 'atendente_loja', 'atendente_banhotosa', 'superuser'],
-        'create': ['atendente_saude', 'atendente_hotel', 'atendente_loja', 'atendente_banhotosa', 'superuser'],
-        'update': ['atendente_saude', 'atendente_hotel', 'atendente_loja', 'atendente_banhotosa', 'superuser'],
-        'destroy': ['atendente_saude', 'atendente_hotel', 'atendente_loja', 'atendente_banhotosa', 'superuser']
+        'partial_update': RolesUtils.PET_COMMON_ROLES,
+        'create': RolesUtils.PET_COMMON_ROLES,
+        'update': RolesUtils.PET_COMMON_ROLES,
+        'destroy': RolesUtils.PET_COMMON_ROLES,
     }
-
-    BREED_ROLES = { 
-        'list': [],
-        'retrieve': [],
-        'partial_update': ['atendente_saude', 'atendente_hotel', 'atendente_loja', 'atendente_banhotosa', 'superuser'],
-        'create': ['atendente_saude', 'atendente_hotel', 'atendente_loja', 'atendente_banhotosa', 'superuser'],
-        'update': ['atendente_saude', 'atendente_hotel', 'atendente_loja', 'atendente_banhotosa', 'superuser'],
-        'destroy': ['atendente_saude', 'atendente_hotel', 'atendente_loja', 'atendente_banhotosa', 'superuser']
-    }
-
+    BREED_ROLES = SPECIE_ROLES
     PET_ROLES = {
         'list': [],
         'retrieve': [],
-        'list_retrive_total': ['atendente_saude', 'atendente_hotel', 'atendente_loja', 'atendente_banhotosa', 'estagiario', 'superuser'],
-        'partial_update': ['atendente_saude', 'atendente_hotel', 'atendente_loja', 'atendente_banhotosa', 'superuser'],
-        'create': ['atendente_saude', 'atendente_hotel', 'atendente_loja', 'atendente_banhotosa', 'superuser'],
-        'update': ['atendente_saude', 'atendente_hotel', 'atendente_loja', 'atendente_banhotosa', 'superuser'],
-        'destroy': ['atendente_saude', 'atendente_hotel', 'atendente_loja', 'atendente_banhotosa', 'superuser']
+        'list_retrive_total': RolesUtils.get_roles(RolesUtils.PET_COMMON_ROLES, ['estagiario']),
+        'partial_update': RolesUtils.PET_COMMON_ROLES,
+        'create': RolesUtils.PET_COMMON_ROLES,
+        'update': RolesUtils.PET_COMMON_ROLES,
+        'destroy': RolesUtils.PET_COMMON_ROLES,
     }
 
 
-class ProdutosRoles: # OK
+class ProdutosRoles:
     PRODUCT_ROLES = {
         'list': [],
         'retrieve': [],
-        'list_retrive_total': ['atendente_loja', 'superuser', 'estagiario'], # Este a lógica muda um pouco, neste caso é só um filtro da informação retornada diferentemente dos outros que relacionam o usuário com a informação pra verificar se o mesmo tem acesso.
-        'partial_update': ['atendente_loja', 'superuser'],
-        'create': ['atendente_loja', 'superuser'],
-        'update': ['atendente_loja', 'superuser'],
-        'destroy': ['atendente_loja', 'superuser']
+        'list_retrive_total': RolesUtils.get_roles(RolesUtils.PRODUTO_COMMON_ROLES, ['estagiario']), # Este a lógica muda um pouco, neste caso é só um filtro da informação retornada, diferentemente dos outros que relacionam o usuário com a informação pra verificar se o mesmo tem acesso.
+        'partial_update': RolesUtils.PRODUTO_COMMON_ROLES,
+        'create': RolesUtils.PRODUTO_COMMON_ROLES,
+        'update': RolesUtils.PRODUTO_COMMON_ROLES,
+        'destroy': RolesUtils.PRODUTO_COMMON_ROLES,
     }
 
 
-class SaudeRoles: #OK
+class SaudeRoles:
     TREATMENTCYCLE_ROLES = {
         'list': [],
         'retrieve': [],
-        'list_retrive_total': ['medico_veterinario', 'atendente_saude', 'superuser', 'estagiario'],
-        'partial_update': ['medico_veterinario', 'atendente_saude', 'superuser'],
-        'create': ['medico_veterinario', 'atendente_saude', 'superuser'],
-        'update': ['medico_veterinario', 'atendente_saude', 'superuser'],
-        'destroy': ['medico_veterinario', 'atendente_saude', 'superuser']
+        'list_retrive_total': RolesUtils.get_roles(RolesUtils.SAUDE_COMMON_ROLES, ['estagiario']),
+        'partial_update': RolesUtils.SAUDE_COMMON_ROLES,
+        'create': RolesUtils.SAUDE_COMMON_ROLES,
+        'update': RolesUtils.SAUDE_COMMON_ROLES,
+        'destroy': RolesUtils.SAUDE_COMMON_ROLES,
     }
-
-    SERVICE_ROLES = {
-        'list': [],
-        'retrieve': [],
-        'list_retrive_total': ['medico_veterinario', 'atendente_saude', 'superuser', 'estagiario'],
-        'partial_update': ['medico_veterinario', 'atendente_saude', 'superuser'],
-        'create': ['medico_veterinario', 'atendente_saude', 'superuser'],
-        'update': ['medico_veterinario', 'atendente_saude', 'superuser'],
-        'destroy': ['medico_veterinario', 'atendente_saude', 'superuser']
-    }
-
-    EXAMTYPE_ROLES = {
-        'list': [],
-        'retrieve': [],
-        'list_retrive_total': ['medico_veterinario', 'atendente_saude', 'superuser', 'estagiario'],
-        'partial_update': ['medico_veterinario', 'atendente_saude', 'superuser'],
-        'create': ['medico_veterinario', 'atendente_saude', 'superuser'],
-        'update': ['medico_veterinario', 'atendente_saude', 'superuser'],
-        'destroy': ['medico_veterinario', 'atendente_saude', 'superuser']
-    }
-
-    EXAM_ROLES = {
-        'list': [],
-        'retrieve': [],
-        'list_retrive_total': ['medico_veterinario', 'atendente_saude', 'superuser', 'estagiario'],
-        'partial_update': ['medico_veterinario', 'atendente_saude', 'superuser'],
-        'create': ['medico_veterinario', 'atendente_saude', 'superuser'],
-        'update': ['medico_veterinario', 'atendente_saude', 'superuser'],
-        'destroy': ['medico_veterinario', 'atendente_saude', 'superuser']
-    }
+    SERVICE_ROLES = TREATMENTCYCLE_ROLES
+    EXAMTYPE_ROLES = TREATMENTCYCLE_ROLES
+    EXAM_ROLES = TREATMENTCYCLE_ROLES
 
 
-class UsuariosRoles: #OK
+class UsuariosRoles:
     USER_ROLES = {
         'list': [],
-        'list_total': ['atendente_saude', 'atendente_hotel', 'atendente_loja', 'atendente_banhotosa', 'estagiario', 'superuser'],
+        'list_total': RolesUtils.get_roles(RolesUtils.USER_COMMON_ROLES, ['estagiario']),
         'retrieve': [],
-        'retrieve_total': ['atendente_saude', 'atendente_hotel', 'atendente_loja', 'atendente_banhotosa', 'estagiario', 'superuser'],
+        'retrieve_total': RolesUtils.get_roles(RolesUtils.USER_COMMON_ROLES, ['estagiario']),
         'partial_update': [],
         'partial_update_total': ['superuser'],
-        'create': [],  # O create tem que ser publico mas so para o cargo user
+        'create': [], # O create tem que ser publico mas so para o cargo user
         'create_total': ['superuser'],
         'update': [],
         'update_total': ['superuser'],
         'destroy': [],
-        'destroy_total': ['superuser']
+        'destroy_total': ['superuser'],
     }
-
-    USERDOCUMENT_ROLES = {
-        'list': [],
-        'list_total': ['estagiario', 'superuser'],
-        'retrieve': [],
-        'retrieve_total': ['estagiario', 'superuser'],
-        'partial_update': [],
-        'partial_update_total': ['superuser'],
-        'create': [],  # O create tem que ser publico mas so para o proprio usuário
-        'create_total': ['superuser'],
-        'update': [],
-        'update_total': ['superuser'],
-        'destroy': [],
-        'destroy_total': ['superuser']
-    }
-
-    USERPHOTO_ROLES = {
-        'list': [],
-        'list_total': ['estagiario', 'superuser'],
-        'retrieve': [],
-        'retrieve_total': ['estagiario', 'superuser'],
-        'partial_update': [],
-        'partial_update_total': ['superuser'],
-        'create': [],  # O create tem que ser publico mas so para o proprio usuário
-        'create_total': ['superuser'],
-        'update': [],
-        'update_total': ['superuser'],
-        'destroy': [],
-        'destroy_total': ['superuser']
-    }
-
-    USERAUDIO_ROLES = {
-        'list': [],
-        'list_total': ['estagiario', 'superuser'],
-        'retrieve': [],
-        'retrieve_total': ['estagiario', 'superuser'],
-        'partial_update': [],
-        'partial_update_total': ['superuser'],
-        'create': [],  # O create tem que ser publico mas so para o proprio usuário
-        'create_total': ['superuser'],
-        'update': [],
-        'update_total': ['superuser'],
-        'destroy': [],
-        'destroy_total': ['superuser']
-    }
+    USERDOCUMENT_ROLES = USER_ROLES
+    USERPHOTO_ROLES = USER_ROLES
+    USERAUDIO_ROLES = USER_ROLES
