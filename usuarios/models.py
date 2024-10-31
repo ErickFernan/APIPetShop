@@ -1,6 +1,7 @@
 import uuid
 
 from django.db import models
+from django.core.exceptions import ValidationError
 
 from utils.models import BaseModel
 from utils.validations import StructureValidators
@@ -28,6 +29,8 @@ class User(BaseModel):
         BANHOTOSA = 'banho/tosa'
         LOJA = 'loja'
         USER = 'user'
+        GERAL = 'geral'
+        SUPERUSER = 'superuser'
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
     first_name = models.CharField(max_length=50)
@@ -39,7 +42,50 @@ class User(BaseModel):
     area = models.CharField(choices=Area.choices, max_length=50)
 
     def __str__(self):
-        return f'{self.name} ({self.role})'
+        return f'{self.first_name} {self.last_name} ({self.role})'
+
+    def clean(self):
+        valid_roles = {
+            self.Area.SAUDE: {
+                self.Role.MEDICO_VET,
+                self.Role.ATENDENTE_SAUDE,
+                self.Role.ASSIST_VET,
+                self.Role.ESTAGIARIO,
+                self.Role.CAIXA,
+                self.Role.ZELADOR,
+            },
+            self.Area.HOTEL: {
+                self.Role.ATENDENTE_HOTEL,
+                self.Role.CAIXA,
+                self.Role.ZELADOR,
+                self.Role.ESTAGIARIO,
+            },
+            self.Area.BANHOTOSA: {
+                self.Role.GROOMER,
+                self.Role.ATENDENTE_BANHOTOSA,
+                self.Role.ESTAGIARIO,
+                self.Role.CAIXA,
+                self.Role.ZELADOR,
+                self.Role.ENTREGADOR,
+            },
+            self.Area.LOJA: {
+                self.Role.ATENDENTE_LOJA,
+                self.Role.ESTAGIARIO,
+                self.Role.CAIXA,
+                self.Role.ZELADOR,
+                self.Role.ENTREGADOR,
+            },
+            self.Area.USER: {self.Role.USER},
+            self.Area.SUPERUSER: {self.Role.SUPERUSER},
+        }
+
+        if self.role not in valid_roles.get(self.area, set()):
+            raise ValidationError(f"A função '{self.role}' não é permitida na área '{self.area}'.")
+
+    def save(self, *args, **kwargs):
+        self.clean()
+        super().save(*args, **kwargs)
+
 
 class UserDocument(BaseModel):
     class Type(models.TextChoices):
@@ -63,10 +109,12 @@ class UserDocument(BaseModel):
         self.clean()  # Chama a validação antes de salvar
         super().save(*args, **kwargs)
 
+
 class UserPhoto(BaseModel):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
     photo_path = models.CharField(max_length=100)
     user_id = models.ForeignKey(User, on_delete=models.CASCADE, related_name='photos', editable=False)
+
 
 class UserAudio(BaseModel):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)

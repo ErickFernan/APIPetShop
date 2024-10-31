@@ -4,6 +4,7 @@ from usuarios.models import User, UserDocument, UserPhoto, UserAudio
 
 
 class UserSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(required=True, write_only=True)
     class Meta:
         model = User
         fields = '__all__'
