@@ -196,8 +196,10 @@ Esse TO DO funcionará como uma versão simplificada de sprint e backlog. Como e
 - [x] Aplicar regras de autenticação e autorização geral em todas as views
 - [x] Personalização das rotas da app produtos
 - [x] Adicionar descrição das funções criadas em utils, bucket, keycloak etc
+- [x] Criação de regras no models de usuarios para não deixar roles e áreas sem relação se misturaremk
 
 ### Tarefas em execução:
+- [ ] Criação das funções responsáveis por criar, salvar senha e excluir um usuário do keycloa
 - [ ] Personalização nas rotas da app usuarios
 
 ### Backlog:
@@ -247,16 +249,6 @@ Quando pronto colocar um vídeo demonstrativo
 
 Além disso pretendo adicionar algumas documentações do projeto, como o link das rotas testadas pelo postman assim como o swagger
 
-<p align="justify">
-Apenas para fins de anotações, vou deixar uma lista de tecnologias que desejo estudar, embora nem todas se encaixem necessariamente neste projeto. Mantendo essa lista aqui, servirá como um lembrete, uma vez que pretendo revisitar este projeto com certa frequência:
-</p> 
-
-- [ ] Kafka
-- [ ] RabbitMQ
-- [ ] Spark
-- [ ] FastAPI
-
-
 Na parte de grupos vou definir a seguinte logica:
 
 Cada role do keycloak recebe a função do usuário e os filtros das tabelas são feitos de acordo com essas roles. Na parte de grupos do keycloak eu criei de modelo para um atentente que seja responsável por todos os setores e outro grupo para alguns setores, está de exemplo mas neste projeto os grupos não serão muito utilizados. Outro ponto importante será a regra a ser seguida: Informações relacionadas à vendas ou informativas serão públicas, por exemplo serviços oferecidos em geral(excluido médicos, pois exames ou tarefas médicas precisam passar por avaliação de um veterinario antes) e informações bonus como as contidas em breed e specie e product(só que neste caso alguns campos devem ser filtrados como preço de compra, photo_path e storage_location). Em user a logica é um pouco diferente, o superuser terá acesso a todos os recursos, o estagiários aos gets, mas na criação cada usuário só poderá modificar seus próprios dados. No geral os lists terão acesso publico mas limitado, ou seja, se fazer sentido o usuário terá acesso à aqueles dados que se relacionam de alguma forma com ele, e superusuarios ou outras funções definidas terão acesso total à todos os dados daquela tabela, se o token do usuario não tiver nenhum dado relacionado a lista retorada será vazia, e se por um acaso um usuario comum tentar acessar algum id que não seja relacionado ao dele uma mensagem de permissão negada será retornada
@@ -266,9 +258,10 @@ OBS.: É MUITO IMPORTANTE FALAR NO README SOBRE AS BRANCHS, POIS NÃO VOU TRABAL
 
 ANOTAÇÕES:
 - verificar seta para o bot(vai depender de como vou salvar os arquivos no minIO)
-- ver se consigo obrigar que o usuário só seja criado se um documento for adicionado junto, mesmo sendo tabelas separadas, tem a operação atomica, mas queria fazer no próprio models.
-- fazer validação de formato com o regex nos outros documentos
+- Seria interessante verificar na hora de adicionar serviços no appointment verificar se o produto para aquele produto possui estoque, se não retornar um erro.
+- as funções para lidar com o time no agendamento estão pronta e estão em functions e validations da app utils, quando for fazer a views lembrar de usar.
 - Os campos de documento estão sendo criado na views e enviado para o serializer validar e salvar, analisar se devo fazer esta operação no models?
+- não quero deixar esse monte de migrations, pois foram ajustes e não melhorias, depois limpar no arquivo final e deixar uma única.
 - criar alguns dados para serem gerados junto com o docker-compose up, vai servir para facilitar se alguma pessoa quiser testar o projeto. As que devem receber estes valores são:
 
 saude: exam_type
@@ -277,12 +270,19 @@ banho/tosa: product_used, service_type
 hotel: service
 produtos: product
 
-- não quero deixar esse monte de migrations, pois foram ajustes e não melhorias, depois limpar no arquivo final e deixar uma única.
-
 ### Melhorias
 - no app saúde verificar se o responsivel de um serviço é válido, por exemplo, um zelador não pode ser o resnponsável por uma cirurgia, então quando for criado o dado deve-se verificar isso
 - automatizar o tetment_cycle status de acordo com o serviço, por exemplo, uma vacina é aplicada e o ciclo já é finalizado
-- as funções para lidar com o time no agendamento estão pronta e estão em functions e validations da app utils, quando for fazer a views lembrar de usar.
 - Criar um arquivo de log
 - Nas apps com muitas tabelas, criar uma rota com um resumo de informações para usuários comuns, fazer uma coleção de dados relacionado ao usuário e  retornar tudo de uma vez. Opção para escolher as informações entre um pet especifico ou de um usuário. É só criar um filtro com nome ou id do pet.
-- Seria interessante verificar na hora de adicionar serviços no appointment verificar se o produto para aquele produto possui estoque, se não retornar um erro.
+- ver se consigo obrigar que o usuário só seja criado se um documento for adicionado junto, mesmo sendo tabelas separadas, tem a operação atomica, mas queria fazer no próprio models.
+- fazer validação de formato com o regex nos outros documentos
+
+<p align="justify">
+Apenas para fins de anotações, vou deixar uma lista de tecnologias que desejo estudar, embora nem todas se encaixem necessariamente neste projeto. Mantendo essa lista aqui, servirá como um lembrete, uma vez que pretendo revisitar este projeto com certa frequência:
+</p> 
+
+- [ ] Kafka
+- [ ] RabbitMQ
+- [ ] Spark
+- [ ] FastAPI
