@@ -27,10 +27,12 @@ class KeyCloakAuthentication(authentication.BaseAuthentication):
 
             # Extrair informações do token (personalizar conforme a necessidade)
             current_user = token_info.get('preferred_username')
+            currente_user_id = token_info.get('sub')
             roles = token_info.get('realm_access', {}).get('roles', [])
             
             # Adicionar informações ao request para acesso nas views
             request.current_user = current_user
+            request.current_user_id = currente_user_id
             request.roles = roles
 
             return current_user, roles

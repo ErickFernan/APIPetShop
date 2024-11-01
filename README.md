@@ -270,6 +270,9 @@ banho/tosa: product_used, service_type
 hotel: service
 produtos: product
 
+- O user vai ter que ser modificado para salvar o id do usuário no keycloak, pois pode acontecer de inconsistencia nos dados, então para prevenir e deixar mais facil algum suporte vai ser necessário ter o id do user no keycloak sendo salvo
+- Vai ser melhor criar funções que chamam o keycloak ao inves de usar o keycloak diretamente, pois em caso de troca do serviço do keycloak por outro bastar modificar a função ao inves de sair procurando em todo o código onde elas foram chamadas
+
 ### Melhorias
 - no app saúde verificar se o responsivel de um serviço é válido, por exemplo, um zelador não pode ser o resnponsável por uma cirurgia, então quando for criado o dado deve-se verificar isso
 - automatizar o tetment_cycle status de acordo com o serviço, por exemplo, uma vacina é aplicada e o ciclo já é finalizado

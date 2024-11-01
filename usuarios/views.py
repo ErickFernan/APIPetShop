@@ -34,7 +34,6 @@ class UserViewSet(BaseViewSet):
             data['role'], data['area'] = 'user', 'user'
 
         serializer = self.serializer_class(data=data)
-
         try:
             if serializer.is_valid():
 
@@ -42,28 +41,36 @@ class UserViewSet(BaseViewSet):
                 
                 with transaction.atomic():
 
-                    user = serializer.save()
-
-                    user_id = keycloak_admin.create_user({
-                        "username": user.email,
-                        "email": user.email,
+                    user_id_keycloak = keycloak_admin.create_user({  # criar func em cliente
+                        "username": data['email'],
+                        "email": data['email'],
                         "enabled": True,
-                        "firstName": user.first_name,
-                        "lastName": user.last_name,
+                        "firstName": data['first_name'],
+                        "lastName": data['last_name'],
                         "attributes": {
                             "locale": ["pt-BR"]
                         }
                     },
                     exist_ok=False)
 
-                    assign_role_to_user(user_id, user.role)
-                    set_password(user_id, password)
+                    assign_role_to_user(user_id_keycloak, data['role'])
+                    set_password(user_id_keycloak, password)
+                    
+                    serializer.validated_data['keycloak_id'] = user_id_keycloak
+                    user = serializer.save()
                     
                     return Response({'message': 'Create successful!', 'data': serializer.data}, status=status.HTTP_201_CREATED)
+        
             return Response({'message': 'Create failed!', 'errors': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
         except Exception as e:
-            print(f"Erro: {e}")
+            # Rollback no keycloak em caso de falha
+            if 'user_id_keycloak' in locals():
+                try:
+                    keycloak_admin.delete_user(user_id_keycloak)
+                except Exception as rollback_error:
+                    return Response({'message': 'Falha no rollback do Keycloak', 'errors': str(rollback_error)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+ 
             return Response({'message': 'Create failed!', 'errors': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
     def destroy(self, request, *args, **kwargs):
@@ -71,13 +78,13 @@ class UserViewSet(BaseViewSet):
             pk = kwargs.get('pk')
             user = get_object_or_404(self.queryset, id=pk)
             
-            if any(role in self.roles_required['destroy_total'] for role in request.roles) or request.current_user == user.email:
+            if any(role in self.roles_required['destroy_total'] for role in request.roles) or str(request.current_user_id) == str(user.keycloak_id):
 
                 with transaction.atomic():
 
                     # Deletar usuário do keycloak
-                    user_id_keycloak = keycloak_admin.get_user_id(user.email)
-                    response = keycloak_admin.delete_user(user_id=user_id_keycloak)
+                    user_id_keycloak = keycloak_admin.get_user_id(user.email) # criar func em cliente
+                    keycloak_admin.delete_user(user_id=user_id_keycloak) # criar func em cliente
 
                     # Deletar usuário do Django
                     user.delete()
@@ -93,20 +100,71 @@ class UserViewSet(BaseViewSet):
 
     def list(self, request, *args, **kwargs):
         try:
-            list_users = self.filter_queryset(self.queryset)
             if any(role in self.roles_required['list_total'] for role in request.roles):
+                list_users = self.filter_queryset(self.queryset)
                 list_serializer = self.serializer_class(list_users, many=True)
                 return Response({'usuários': list_serializer.data}, status=status.HTTP_200_OK)
 
-            # elif request.current_user == user.email:
             else:
-                user = get_object_or_404(self.queryset, email=request.current_user)
+                user = get_object_or_404(self.queryset, keycloak_id=request.current_user_id)
                 user_serializer = self.serializer_class(user)
                 return Response({'usuário': user_serializer.data}, status=status.HTTP_200_OK)
-
+        
+        except Http404:
+            return Response({"detail": "User não encontrado."}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
             print("An unexpected error occurred:", e)
             return Response({"detail": "An unexpected error occurred."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    def retrieve(self, request, *args, **kwargs):
+        try:
+            pk = kwargs.get('pk')
+            user = get_object_or_404(self.queryset, id=pk)
+            
+            if not (any(role in self.roles_required['list_total'] for role in request.roles) or str(request.current_user_id) == str(user.keycloak_id)):
+                return Response({"detail": "You do not have permission to perform this action."}, status=status.HTTP_403_FORBIDDEN)
+            
+            user_serializer = self.serializer_class(user)
+            return Response({'usuário': user_serializer.data}, status=status.HTTP_200_OK)
+
+        except Http404:
+            return Response({"detail": "User não encontrado."}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            print("An unexpected error occurred:", e)
+            return Response({"detail": "An unexpected error occurred."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    def partial_update(self, request, *args, **kwargs):
+        try:
+            data = request.data.copy()
+            pk = kwargs.get('pk')
+            user = get_object_or_404(self.queryset, id=pk)
+
+            if not (any(role in self.roles_required['list_total'] for role in request.roles) or str(request.current_user_id) == str(user.keycloak_id)):
+                return Response({"detail": "You do not have permission to perform this action."}, status=status.HTTP_403_FORBIDDEN)
+            
+            if str(request.current_user_id) == str(user.keycloak_id):
+                data['role'], data['area'] = user.role, user.area
+
+            serializer = self.serializer_class(user, data=data, partial=True)
+                
+            if serializer.is_valid():
+                # Atualiazr no keycloak também
+                keycloak_admin.update_user(user_id="user-id-keycloak",
+                                      payload={'firstName': 'Example Update'})
+                serializer.save()
+
+                return Response({'message': 'Upload successful!', 'data': serializer.data}, status=status.HTTP_200_OK)
+                
+            return Response({'message': 'Update failed!', 'errors': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+        except Http404:
+            return Response({"detail": "User não encontrado."}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            print("An unexpected error occurred:", e)
+            return Response({"detail": "An unexpected error occurred."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    def update_password():
+        ...
 
 class UserDocumentViewSet(BaseViewSet):
     queryset = UserDocument.objects.all()
