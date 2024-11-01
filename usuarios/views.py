@@ -1,5 +1,5 @@
 from keycloak import KeycloakOpenIDConnection
-from keycloak_config.keycloak_client import assign_role_to_user, keycloak_admin, set_password
+from keycloak_config.keycloak_client import assign_role_to_user, set_password, get_role_info, add_user_to_auth_service, delete_user_to_auth_service, get_user_info, update_user_to_auth_service
 
 from django.db import transaction
 from django.shortcuts import get_object_or_404
@@ -41,22 +41,15 @@ class UserViewSet(BaseViewSet):
                 
                 with transaction.atomic():
 
-                    user_id_keycloak = keycloak_admin.create_user({  # criar func em cliente
-                        "username": data['email'],
-                        "email": data['email'],
-                        "enabled": True,
-                        "firstName": data['first_name'],
-                        "lastName": data['last_name'],
-                        "attributes": {
-                            "locale": ["pt-BR"]
-                        }
-                    },
-                    exist_ok=False)
+                    user_auth_service_id = add_user_to_auth_service(username=data['email'], 
+                                                                email=data['email'], 
+                                                                firstName=data['first_name'], 
+                                                                lastName=data['last_name'])
 
-                    assign_role_to_user(user_id_keycloak, data['role'])
-                    set_password(user_id_keycloak, password)
+                    assign_role_to_user(user_auth_service_id, get_role_info(data['role']))
+                    set_password(user_auth_service_id, password)
                     
-                    serializer.validated_data['keycloak_id'] = user_id_keycloak
+                    serializer.validated_data['auth_service_id'] = user_auth_service_id
                     user = serializer.save()
                     
                     return Response({'message': 'Create successful!', 'data': serializer.data}, status=status.HTTP_201_CREATED)
@@ -65,9 +58,9 @@ class UserViewSet(BaseViewSet):
 
         except Exception as e:
             # Rollback no keycloak em caso de falha
-            if 'user_id_keycloak' in locals():
+            if 'user_auth_service_id' in locals():
                 try:
-                    keycloak_admin.delete_user(user_id_keycloak)
+                    delete_user_to_auth_service(user_auth_service_id)
                 except Exception as rollback_error:
                     return Response({'message': 'Falha no rollback do Keycloak', 'errors': str(rollback_error)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
  
@@ -78,13 +71,13 @@ class UserViewSet(BaseViewSet):
             pk = kwargs.get('pk')
             user = get_object_or_404(self.queryset, id=pk)
             
-            if any(role in self.roles_required['destroy_total'] for role in request.roles) or str(request.current_user_id) == str(user.keycloak_id):
+            if any(role in self.roles_required['destroy_total'] for role in request.roles) or str(request.current_user_id) == str(user.auth_service_id):
 
                 with transaction.atomic():
 
                     # Deletar usuário do keycloak
-                    user_id_keycloak = keycloak_admin.get_user_id(user.email) # criar func em cliente
-                    keycloak_admin.delete_user(user_id=user_id_keycloak) # criar func em cliente
+                    user_auth_service_id = get_user_info(email=user.email)
+                    delete_user_to_auth_service(user_auth_service_id)
 
                     # Deletar usuário do Django
                     user.delete()
@@ -106,7 +99,7 @@ class UserViewSet(BaseViewSet):
                 return Response({'usuários': list_serializer.data}, status=status.HTTP_200_OK)
 
             else:
-                user = get_object_or_404(self.queryset, keycloak_id=request.current_user_id)
+                user = get_object_or_404(self.queryset, auth_service_id=request.current_user_id)
                 user_serializer = self.serializer_class(user)
                 return Response({'usuário': user_serializer.data}, status=status.HTTP_200_OK)
         
@@ -121,7 +114,7 @@ class UserViewSet(BaseViewSet):
             pk = kwargs.get('pk')
             user = get_object_or_404(self.queryset, id=pk)
             
-            if not (any(role in self.roles_required['list_total'] for role in request.roles) or str(request.current_user_id) == str(user.keycloak_id)):
+            if not (any(role in self.roles_required['list_total'] for role in request.roles) or str(request.current_user_id) == str(user.auth_service_id)):
                 return Response({"detail": "You do not have permission to perform this action."}, status=status.HTTP_403_FORBIDDEN)
             
             user_serializer = self.serializer_class(user)
@@ -139,18 +132,22 @@ class UserViewSet(BaseViewSet):
             pk = kwargs.get('pk')
             user = get_object_or_404(self.queryset, id=pk)
 
-            if not (any(role in self.roles_required['list_total'] for role in request.roles) or str(request.current_user_id) == str(user.keycloak_id)):
+            if not (any(role in self.roles_required['list_total'] for role in request.roles) or str(request.current_user_id) == str(user.auth_service_id)):
                 return Response({"detail": "You do not have permission to perform this action."}, status=status.HTTP_403_FORBIDDEN)
             
-            if str(request.current_user_id) == str(user.keycloak_id):
+            if str(request.current_user_id) == str(user.auth_service_id):
                 data['role'], data['area'] = user.role, user.area
 
             serializer = self.serializer_class(user, data=data, partial=True)
                 
             if serializer.is_valid():
-                # Atualiazr no keycloak também
-                keycloak_admin.update_user(user_id="user-id-keycloak",
-                                      payload={'firstName': 'Example Update'})
+                # Atualizar no keycloak também
+                user_auth_service_id = get_user_info(user.email)
+                update_user_to_auth_service(user_id=user_auth_service_id,
+                                            payload={"email": data.get('email', user.email),
+                                                     "firstName": data.get('first_name', user.first_name),
+                                                     "lastName": data.get('last_name', user.last_name)})
+               
                 serializer.save()
 
                 return Response({'message': 'Upload successful!', 'data': serializer.data}, status=status.HTTP_200_OK)
@@ -160,8 +157,18 @@ class UserViewSet(BaseViewSet):
         except Http404:
             return Response({"detail": "User não encontrado."}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
-            print("An unexpected error occurred:", e)
-            return Response({"detail": "An unexpected error occurred."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            # Rollback no keycloak em caso de falha
+            if 'user_auth_service_id' in locals():
+                try:
+                    update_user_to_auth_service(user_id=user_auth_service_id,
+                                                payload={"email": user.email,
+                                                         "firstName": user.first_name,
+                                                         "lastName": user.last_name})
+                except Exception as rollback_error:
+                    return Response({'message': 'Falha no rollback do Keycloak', 'errors': str(rollback_error)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+ 
+            return Response({'message': 'Create failed!', 'errors': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
 
     def update_password():
         ...

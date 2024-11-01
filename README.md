@@ -201,6 +201,7 @@ Esse TO DO funcionará como uma versão simplificada de sprint e backlog. Como e
 ### Tarefas em execução:
 - [ ] Criação das funções responsáveis por criar, salvar senha e excluir um usuário do keycloa
 - [ ] Personalização nas rotas da app usuarios
+- [ ] Bug o username do keycloak é imutável, então não posso utilizar o email pra isso
 
 ### Backlog:
 - [ ] Personalização das rotas da app banhotosa

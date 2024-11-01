@@ -1,3 +1,7 @@
+"""
+Eu optei por criar funções com as chamadas do python-keyvloak, pois se o método mudar ou for utilizar um outro serviço no lugar do keycloak
+vai ser necessário mudar apenas a regra dentro da função e não todo os codigos nas views por exemplo
+"""
 from keycloak import KeycloakOpenID, KeycloakAdmin, KeycloakOpenIDConnection
 
 from django.conf import settings
@@ -22,9 +26,20 @@ keycloak_connection = KeycloakOpenIDConnection(
 
 keycloak_admin = KeycloakAdmin(connection=keycloak_connection)
 
-def assign_role_to_user(user_id, role_name):
+def get_role_info(role_name):
     try:
         role = keycloak_admin.get_realm_role(role_name)
+        return role
+
+    except Exception as e:
+        print(f"Erro: {e}")
+        raise e
+
+def get_user_info(email):
+    return keycloak_admin.get_user_id(email)
+
+def assign_role_to_user(user_id, role):
+    try:
         keycloak_admin.assign_realm_roles(user_id=user_id, roles=[role])
 
     except Exception as e:
@@ -38,3 +53,24 @@ def set_password(user_id, password):
     except Exception as e:
         print(f"Erro: {e}")
         raise e
+
+def add_user_to_auth_service(username, email, firstName, lastName):
+    user_id_keycloak = keycloak_admin.create_user({
+                        "username": username,
+                        "email": email,
+                        "enabled": True,
+                        "firstName": firstName,
+                        "lastName": lastName,
+                        "attributes": {
+                            "locale": ["pt-BR"]
+                        }
+                    },
+                    exist_ok=False)
+    
+    return user_id_keycloak
+
+def delete_user_to_auth_service(user_auth_id):
+    keycloak_admin.delete_user(user_auth_id)
+
+def update_user_to_auth_service(user_id, payload):
+    keycloak_admin.update_user(user_id, payload)
