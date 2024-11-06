@@ -27,7 +27,7 @@ class KeyCloakAuthentication(authentication.BaseAuthentication):
 
             # Extrair informações do token (personalizar conforme a necessidade)
             current_user = token_info.get('preferred_username')
-            currente_user_id = token_info.get('sub')
+            currente_user_id = token_info.get('django_uuid') # Aqui ele pega carrega o id do proprio usuário no django
             roles = token_info.get('realm_access', {}).get('roles', [])
             
             # Adicionar informações ao request para acesso nas views

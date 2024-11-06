@@ -1,5 +1,5 @@
 from keycloak import KeycloakOpenIDConnection
-from keycloak_config.keycloak_client import assign_role_to_user, set_password, get_role_info, add_user_to_auth_service, delete_user_to_auth_service, get_user_info, update_user_to_auth_service
+from keycloak_config.keycloak_client import assign_role_to_user, set_password, get_role_info, add_user_to_auth_service, delete_user_to_auth_service, get_user_info, get_user_info2, update_user_to_auth_service
 
 from django.db import transaction
 from django.shortcuts import get_object_or_404
@@ -51,7 +51,16 @@ class UserViewSet(BaseViewSet):
                     set_password(user_auth_service_id, password)
                     
                     serializer.validated_data['auth_service_id'] = user_auth_service_id
-                    user = serializer.save()
+                    serializer.save()
+                    user = get_object_or_404(self.queryset, email=data['email'])
+
+                    update_user_to_auth_service(user_id=get_user_info(username=user.username),
+                                                payload={"email": data.get('email', user.email),
+                                                         "firstName": data.get('first_name', user.first_name),
+                                                         "lastName": data.get('last_name', user.last_name),
+                                                         "attributes": {
+                                                            "django_uuid": [str(user.id)]
+                                                        }})
                     
                     return Response({'message': 'Create successful!', 'data': serializer.data}, status=status.HTTP_201_CREATED)
         
@@ -70,11 +79,12 @@ class UserViewSet(BaseViewSet):
     def destroy(self, request, *args, **kwargs):
         try:
             pk = kwargs.get('pk')
-            user = get_object_or_404(self.queryset, id=pk)
             
-            if any(role in self.roles_required['destroy_total'] for role in request.roles) or str(request.current_user_id) == str(user.auth_service_id):
+            if any(role in self.roles_required['destroy_total'] for role in request.roles) or str(request.current_user_id) == pk:
 
                 with transaction.atomic():
+
+                    user = get_object_or_404(self.queryset, id=pk)
 
                     # Deletar usuário do keycloak
                     user_auth_service_id = get_user_info(username=user.username)
@@ -100,7 +110,7 @@ class UserViewSet(BaseViewSet):
                 return Response({'usuários': list_serializer.data}, status=status.HTTP_200_OK)
 
             else:
-                user = get_object_or_404(self.queryset, auth_service_id=request.current_user_id)
+                user = get_object_or_404(self.queryset, id=request.current_user_id)
                 user_serializer = self.serializer_class(user)
                 return Response({'usuário': user_serializer.data}, status=status.HTTP_200_OK)
         
@@ -113,11 +123,11 @@ class UserViewSet(BaseViewSet):
     def retrieve(self, request, *args, **kwargs):
         try:
             pk = kwargs.get('pk')
-            user = get_object_or_404(self.queryset, id=pk)
             
-            if not (any(role in self.roles_required['list_total'] for role in request.roles) or str(request.current_user_id) == str(user.auth_service_id)):
+            if not (any(role in self.roles_required['list_total'] for role in request.roles) or str(request.current_user_id) == pk):
                 return Response({"detail": "You do not have permission to perform this action."}, status=status.HTTP_403_FORBIDDEN)
             
+            user = get_object_or_404(self.queryset, id=pk)
             user_serializer = self.serializer_class(user)
             return Response({'usuário': user_serializer.data}, status=status.HTTP_200_OK)
 
@@ -131,12 +141,13 @@ class UserViewSet(BaseViewSet):
         try:
             data = request.data.copy()
             pk = kwargs.get('pk')
-            user = get_object_or_404(self.queryset, id=pk)
 
-            if not (any(role in self.roles_required['list_total'] for role in request.roles) or str(request.current_user_id) == str(user.auth_service_id)):
+            if not (any(role in self.roles_required['list_total'] for role in request.roles) or str(request.current_user_id) == pk):
                 return Response({"detail": "You do not have permission to perform this action."}, status=status.HTTP_403_FORBIDDEN)
             
-            if str(request.current_user_id) == str(user.auth_service_id):
+            user = get_object_or_404(self.queryset, id=pk)
+
+            if str(request.current_user_id) == pk:
                 data['role'], data['area'] = user.role, user.area
 
             serializer = self.serializer_class(user, data=data, partial=True)
@@ -174,11 +185,13 @@ class UserViewSet(BaseViewSet):
         try:
             data = request.data.copy()
             pk = kwargs.get('pk')
-            user = get_object_or_404(self.queryset, id=pk)
+            
 
-            if not (any(role in self.roles_required['list_total'] for role in request.roles) or str(request.current_user_id) == str(user.auth_service_id)):
+            if not (any(role in self.roles_required['list_total'] for role in request.roles) or str(request.current_user_id) == pk):
                 return Response({"detail": "You do not have permission to perform this action."}, status=status.HTTP_403_FORBIDDEN)
             
+            user = get_object_or_404(self.queryset, id=pk)
+
             if str(request.current_user_id) == str(user.auth_service_id):
                 data['role'], data['area'] = user.role, user.area
 
@@ -221,19 +234,20 @@ class UserViewSet(BaseViewSet):
                 return Response({"detail": "Password field is required."}, status=status.HTTP_400_BAD_REQUEST)
 
             pk = kwargs.get('pk')
-            user = get_object_or_404(self.queryset, id=pk)
 
-            if not (any(role in self.roles_required['update_password_total']  for role in request.roles) or str(request.current_user_id) == str(user.auth_service_id)):
+            if not (any(role in self.roles_required['update_password_total']  for role in request.roles) or str(request.current_user_id) == pk):
                 return Response({"detail": "You do not have permission to perform this action."}, status=status.HTTP_403_FORBIDDEN)
-
+            
+            user = get_object_or_404(self.queryset, id=pk)
             set_password(user.auth_service_id, password)
+            
             return Response({'message': 'Update successful!'}, status=status.HTTP_200_OK)
         
         except Http404:
             return Response({"detail": "User não encontrado."}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
             print("An unexpected error occurred:", e)
-            return Response({"detail": "An unexpected error occurred."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response({"detail": "An unexpected error occurred.", 'errors':str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 class UserDocumentViewSet(BaseViewSet):

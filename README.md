@@ -199,9 +199,14 @@ Esse TO DO funcionará como uma versão simplificada de sprint e backlog. Como e
 - [x] Criação de regras no models de usuarios para não deixar roles e áreas sem relação se misturarem
 - [x] Bug o username do keycloak é imutável, então não posso utilizar o email pra isso
 - [x] Criação das funções responsáveis por criar, salvar senha e excluir um usuário do keycloak
-- [ ] Bug *
+- [x] Bug *
 
-- \* - Pelo fato de eu usar um uuid diferente para o user salvo no keycloak e o user salvo no django eu preciso fazer uma consulta com o get (app usuarios - User) para recuperar esses valores e depois verificar se quem solicitou possui acesso ou não. No momento não é um problema, mas em uma aplicação maior pode gerar problemas de desempenho e risco de segurança. Para consertar isso eu posso adicionar o uuid do django nas informações do jwt token do keycloak. Outra solução seria estrutual, por exemplo, usar o mesmo uuid de usuário no keycloak e no django. Entretanto, esta seria uma solução mais trabalhosa.
+- \* - Pelo fato de eu usar um uuid diferente para o user salvo no keycloak e o user salvo no django eu preciso fazer uma consulta com o get (app usuarios - User) para recuperar esses valores e depois verificar se quem solicitou possui acesso ou não. No momento não é um problema, mas em uma aplicação maior pode gerar problemas de desempenho e risco de segurança. Para consertar isso eu posso adicionar o uuid do django nas informações do jwt token do keycloak. Outra solução seria estrutual, por exemplo, usar o mesmo uuid de usuário no keycloak e no django. Entretanto, esta seria uma solução mais trabalhosa. Etapas para correção do bug:
+- [x] Descobrir como configurar esse novos atributos(?) no keycloak
+- [x] Verificar como fazer esta configuração no json de criação do keycloak - para ficar automatizado. OBS, não ficou 100% automatizado, mas ficou bem simplificado utilizando o postman + interface keycloak
+- [x] Modificar a views para salvar o valor quando criar o usuário
+- [x] Modificar como a verificação é feita nas outras views
+
 
 ### Tarefas em execução:
 - [ ] Personalização nas rotas da app usuarios
@@ -276,6 +281,9 @@ produtos: product
 
 - O user vai ter que ser modificado para salvar o id do usuário no keycloak, pois pode acontecer de inconsistencia nos dados, então para prevenir e deixar mais facil algum suporte vai ser necessário ter o id do user no keycloak sendo salvo
 - Vai ser melhor criar funções que chamam o keycloak ao inves de usar o keycloak diretamente, pois em caso de troca do serviço do keycloak por outro bastar modificar a função ao inves de sair procurando em todo o código onde elas foram chamadas
+- Eu não criei regras de validação para a senha pelo fato de o keycloak ter opções personalizaveis para isso. Sendo dessa forma vou deixar como algo personalizável no projeto. Para saber como fazer esta configuração confira este vídeo tutorial: [colocar url do video aqui, diferentemente do de configuração apenas o links sem o video]
+- Eu preciso melhorar os raises do keycloak client e melhorar a forma como lido com as exceptions nas views usuários.
+- criar o arquivo de log também, acho que vai ser mais importante fazer isto agora pra n ter que vim consertando nas outras apps depois.
 
 ### Melhorias
 - no app saúde verificar se o responsivel de um serviço é válido, por exemplo, um zelador não pode ser o resnponsável por uma cirurgia, então quando for criado o dado deve-se verificar isso

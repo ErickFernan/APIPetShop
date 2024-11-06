@@ -38,6 +38,9 @@ def get_role_info(role_name):
 def get_user_info(username):
     return keycloak_admin.get_user_id(username)
 
+def get_user_info2(username):
+    return keycloak_admin.get_user(username)
+
 def assign_role_to_user(user_id, role):
     try:
         keycloak_admin.assign_realm_roles(user_id=user_id, roles=[role])
