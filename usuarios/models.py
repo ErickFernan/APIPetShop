@@ -41,6 +41,7 @@ class User(BaseModel):
     role = models.CharField(choices=Role.choices, max_length=50)
     area = models.CharField(choices=Area.choices, max_length=50)
     auth_service_id = models.UUIDField(editable=False, unique=True)
+    username = models.CharField(max_length=25, unique=True, editable=False, validators=[StructureValidators.username_validator])
 
     def __str__(self):
         return f'{self.first_name} {self.last_name} ({self.role})'

@@ -196,12 +196,15 @@ Esse TO DO funcionará como uma versão simplificada de sprint e backlog. Como e
 - [x] Aplicar regras de autenticação e autorização geral em todas as views
 - [x] Personalização das rotas da app produtos
 - [x] Adicionar descrição das funções criadas em utils, bucket, keycloak etc
-- [x] Criação de regras no models de usuarios para não deixar roles e áreas sem relação se misturaremk
+- [x] Criação de regras no models de usuarios para não deixar roles e áreas sem relação se misturarem
+- [x] Bug o username do keycloak é imutável, então não posso utilizar o email pra isso
+- [x] Criação das funções responsáveis por criar, salvar senha e excluir um usuário do keycloak
+- [ ] Bug *
+
+- \* - Pelo fato de eu usar um uuid diferente para o user salvo no keycloak e o user salvo no django eu preciso fazer uma consulta com o get (app usuarios - User) para recuperar esses valores e depois verificar se quem solicitou possui acesso ou não. No momento não é um problema, mas em uma aplicação maior pode gerar problemas de desempenho e risco de segurança. Para consertar isso eu posso adicionar o uuid do django nas informações do jwt token do keycloak. Outra solução seria estrutual, por exemplo, usar o mesmo uuid de usuário no keycloak e no django. Entretanto, esta seria uma solução mais trabalhosa.
 
 ### Tarefas em execução:
-- [ ] Criação das funções responsáveis por criar, salvar senha e excluir um usuário do keycloa
 - [ ] Personalização nas rotas da app usuarios
-- [ ] Bug o username do keycloak é imutável, então não posso utilizar o email pra isso
 
 ### Backlog:
 - [ ] Personalização das rotas da app banhotosa

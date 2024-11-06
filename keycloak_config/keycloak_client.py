@@ -1,5 +1,5 @@
 """
-Eu optei por criar funções com as chamadas do python-keyvloak, pois se o método mudar ou for utilizar um outro serviço no lugar do keycloak
+Eu optei por criar funções com as chamadas do python-keycloak, pois se o método mudar ou for utilizar um outro serviço no lugar do keycloak
 vai ser necessário mudar apenas a regra dentro da função e não todo os codigos nas views por exemplo
 """
 from keycloak import KeycloakOpenID, KeycloakAdmin, KeycloakOpenIDConnection
@@ -35,8 +35,8 @@ def get_role_info(role_name):
         print(f"Erro: {e}")
         raise e
 
-def get_user_info(email):
-    return keycloak_admin.get_user_id(email)
+def get_user_info(username):
+    return keycloak_admin.get_user_id(username)
 
 def assign_role_to_user(user_id, role):
     try:

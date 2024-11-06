@@ -130,6 +130,8 @@ class UsuariosRoles:
         'update_total': ['superuser'],
         'destroy': [],
         'destroy_total': ['superuser'],
+        'update_password': [],
+        'update_password_total': ['superuser']
     }
     USERDOCUMENT_ROLES = USER_ROLES
     USERPHOTO_ROLES = USER_ROLES

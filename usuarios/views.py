@@ -7,12 +7,13 @@ from django.http import Http404
 
 from rest_framework import status
 from rest_framework.response import Response
+from rest_framework.decorators import action
 
 from utils.views import BaseViewSet
 from utils.roles import UsuariosRoles
 
 from usuarios.models import User, UserDocument, UserPhoto, UserAudio
-from usuarios.serializers import UserSerializer, UserDocumentSerializer, UserPhotoSerializer, UserAudioSerializer
+from usuarios.serializers import UserSerializer, UserCreateSerializer, UserDocumentSerializer, UserPhotoSerializer, UserAudioSerializer
 
 
 class UserViewSet(BaseViewSet):
@@ -33,7 +34,7 @@ class UserViewSet(BaseViewSet):
         if not any(role in self.roles_required['create_total'] for role in request.roles):
             data['role'], data['area'] = 'user', 'user'
 
-        serializer = self.serializer_class(data=data)
+        serializer = UserCreateSerializer(data=data)
         try:
             if serializer.is_valid():
 
@@ -41,7 +42,7 @@ class UserViewSet(BaseViewSet):
                 
                 with transaction.atomic():
 
-                    user_auth_service_id = add_user_to_auth_service(username=data['email'], 
+                    user_auth_service_id = add_user_to_auth_service(username=data['username'], 
                                                                 email=data['email'], 
                                                                 firstName=data['first_name'], 
                                                                 lastName=data['last_name'])
@@ -76,7 +77,7 @@ class UserViewSet(BaseViewSet):
                 with transaction.atomic():
 
                     # Deletar usuário do keycloak
-                    user_auth_service_id = get_user_info(email=user.email)
+                    user_auth_service_id = get_user_info(username=user.username)
                     delete_user_to_auth_service(user_auth_service_id)
 
                     # Deletar usuário do Django
@@ -142,7 +143,7 @@ class UserViewSet(BaseViewSet):
                 
             if serializer.is_valid():
                 # Atualizar no keycloak também
-                user_auth_service_id = get_user_info(user.email)
+                user_auth_service_id = get_user_info(user.username)
                 update_user_to_auth_service(user_id=user_auth_service_id,
                                             payload={"email": data.get('email', user.email),
                                                      "firstName": data.get('first_name', user.first_name),
@@ -169,9 +170,71 @@ class UserViewSet(BaseViewSet):
  
             return Response({'message': 'Create failed!', 'errors': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
+    def update(self, request, *args, **kwargs):
+        try:
+            data = request.data.copy()
+            pk = kwargs.get('pk')
+            user = get_object_or_404(self.queryset, id=pk)
 
-    def update_password():
-        ...
+            if not (any(role in self.roles_required['list_total'] for role in request.roles) or str(request.current_user_id) == str(user.auth_service_id)):
+                return Response({"detail": "You do not have permission to perform this action."}, status=status.HTTP_403_FORBIDDEN)
+            
+            if str(request.current_user_id) == str(user.auth_service_id):
+                data['role'], data['area'] = user.role, user.area
+
+            serializer = UserSerializer(user, data=data)
+                
+            if serializer.is_valid():
+                # Atualizar no keycloak também
+                user_auth_service_id = get_user_info(user.username)
+                update_user_to_auth_service(user_id=user_auth_service_id,
+                                            payload={"email": data.get('email', user.email),
+                                                     "firstName": data.get('first_name', user.first_name),
+                                                     "lastName": data.get('last_name', user.last_name)})
+               
+                serializer.save()
+
+                return Response({'message': 'Upload successful!', 'data': serializer.data}, status=status.HTTP_200_OK)
+                
+            return Response({'message': 'Update failed!', 'errors': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+        except Http404:
+            return Response({"detail": "User não encontrado."}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            # Rollback no keycloak em caso de falha
+            if 'user_auth_service_id' in locals():
+                try:
+                    update_user_to_auth_service(user_id=user_auth_service_id,
+                                                payload={"email": user.email,
+                                                         "firstName": user.first_name,
+                                                         "lastName": user.last_name})
+                except Exception as rollback_error:
+                    return Response({'message': 'Falha no rollback do Keycloak', 'errors': str(rollback_error)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+ 
+            return Response({'message': 'Create failed!', 'errors': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=True, methods=['put'])
+    def update_password(self, request, *args, **kwargs):
+        try:
+            password = request.data.get('password')
+            if not password:
+                return Response({"detail": "Password field is required."}, status=status.HTTP_400_BAD_REQUEST)
+
+            pk = kwargs.get('pk')
+            user = get_object_or_404(self.queryset, id=pk)
+
+            if not (any(role in self.roles_required['update_password_total']  for role in request.roles) or str(request.current_user_id) == str(user.auth_service_id)):
+                return Response({"detail": "You do not have permission to perform this action."}, status=status.HTTP_403_FORBIDDEN)
+
+            set_password(user.auth_service_id, password)
+            return Response({'message': 'Update successful!'}, status=status.HTTP_200_OK)
+        
+        except Http404:
+            return Response({"detail": "User não encontrado."}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            print("An unexpected error occurred:", e)
+            return Response({"detail": "An unexpected error occurred."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 
 class UserDocumentViewSet(BaseViewSet):
     queryset = UserDocument.objects.all()

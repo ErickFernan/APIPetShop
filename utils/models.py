@@ -7,8 +7,8 @@ class BaseModel(models.Model):
     """
     Base modelo criada para já conter o campos created_at e updated_at que estão presentes em todas as tabelas.
     """
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(auto_now_add=True, editable=False)
+    updated_at = models.DateTimeField(auto_now=True, editable=False)
 
     class Meta:
         abstract = True

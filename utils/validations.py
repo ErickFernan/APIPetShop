@@ -66,3 +66,11 @@ class StructureValidators():
     rg_validator = RegexValidator(r'^\d{7,8}$', message='RG inválido. Deve ter entre 7 e 8 dígitos.')
     crmv_validator = RegexValidator(r'^\d{1,7}$', message='CRMV inválido. Deve ter entre 1 e 7 dígitos.')
     phone_validator = RegexValidator(r'^\(\d{2}\)\s\d{5}-\d{4}$', message='Número de telefone inválido')
+
+    username_validator = RegexValidator(
+        r'^(?!.*[_-]{2})(?![-_])(?=.{1,25}$)[A-Za-z0-9._-]+(?<![-_])$',
+        message='Username inválido. Deve ter no máximo 25 caracteres, '
+                'pode conter letras, números, ponto, sublinhado ou hífen, '
+                'não pode começar ou terminar com um caractere especial, '
+                'e não pode ter caracteres especiais consecutivos.'
+    )
