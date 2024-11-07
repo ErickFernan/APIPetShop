@@ -202,8 +202,9 @@ Esse TO DO funcionará como uma versão simplificada de sprint e backlog. Como e
 - [x] Adicionar ID do Keycloak ao modelo User para evitar inconsistências
 - [x] Bug *
 - [x] Implementar logging para facilitar manutenção em novas aplicações
+- [x] Aprimorar tratamento de exceções no cliente Keycloak e nas views de usuários(utils: validations, functions. produtos:views. keycloak_config: auth, permissio. bucket:minio_client, usuarios:views)
 
-- \* - Pelo fato de eu usar um uuid diferente para o user salvo no keycloak e o user salvo no django eu preciso fazer uma consulta com o get (app usuarios - User) para recuperar esses valores e depois verificar se quem solicitou possui acesso ou não. No momento não é um problema, mas em uma aplicação maior pode gerar problemas de desempenho e risco de segurança. Para consertar isso eu posso adicionar o uuid do django nas informações do jwt token do keycloak. Outra solução seria estrutual, por exemplo, usar o mesmo uuid de usuário no keycloak e no django. Entretanto, esta seria uma solução mais trabalhosa. Etapas para correção do bug:
+    (*) Pelo fato de eu usar um uuid diferente para o user salvo no keycloak e o user salvo no django eu preciso fazer uma consulta com o get (app usuarios - User) para recuperar esses valores e depois verificar se quem solicitou possui acesso ou não. No momento não é um problema, mas em uma aplicação maior pode gerar problemas de desempenho e risco de segurança. Para consertar isso eu posso adicionar o uuid do django nas informações do jwt token do keycloak. Outra solução seria estrutual, por exemplo, usar o mesmo uuid de usuário no keycloak e no django. Entretanto, esta seria uma solução mais trabalhosa. Etapas para correção do bug:
     - [x] Descobrir como configurar esse novos atributos(?) no keycloak
     - [x] Verificar como fazer esta configuração no json de criação do keycloak - para ficar automatizado. OBS, não ficou 100% automatizado, mas ficou bem simplificado utilizando o postman + interface keycloak
     - [x] Modificar a views para salvar o valor quando criar o usuário
@@ -212,7 +213,6 @@ Esse TO DO funcionará como uma versão simplificada de sprint e backlog. Como e
 
 ### Tarefas em execução:
 - [ ] Personalização nas rotas da app usuarios
-- [ ] Aprimorar tratamento de exceções no cliente Keycloak e nas views de usuários(utils: validations, functions. produtos:views. keycloak_config: auth, permissio. bucket:minio_client, usuarios:views)
 
 ### Backlog:
 - [ ] Personalização das rotas da app banhotosa
@@ -227,8 +227,8 @@ Em upgrades vou separar tarefas grande que precisarão ser dividas em outras sub
 - [ ] criação de testes unitários com pytest
 - [ ] Criação do bot
 - [ ] Adicionar o Kong ao projeto
-- [ ] Criar uma aplicação extra completa (front e back) com um serviço de chat por texto e voz.
 - [ ] Criar um sistema que irá preencher caracteristicas (hábitos, alimentação, etc) das raças dos pets usando o llama3 com o lmstudio, detalhes pensar futuramente.
+- [ ] Criar uma aplicação extra completa (front e back) com um serviço de chat por texto e voz.
 
 ### IMPORTANTE:
 <p align="justify">
@@ -271,7 +271,7 @@ OBS.: É MUITO IMPORTANTE FALAR NO README SOBRE AS BRANCHS, POIS NÃO VOU TRABAL
 ANOTAÇÕES:
 - verificar seta para o bot(vai depender de como vou salvar os arquivos no minIO)
 - Seria interessante verificar na hora de adicionar serviços no appointment verificar se o produto para aquele produto possui estoque, se não retornar um erro.
-- as funções para lidar com o time no agendamento estão pronta e estão em functions e validations da app utils, quando for fazer a views lembrar de usar.
+- as funções para lidar com o tempo no agendamento estão pronta e estão em functions e validations da app utils, quando for fazer a views lembrar de usar.
 - Os campos de documento estão sendo criado na views e enviado para o serializer validar e salvar, analisar se devo fazer esta operação no models?
 - não quero deixar esse monte de migrations, pois foram ajustes e não melhorias, depois limpar no arquivo final e deixar uma única.
 - criar alguns dados para serem gerados junto com o docker-compose up, vai servir para facilitar se alguma pessoa quiser testar o projeto. As que devem receber estes valores são:
@@ -282,23 +282,23 @@ banho/tosa: product_used, service_type
 hotel: service
 produtos: product
 
-- O user vai ter que ser modificado para salvar o id do usuário no keycloak, pois pode acontecer de inconsistencia nos dados, então para prevenir e deixar mais facil algum suporte vai ser necessário ter o id do user no keycloak sendo salvo
-- Vai ser melhor criar funções que chamam o keycloak ao inves de usar o keycloak diretamente, pois em caso de troca do serviço do keycloak por outro bastar modificar a função ao inves de sair procurando em todo o código onde elas foram chamadas
-- Eu não criei regras de validação para a senha pelo fato de o keycloak ter opções personalizaveis para isso. Sendo dessa forma vou deixar como algo personalizável no projeto. Para saber como fazer esta configuração confira este vídeo tutorial: [colocar url do video aqui, diferentemente do de configuração apenas o links sem o video]
-- Eu preciso melhorar os raises do keycloak client e melhorar a forma como lido com as exceptions nas views usuários.
-- criar o arquivo de log também, acho que vai ser mais importante fazer isto agora pra n ter que vim consertando nas outras apps depois.
-
-### Melhorias
+### Melhorias que um dia podem ser feitas (não prioritárias)
 - no app saúde verificar se o responsivel de um serviço é válido, por exemplo, um zelador não pode ser o resnponsável por uma cirurgia, então quando for criado o dado deve-se verificar isso
-- automatizar o tetment_cycle status de acordo com o serviço, por exemplo, uma vacina é aplicada e o ciclo já é finalizado
-- Criar um arquivo de log
+- automatizar o tetment_cycle status de acordo com o serviço, por exemplo, uma vacina é aplicada e o ciclo já é finalizado????????? faz sentido?
 - Nas apps com muitas tabelas, criar uma rota com um resumo de informações para usuários comuns, fazer uma coleção de dados relacionado ao usuário e  retornar tudo de uma vez. Opção para escolher as informações entre um pet especifico ou de um usuário. É só criar um filtro com nome ou id do pet.
-- ver se consigo obrigar que o usuário só seja criado se um documento for adicionado junto, mesmo sendo tabelas separadas, tem a operação atomica, mas queria fazer no próprio models.
+- ver se consigo obrigar que o usuário só seja criado se um documento for adicionado junto, mesmo sendo tabelas separadas, tem a operação atomica (não serve pra isso), mas queria fazer no próprio models.
 - Fazer validação de formato com o regex nos outros documentos
 - Existem os Triggers em SQL para validações mais complexas, mas não vejo necessiadade de usar nesse projeto. É uma ação que daria mais segurança aos dados, mas pra um projeto de treino seria exagerado, futuramente posso fazer em alguma tabela para referencia.
 - Apesar de muitas rotas públicas, todas elas precisam de um token válido, ou seja, gerado pelo keycloak e que passe pela instrospecção. Se em algum momento precisar mudar isso para não exigir token é só mudar a regra de como o django verifica o token.
 - Implementar logs específicos para quando HasRolePermission permite ou nega acesso, e para quando KeyCloakAuthentication falha, pode ser útil para auditorias e para detectar possíveis tentativas de acesso não autorizado.
 - Caso queria criar senhas mais robusta é possivel ir na adminstração do keycloak, authentication e por fim policies e escolher as regras que deseja para a senha de usuário.
+
+### Observações
+- O user foi modificado para salvar o id do usuário no keycloak, pois pode acontecer de inconsistencia nos dados, então para prevenir e deixar mais facil algum suporte vai ser necessário ter o id do user no keycloak sendo salvo
+- Foi melhor criar funções que chamam o keycloak ao inves de usar o keycloak diretamente, pois em caso de troca do serviço do keycloak por outro basta modificar a função ao inves de sair procurando em todo o código onde elas foram chamadas
+- Eu não criei regras de validação para a senha pelo fato de o keycloak ter opções personalizaveis para isso. Sendo dessa forma vou deixar como algo personalizável no projeto. Para saber como fazer esta configuração confira este vídeo tutorial: 
+
+[colocar url do video aqui, diferentemente do de configuração apenas o links sem o video]
 
 <p align="justify">
 Apenas para fins de anotações, vou deixar uma lista de tecnologias que desejo estudar, embora nem todas se encaixem necessariamente neste projeto. Mantendo essa lista aqui, servirá como um lembrete, uma vez que pretendo revisitar este projeto com certa frequência:
