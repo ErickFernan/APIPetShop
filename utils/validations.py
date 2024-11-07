@@ -19,9 +19,7 @@ def image_validation(file):
     try:
         with Image.open(file) as img:
             img.verify()
-            print(img.format)
             if img.format not in ['JPEG', 'PNG']:
-                print('entreiaqui')
                 raise ImageValidationError()
                 
     except (IOError, SyntaxError) as e:

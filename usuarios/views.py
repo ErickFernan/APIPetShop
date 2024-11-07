@@ -11,6 +11,7 @@ from rest_framework.decorators import action
 
 from utils.views import BaseViewSet
 from utils.roles import UsuariosRoles
+from utils.logs_config import log_exception
 
 from usuarios.models import User, UserDocument, UserPhoto, UserAudio
 from usuarios.serializers import UserSerializer, UserCreateSerializer, UserDocumentSerializer, UserPhotoSerializer, UserAudioSerializer
@@ -35,6 +36,7 @@ class UserViewSet(BaseViewSet):
             data['role'], data['area'] = 'user', 'user'
 
         serializer = UserCreateSerializer(data=data)
+        
         try:
             if serializer.is_valid():
 
@@ -72,8 +74,9 @@ class UserViewSet(BaseViewSet):
                 try:
                     delete_user_to_auth_service(user_auth_service_id)
                 except Exception as rollback_error:
+                    log_exception('create (rollback)', rollback_error)
                     return Response({'message': 'Falha no rollback do Keycloak', 'errors': str(rollback_error)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
- 
+            log_exception('create', e)
             return Response({'message': 'Create failed!', 'errors': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
     def destroy(self, request, *args, **kwargs):
@@ -92,14 +95,14 @@ class UserViewSet(BaseViewSet):
 
                     # Deletar usuário do Django
                     user.delete()
-
-                    return Response({'message': 'Deleted successful!'}, status=status.HTTP_200_OK)
+                   
+                    return Response({'message': 'Deleted successful!'}, status=status.HTTP_200_OK)         
             return Response({"detail": "You do not have permission to perform this action."}, status=status.HTTP_403_FORBIDDEN)
 
         except Http404:
             return Response({"detail": "Usuário não encontrado."}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
-            print("An unexpected error occurred:", e)
+            log_exception('destroy', e)
             return Response({"detail": f"An unexpected error occurred22. {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def list(self, request, *args, **kwargs):
@@ -117,7 +120,7 @@ class UserViewSet(BaseViewSet):
         except Http404:
             return Response({"detail": "User não encontrado."}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
-            print("An unexpected error occurred:", e)
+            log_exception('list', e)
             return Response({"detail": "An unexpected error occurred."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def retrieve(self, request, *args, **kwargs):
@@ -134,7 +137,7 @@ class UserViewSet(BaseViewSet):
         except Http404:
             return Response({"detail": "User não encontrado."}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
-            print("An unexpected error occurred:", e)
+            log_exception('retrieve', e)
             return Response({"detail": "An unexpected error occurred."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def partial_update(self, request, *args, **kwargs):
@@ -177,8 +180,9 @@ class UserViewSet(BaseViewSet):
                                                          "firstName": user.first_name,
                                                          "lastName": user.last_name})
                 except Exception as rollback_error:
+                    log_exception('partial_update (rollback)', rollback_error)
                     return Response({'message': 'Falha no rollback do Keycloak', 'errors': str(rollback_error)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
- 
+            log_exception('partial_update', e)
             return Response({'message': 'Create failed!', 'errors': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
     def update(self, request, *args, **kwargs):
@@ -222,8 +226,9 @@ class UserViewSet(BaseViewSet):
                                                          "firstName": user.first_name,
                                                          "lastName": user.last_name})
                 except Exception as rollback_error:
+                    log_exception('update (rollback)', rollback_error)
                     return Response({'message': 'Falha no rollback do Keycloak', 'errors': str(rollback_error)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
- 
+            log_exception('update', e)
             return Response({'message': 'Create failed!', 'errors': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
     @action(detail=True, methods=['put'])
@@ -246,7 +251,7 @@ class UserViewSet(BaseViewSet):
         except Http404:
             return Response({"detail": "User não encontrado."}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
-            print("An unexpected error occurred:", e)
+            log_exception('update_password', e)
             return Response({"detail": "An unexpected error occurred.", 'errors':str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 

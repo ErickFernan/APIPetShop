@@ -18,6 +18,7 @@ from utils.functions import extract_file_details
 from utils.views import BaseViewSet
 from utils.roles import ProdutosRoles
 from utils.exceptions import ImageValidationError
+from utils.logs_config import log_exception
 
 
 class ProductViewSet(BaseViewSet):
@@ -48,7 +49,7 @@ class ProductViewSet(BaseViewSet):
         except ImageValidationError as e:
             return Response({'message': str(e)}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
-            print("An unexpected error occurred:", e)
+            log_exception('create', e)
             return Response({"detail": "An unexpected error occurred."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def destroy(self, request, *args, **kwargs):

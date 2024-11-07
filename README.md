@@ -198,18 +198,21 @@ Esse TO DO funcionará como uma versão simplificada de sprint e backlog. Como e
 - [x] Adicionar descrição das funções criadas em utils, bucket, keycloak etc
 - [x] Criação de regras no models de usuarios para não deixar roles e áreas sem relação se misturarem
 - [x] Bug o username do keycloak é imutável, então não posso utilizar o email pra isso
-- [x] Criação das funções responsáveis por criar, salvar senha e excluir um usuário do keycloak
+- [x] Criar funções de chamada para o Keycloak para facilitar manutenção
+- [x] Adicionar ID do Keycloak ao modelo User para evitar inconsistências
 - [x] Bug *
+- [x] Implementar logging para facilitar manutenção em novas aplicações
 
 - \* - Pelo fato de eu usar um uuid diferente para o user salvo no keycloak e o user salvo no django eu preciso fazer uma consulta com o get (app usuarios - User) para recuperar esses valores e depois verificar se quem solicitou possui acesso ou não. No momento não é um problema, mas em uma aplicação maior pode gerar problemas de desempenho e risco de segurança. Para consertar isso eu posso adicionar o uuid do django nas informações do jwt token do keycloak. Outra solução seria estrutual, por exemplo, usar o mesmo uuid de usuário no keycloak e no django. Entretanto, esta seria uma solução mais trabalhosa. Etapas para correção do bug:
-- [x] Descobrir como configurar esse novos atributos(?) no keycloak
-- [x] Verificar como fazer esta configuração no json de criação do keycloak - para ficar automatizado. OBS, não ficou 100% automatizado, mas ficou bem simplificado utilizando o postman + interface keycloak
-- [x] Modificar a views para salvar o valor quando criar o usuário
-- [x] Modificar como a verificação é feita nas outras views
+    - [x] Descobrir como configurar esse novos atributos(?) no keycloak
+    - [x] Verificar como fazer esta configuração no json de criação do keycloak - para ficar automatizado. OBS, não ficou 100% automatizado, mas ficou bem simplificado utilizando o postman + interface keycloak
+    - [x] Modificar a views para salvar o valor quando criar o usuário
+    - [x] Modificar como a verificação é feita nas outras views
 
 
 ### Tarefas em execução:
 - [ ] Personalização nas rotas da app usuarios
+- [ ] Aprimorar tratamento de exceções no cliente Keycloak e nas views de usuários(utils: validations, functions. produtos:views. keycloak_config: auth, permissio. bucket:minio_client, usuarios:views)
 
 ### Backlog:
 - [ ] Personalização das rotas da app banhotosa
