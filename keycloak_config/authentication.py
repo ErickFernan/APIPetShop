@@ -5,6 +5,8 @@ from django.conf import settings
 
 from keycloak_config.keycloak_client import keycloak_openid
 
+from utils.logs_config import handle_exception
+
 
 class KeyCloakAuthentication(authentication.BaseAuthentication):
     """
@@ -38,6 +40,4 @@ class KeyCloakAuthentication(authentication.BaseAuthentication):
             return current_user, roles
 
         except Exception as e:
-            raise AuthenticationFailed(f'Error verifying token: {e}')
-
-        raise AuthenticationFailed('Invalid authentication credentials.')
+            handle_exception('authenticate', e)

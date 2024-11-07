@@ -233,6 +233,11 @@ class UserViewSet(BaseViewSet):
 
     @action(detail=True, methods=['put'])
     def update_password(self, request, *args, **kwargs):
+        # Duvida para pesquisar depois: Esta função usa uma rota que o keycloak já disponibiliza normalemente. A questão é, neste caso eu devo aproveitar a API do keycloak
+        # , ou seja, utilizar a própria rota do keycloak para fazer a troca da senha, ou eu devo criar esta rota na view igual eu fi aqui?
+        # Esta dúvida se da principalmente pelo fato de eu querer usar o kong futuramente neste projeto, como ele é um gateway não teria necessidade de criar uma nova rota para tratar
+        # esta função que diz respeito apenas ao keycloak, o kong centralizaria tudo. 
+        # Quando for mecher na parte relacionada ao kong voltar aqui e analisar qual a melhor abordagem!!!!!!!
         try:
             password = request.data.get('password')
             if not password:
