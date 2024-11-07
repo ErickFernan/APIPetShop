@@ -70,7 +70,7 @@ class ProductViewSet(BaseViewSet):
         except Http404:
             return Response({"detail": "Produto não encontrado."}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
-            print("An unexpected error occurred:", e)
+            log_exception('destroy', e)
             return Response({"detail": "An unexpected error occurred22."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def update(self, request, *args, **kwargs):  
@@ -97,7 +97,7 @@ class ProductViewSet(BaseViewSet):
         except Http404:
             return Response({"detail": "Produto não encontrado."}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
-            print("An unexpected error occurred:", e)
+            log_exception('update', e)
             return Response({"detail": "An unexpected error occurred."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
             
     def partial_update(self, request, *args, **kwargs):
@@ -124,7 +124,7 @@ class ProductViewSet(BaseViewSet):
         except Http404:
             return Response({"detail": "Produto não encontrado."}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
-            print("An unexpected error occurred:", e)
+            log_exception('partial_update', e)
             return Response({"detail": "An unexpected error occurred."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
             
@@ -140,7 +140,7 @@ class ProductViewSet(BaseViewSet):
             return Response({'produtos': list_serializer.data}, status=status.HTTP_200_OK)
 
         except Exception as e:
-            print("An unexpected error occurred:", e)
+            log_exception('list', e)
             return Response({"detail": "An unexpected error occurred."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def retrieve(self, request, *args, **kwargs):    
@@ -158,5 +158,5 @@ class ProductViewSet(BaseViewSet):
         except Http404:
             return Response({"detail": "Produto não encontrado."}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
-            print("An unexpected error occurred:", e)
+            log_exception('retrieve', e)
             return Response({"detail": "An unexpected error occurred."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
