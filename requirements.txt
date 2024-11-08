@@ -26,8 +26,10 @@ pillow==11.0.0
 psycopg2-binary==2.9.9
 pycparser==2.22
 pycryptodome==3.21.0
+pydub==0.25.1
 python-decouple==3.8
 python-keycloak==4.6.1
+python-magic==0.4.27
 pytz==2024.2
 PyYAML==6.0.2
 requests==2.32.3

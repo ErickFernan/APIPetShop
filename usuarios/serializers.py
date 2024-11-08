@@ -33,7 +33,35 @@ class UserPhotoSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class UserPhotoCreateSerializer(serializers.ModelSerializer):
+    user_id = serializers.UUIDField(required=False, write_only=True)
+    photo_path = serializers.CharField(required=False)
+    photo = serializers.FileField(required=True, write_only=True) 
+    class Meta:
+        model = UserPhoto
+        fields = '__all__'
+    
+    def create(self, validated_data):
+        # Remove 'photo' do validated_data antes de salvar → Neste caso não tem como fugir ¯\_(ツ)_/¯.
+        validated_data.pop('photo')
+        return super().create(validated_data)
+
+
 class UserAudioSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserAudio
         fields = '__all__'
+
+class UserAudioCreateSerializer(serializers.ModelSerializer):
+    user_id = serializers.UUIDField(required=False, write_only=True)
+    audio_path = serializers.CharField(required=False)
+    audio = serializers.FileField(required=True, write_only=True) 
+    class Meta:
+        model = UserAudio
+        fields = '__all__'
+    
+    def create(self, validated_data):
+        # Remove 'photo' do validated_data antes de salvar → Neste caso não tem como fugir ¯\_(ツ)_/¯.
+        validated_data.pop('audio')
+        return super().create(validated_data)
+

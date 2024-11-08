@@ -9,6 +9,11 @@ WORKDIR /usr/src/app
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 
+# Install ffmpeg (required by pydub for audio processing) and libmagic1(python-magic)
+RUN apt-get update && \
+    apt-get install -y ffmpeg libmagic1 && \
+    rm -rf /var/lib/apt/lists/*
+
 # install dependencies
 RUN pip install --upgrade pip
 COPY ./requirements.txt /usr/src/app

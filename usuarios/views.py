@@ -12,9 +12,12 @@ from rest_framework.decorators import action
 from utils.views import BaseViewSet
 from utils.roles import UsuariosRoles
 from utils.logs_config import log_exception
+from utils.exceptions import ImageValidationError, AudioValidationError
+from utils.validations import image_validation, audio_validation, validate_serializer_and_upload_file
+from utils.functions import extract_file_details, manage_exceptions
 
 from usuarios.models import User, UserDocument, UserPhoto, UserAudio
-from usuarios.serializers import UserSerializer, UserCreateSerializer, UserDocumentSerializer, UserPhotoSerializer, UserAudioSerializer
+from usuarios.serializers import UserSerializer, UserCreateSerializer, UserDocumentSerializer, UserPhotoSerializer, UserPhotoCreateSerializer, UserAudioSerializer, UserAudioCreateSerializer
 
 
 class UserViewSet(BaseViewSet):
@@ -76,34 +79,31 @@ class UserViewSet(BaseViewSet):
                 except Exception as rollback_error:
                     log_exception('create (rollback)', rollback_error)
                     return Response({'message': 'Falha no rollback do Keycloak', 'errors': str(rollback_error)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-            log_exception('create', e)
-            return Response({'message': 'Create failed!', 'errors': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            
+            return manage_exceptions(e, context='create')
 
     def destroy(self, request, *args, **kwargs):
         try:
             pk = kwargs.get('pk')
             
-            if any(role in self.roles_required['destroy_total'] for role in request.roles) or str(request.current_user_id) == pk:
+            if not (any(role in self.roles_required['list_total'] for role in request.roles) or str(request.current_user_id) == pk):
+                return Response({"detail": "You do not have permission to perform this action."}, status=status.HTTP_403_FORBIDDEN)
 
-                with transaction.atomic():
+            with transaction.atomic():
 
-                    user = get_object_or_404(self.queryset, id=pk)
+                user = get_object_or_404(self.queryset, id=pk)
 
-                    # Deletar usuário do keycloak
-                    user_auth_service_id = get_user_info(username=user.username)
-                    delete_user_to_auth_service(user_auth_service_id)
+                # Deletar usuário do keycloak
+                user_auth_service_id = get_user_info(username=user.username)
+                delete_user_to_auth_service(user_auth_service_id)
 
-                    # Deletar usuário do Django
-                    user.delete()
+                # Deletar usuário do Django
+                user.delete()
                    
-                    return Response({'message': 'Deleted successful!'}, status=status.HTTP_200_OK)         
-            return Response({"detail": "You do not have permission to perform this action."}, status=status.HTTP_403_FORBIDDEN)
+                return Response({'message': 'Deleted successful!'}, status=status.HTTP_200_OK)         
 
-        except Http404:
-            return Response({"detail": "Usuário não encontrado."}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
-            log_exception('destroy', e)
-            return Response({"detail": f"An unexpected error occurred22. {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return manage_exceptions(e, context='destroy')
 
     def list(self, request, *args, **kwargs):
         try:
@@ -117,11 +117,8 @@ class UserViewSet(BaseViewSet):
                 user_serializer = self.serializer_class(user)
                 return Response({'usuário': user_serializer.data}, status=status.HTTP_200_OK)
         
-        except Http404:
-            return Response({"detail": "User não encontrado."}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
-            log_exception('list', e)
-            return Response({"detail": "An unexpected error occurred."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return manage_exceptions(e, context='list')
 
     def retrieve(self, request, *args, **kwargs):
         try:
@@ -134,12 +131,9 @@ class UserViewSet(BaseViewSet):
             user_serializer = self.serializer_class(user)
             return Response({'usuário': user_serializer.data}, status=status.HTTP_200_OK)
 
-        except Http404:
-            return Response({"detail": "User não encontrado."}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
-            log_exception('retrieve', e)
-            return Response({"detail": "An unexpected error occurred."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
+            return manage_exceptions(e, context='retrieve')
+    
     def partial_update(self, request, *args, **kwargs):
         try:
             data = request.data.copy()
@@ -169,8 +163,6 @@ class UserViewSet(BaseViewSet):
                 
             return Response({'message': 'Update failed!', 'errors': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
-        except Http404:
-            return Response({"detail": "User não encontrado."}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
             # Rollback no keycloak em caso de falha
             if 'user_auth_service_id' in locals():
@@ -182,14 +174,13 @@ class UserViewSet(BaseViewSet):
                 except Exception as rollback_error:
                     log_exception('partial_update (rollback)', rollback_error)
                     return Response({'message': 'Falha no rollback do Keycloak', 'errors': str(rollback_error)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-            log_exception('partial_update', e)
-            return Response({'message': 'Create failed!', 'errors': str(e)}, status=status.HTTP_400_BAD_REQUEST)
-
+            
+            return manage_exceptions(e, context='partial_update')
+    
     def update(self, request, *args, **kwargs):
         try:
             data = request.data.copy()
             pk = kwargs.get('pk')
-            
 
             if not (any(role in self.roles_required['list_total'] for role in request.roles) or str(request.current_user_id) == pk):
                 return Response({"detail": "You do not have permission to perform this action."}, status=status.HTTP_403_FORBIDDEN)
@@ -215,8 +206,6 @@ class UserViewSet(BaseViewSet):
                 
             return Response({'message': 'Update failed!', 'errors': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
-        except Http404:
-            return Response({"detail": "User não encontrado."}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
             # Rollback no keycloak em caso de falha
             if 'user_auth_service_id' in locals():
@@ -228,9 +217,10 @@ class UserViewSet(BaseViewSet):
                 except Exception as rollback_error:
                     log_exception('update (rollback)', rollback_error)
                     return Response({'message': 'Falha no rollback do Keycloak', 'errors': str(rollback_error)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-            log_exception('update', e)
-            return Response({'message': 'Create failed!', 'errors': str(e)}, status=status.HTTP_400_BAD_REQUEST)
-
+            
+            return manage_exceptions(e, context='update')
+    
+    
     @action(detail=True, methods=['put'])
     def update_password(self, request, *args, **kwargs):
         # Duvida para pesquisar depois: Esta função usa uma rota que o keycloak já disponibiliza normalemente. A questão é, neste caso eu devo aproveitar a API do keycloak
@@ -253,11 +243,8 @@ class UserViewSet(BaseViewSet):
             
             return Response({'message': 'Update successful!'}, status=status.HTTP_200_OK)
         
-        except Http404:
-            return Response({"detail": "User não encontrado."}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
-            log_exception('update_password', e)
-            return Response({"detail": "An unexpected error occurred.", 'errors':str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return manage_exceptions(e, context='update_password')
 
 
 class UserDocumentViewSet(BaseViewSet):
@@ -273,10 +260,60 @@ class UserPhotoViewSet(BaseViewSet):
 
     folder_prefix = 'usersphotos'
 
+    def create(self, request):
+        try:
+            data = request.data.copy()
 
+            if not (any(role in self.roles_required['create_total'] for role in request.roles) or str(request.current_user_id) == data['user_id']):
+                return Response({"detail": "You do not have permission to perform this action."}, status=status.HTTP_403_FORBIDDEN) # dá pra transformar em uma função
+
+            file = request.FILES.get('photo')
+            file_name, content_type = None, None
+        
+            user = get_object_or_404(User, id=data['user_id'])
+
+            if file:
+                image_validation(file=file)
+
+                file_name, content_type = extract_file_details(file)
+                data['photo_path'] = f"{self.folder_prefix}/{file_name}"
+
+            serializer = UserPhotoCreateSerializer(data=data)
+
+            return validate_serializer_and_upload_file(serializer, file, file_name, content_type, self.folder_prefix, user)
+        
+        except Exception as e:
+            return manage_exceptions(e, context='create')
+
+            
 class UserAudioViewSet(BaseViewSet):
     queryset = UserAudio.objects.all()
     serializer_class = UserAudioSerializer
     roles_required = UsuariosRoles.USERAUDIO_ROLES
 
     folder_prefix = 'usersaudios'
+
+    def create(self, request):
+        try:
+            data = request.data
+
+            if not (any(role in self.roles_required['create_total'] for role in request.roles) or str(request.current_user_id) == data['user_id']):
+                return Response({"detail": "You do not have permission to perform this action."}, status=status.HTTP_403_FORBIDDEN) # dá pra transformar em uma função
+
+            file = request.FILES.get('audio')
+            file_name, content_type = None, None
+
+            user = get_object_or_404(User, id=data['user_id'])
+
+            if file:
+                audio_validation(file=file)
+
+                file_name, content_type = extract_file_details(file)
+                data['audio_path'] = f"{self.folder_prefix}/{file_name}"
+
+            serializer = UserAudioCreateSerializer(data=data)
+
+            return validate_serializer_and_upload_file(serializer, file, file_name, content_type, self.folder_prefix, user)
+        
+        except Exception as e:
+            return manage_exceptions(e, context='create')

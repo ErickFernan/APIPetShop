@@ -7,6 +7,8 @@ from keycloak_config.keycloak_client import keycloak_openid
 
 from utils.logs_config import handle_exception
 
+from rest_framework import status
+from rest_framework.response import Response
 
 class KeyCloakAuthentication(authentication.BaseAuthentication):
     """
@@ -40,4 +42,4 @@ class KeyCloakAuthentication(authentication.BaseAuthentication):
             return current_user, roles
 
         except Exception as e:
-            handle_exception('authenticate', e)
+            handle_exception('authenticate', AuthenticationFailed)

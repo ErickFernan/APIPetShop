@@ -1,8 +1,16 @@
 import os
 import uuid
+import logging
+
+from django.http import Http404
 
 from datetime import time, timedelta
 
+from rest_framework.response import Response
+from rest_framework import status
+
+from utils.exceptions import ImageValidationError, AudioValidationError
+from utils.logs_config import log_exception
 
 def generate_time_choices(start_hour=6, end_hour=22, interval_minutes=30):
     """
@@ -50,3 +58,22 @@ def extract_file_details(file, product=None):
     file_name = product.photo_path.split('/')[-1] if product and product.photo_path else change_file_name(file.name)
     content_type = file.content_type
     return file_name, content_type
+
+# Função para logar exceções e gerar respostas padronizadas
+def manage_exceptions(exception, context=''):
+    """
+    Centraliza o tratamento de exceções para todas as views. 
+    Registra o erro e retorna uma resposta adequada ao cliente.
+    """
+    log_exception(context, exception)
+
+    if isinstance(exception, ImageValidationError):
+        return Response({'message': "Invalid image file.", "details" : str(exception)}, status=status.HTTP_400_BAD_REQUEST)
+
+    if isinstance(exception, AudioValidationError):
+        return Response({'message': "Invalid audio file.", "details" : str(exception)}, status=status.HTTP_400_BAD_REQUEST)
+    
+    elif isinstance(exception, Http404):
+        return Response({"detail": "User não encontrado."}, status=status.HTTP_404_NOT_FOUND)
+    
+    return Response({"detail": "An unexpected error occurred.", "errors": str(exception)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

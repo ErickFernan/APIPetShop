@@ -170,7 +170,7 @@ Como mencionei anteriormente, este projeto de portfólio será utilizado para ex
 Esse TO DO funcionará como uma versão simplificada de sprint e backlog. Como estou desenvolvendo este projeto de forma independente e não pretendo utilizar ferramentas de SCRUM, optei por essa abordagem prática para garantir a organização e não perder de vista as ideias que surgirem ao longo do processo.
 </p> 
 
-### Tarefas concluidas:
+### Tarefas concluídas:
 - [x] Modelar serviços do projeto
 - [x] Modelar banco de dados
 - [x] Criar o readme
@@ -281,6 +281,7 @@ pet: breed, specie
 banho/tosa: product_used, service_type
 hotel: service
 produtos: product
+- Tem que ver como faz para excluir os audios do bucket quando o usuário for excluido também
 
 ### Melhorias que um dia podem ser feitas (não prioritárias)
 - no app saúde verificar se o responsivel de um serviço é válido, por exemplo, um zelador não pode ser o resnponsável por uma cirurgia, então quando for criado o dado deve-se verificar isso

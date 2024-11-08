@@ -1,5 +1,8 @@
 from PIL import Image
 
+from pydub import AudioSegment
+import magic
+
 from rest_framework import status
 from rest_framework.response import Response
 
@@ -9,7 +12,7 @@ from django.core.validators import RegexValidator
 
 from bucket.minio_client import upload_file
 
-from utils.exceptions import ImageValidationError
+from utils.exceptions import ImageValidationError, AudioValidationError
 from utils.logs_config import handle_exception
 
 
@@ -18,16 +21,34 @@ def image_validation(file):
     Valida se a imagem não está corrompida e se é um JPEG ou PNG
     """
     try:
+        mime = magic.from_buffer(file.read(1024), mime=True)
+        file.seek(0) # é necessário voltar o ponteiro pois consumi os primeiros 1024 bytes do arquivo
+        if mime not in ['image/jpeg', 'image/png']:
+            raise ImageValidationError()
+
         with Image.open(file) as img:
-            img.verify()
-            if img.format not in ['JPEG', 'PNG']:
-                raise ImageValidationError()
+            img.verify()  # Verifica se a imagem está corrompida
                 
-    except (IOError, SyntaxError) as e:
+    except Exception as e:
         raise ImageValidationError() # Optei pro mostrar um erro generico nos dois casos
 
+def audio_validation(file):
+    """
+    Valida se o áudio não está corrompido e se é MP3 ou WAV.
+    """
+    try:
+        # Verifique se o tipo MIME é MP3 ou WAV → muito mais seguro que usar .ext
+        mime = magic.from_buffer(file.read(1024), mime=True)
+        if mime not in ['audio/mpeg', 'audio/wav']:
+            raise AudioValidationError()
+        file.seek(0) # é necessário voltar o ponteiro pois consumi os primeiros 1024 bytes do arquivo
+        
+        AudioSegment.from_file(file) # Verifica se esta corrompido
+    
+    except Exception as e:
+        raise AudioValidationError()
 
-def validate_serializer_and_upload_file(serializer, file, file_name, content_type, folder_prefix):
+def validate_serializer_and_upload_file(serializer, file, file_name, content_type, folder_prefix, user=None):
     """
     Valida o serializer e realiza o upload do arquivo.
     - Se o serializer for válido, verifica se o arquivo existe.
@@ -37,10 +58,11 @@ def validate_serializer_and_upload_file(serializer, file, file_name, content_typ
     """
     try:
         if serializer.is_valid():
+            
             if file and not upload_file(file, file_name, content_type, folder_prefix):
                 return Response({"detail": "Failed to upload file to MinIO"}, status=status.HTTP_400_BAD_REQUEST)
 
-            serializer.save()
+            serializer.save(user_id=user) if user else serializer.save()
             return Response({'message': 'Upload successful!', 'data': serializer.data}, status=status.HTTP_201_CREATED)
 
         return Response({'message': 'Upload failed!', 'errors': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
