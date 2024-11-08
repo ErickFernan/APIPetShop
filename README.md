@@ -281,7 +281,7 @@ pet: breed, specie
 banho/tosa: product_used, service_type
 hotel: service
 produtos: product
-- Tem que ver como faz para excluir os audios do bucket quando o usuário for excluido também
+- Tem que ver como faz para excluir os audios e fotos do usuário do bucket quando o usuário for excluido também
 
 ### Melhorias que um dia podem ser feitas (não prioritárias)
 - no app saúde verificar se o responsivel de um serviço é válido, por exemplo, um zelador não pode ser o resnponsável por uma cirurgia, então quando for criado o dado deve-se verificar isso

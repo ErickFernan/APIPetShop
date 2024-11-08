@@ -36,12 +36,6 @@ def get_user_info(username):
     except Exception as e:
         handle_exception('get_user_info', e)
 
-def get_user_info2(username):
-    try:
-        return keycloak_admin.get_user(username)
-    except Exception as e:
-        handle_exception('get_user_info2', e)
-
 def assign_role_to_user(user_id, role):
     try:
         keycloak_admin.assign_realm_roles(user_id=user_id, roles=[role])
@@ -80,4 +74,46 @@ def update_user_to_auth_service(user_id, payload):
     try:
         keycloak_admin.update_user(user_id, payload)
     except Exception as e:
+        handle_exception('update_user_to_auth_service', e)
+
+def rollback_update_keycloak(user_auth_service_id, user):
+    """
+    Função para realizar o rollback no Keycloak em caso de falha na operação principal.
+    Neste caso ele retorna as pro estado original as informações que foram modificadas
+
+    Args:
+        user_auth_service_id (str): ID do usuário no Keycloak.
+        user (User): Instância do usuário para recuperar os dados de email, nome e sobrenome.
+
+    Returns:
+        Response ou None: Retorna uma resposta de erro caso o rollback falhe.
+    """
+    try:
+        update_user_to_auth_service(
+            user_id=user_auth_service_id,
+            payload={
+                "email": user.email,
+                "firstName": user.first_name,
+                "lastName": user.last_name
+            }
+        )
+    except Exception as e:
+        log_exception('update (rollback)', e)
+        handle_exception('update_user_to_auth_service', e)
+
+def rollback_delete_keycloak(user_auth_service_id):
+    """
+    Função para realizar o rollback no Keycloak em caso de falha na operação principal.
+    Neste caso ele deleta o usuário se ocorrer um erro
+
+    Args:
+        user_auth_service_id (str): ID do usuário no Keycloak.
+
+    Returns:
+        Response ou None: Retorna uma resposta de erro caso o rollback falhe.
+    """
+    try:
+        delete_user_to_auth_service(user_auth_service_id)
+    except Exception as e:
+        log_exception('update (rollback)', e)
         handle_exception('update_user_to_auth_service', e)

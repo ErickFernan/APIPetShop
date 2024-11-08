@@ -1,5 +1,11 @@
 from utils.logs_config import log_exception
 
+from django.http import Http404
+
+from rest_framework.response import Response
+from rest_framework import status
+
+
 class ImageValidationError(Exception):
     """
     Exception personalizada para validação no upload da imagem
@@ -21,13 +27,33 @@ class AudioValidationError(Exception):
         log_exception('AudioValidationError', message)
         super().__init__(self.message)
 
-class KeycloakRollBackError(Exception):
+
+class KeycloakRollbackError(Exception):
     """
-    Exceção personalizada para validação no upload de áudio.
+    Exceção personalizada para rollback do keycloak.
     Já possui o log configurado.
     """
     def __init__(self, message="Falha no rollback do Keycloak'"):
         self.message = message
         log_exception('KeycloakRollBackError', message)
         super().__init__(self.message)
-        
+
+
+# Função para logar exceções e gerar respostas padronizadas
+def manage_exceptions(exception, context=''):
+    """
+    Centraliza o tratamento de exceções para todas as views. 
+    Registra o erro e retorna uma resposta adequada ao cliente.
+    """
+    log_exception(context, exception)
+
+    if isinstance(exception, ImageValidationError):
+        return Response({'message': "Invalid image file.", "details" : str(exception)}, status=status.HTTP_400_BAD_REQUEST)
+
+    if isinstance(exception, AudioValidationError):
+        return Response({'message': "Invalid audio file.", "details" : str(exception)}, status=status.HTTP_400_BAD_REQUEST)
+    
+    elif isinstance(exception, Http404):
+        return Response({"detail": "User não encontrado."}, status=status.HTTP_404_NOT_FOUND)
+    
+    return Response({"detail": "An unexpected error occurred.", "errors": str(exception)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

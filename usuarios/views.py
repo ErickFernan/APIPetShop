@@ -1,9 +1,9 @@
-from keycloak import KeycloakOpenIDConnection
-from keycloak_config.keycloak_client import assign_role_to_user, set_password, get_role_info, add_user_to_auth_service, delete_user_to_auth_service, get_user_info, get_user_info2, update_user_to_auth_service
+from keycloak_config.keycloak_client import (assign_role_to_user, set_password, get_role_info, 
+                                            add_user_to_auth_service, delete_user_to_auth_service, get_user_info, 
+                                            update_user_to_auth_service, rollback_update_keycloak, rollback_delete_keycloak)
 
 from django.db import transaction
 from django.shortcuts import get_object_or_404
-from django.http import Http404
 
 from rest_framework import status
 from rest_framework.response import Response
@@ -12,12 +12,14 @@ from rest_framework.decorators import action
 from utils.views import BaseViewSet
 from utils.roles import UsuariosRoles
 from utils.logs_config import log_exception
-from utils.exceptions import ImageValidationError, AudioValidationError
+from utils.exceptions import KeycloakRollbackError, manage_exceptions
 from utils.validations import image_validation, audio_validation, validate_serializer_and_upload_file
-from utils.functions import extract_file_details, manage_exceptions
+from utils.functions import extract_file_details, has_permission
 
 from usuarios.models import User, UserDocument, UserPhoto, UserAudio
-from usuarios.serializers import UserSerializer, UserCreateSerializer, UserDocumentSerializer, UserPhotoSerializer, UserPhotoCreateSerializer, UserAudioSerializer, UserAudioCreateSerializer
+from usuarios.serializers import (UserSerializer, UserCreateSerializer, UserDocumentSerializer, 
+                                  UserPhotoSerializer, UserPhotoCreateSerializer, UserAudioSerializer, 
+                                  UserAudioCreateSerializer)
 
 
 class UserViewSet(BaseViewSet):
@@ -74,11 +76,7 @@ class UserViewSet(BaseViewSet):
         except Exception as e:
             # Rollback no keycloak em caso de falha
             if 'user_auth_service_id' in locals():
-                try:
-                    delete_user_to_auth_service(user_auth_service_id)
-                except Exception as rollback_error:
-                    log_exception('create (rollback)', rollback_error)
-                    return Response({'message': 'Falha no rollback do Keycloak', 'errors': str(rollback_error)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                rollback_delete_keycloak(user_auth_service_id)
             
             return manage_exceptions(e, context='create')
 
@@ -86,7 +84,7 @@ class UserViewSet(BaseViewSet):
         try:
             pk = kwargs.get('pk')
             
-            if not (any(role in self.roles_required['list_total'] for role in request.roles) or str(request.current_user_id) == pk):
+            if not has_permission(pk=pk, request=request, roles=self.roles_required['destroy_total']):
                 return Response({"detail": "You do not have permission to perform this action."}, status=status.HTTP_403_FORBIDDEN)
 
             with transaction.atomic():
@@ -99,6 +97,8 @@ class UserViewSet(BaseViewSet):
 
                 # Deletar usuário do Django
                 user.delete()
+
+                # Criar para deletar os arquivos de audio e imagem que se relacionam com o user
                    
                 return Response({'message': 'Deleted successful!'}, status=status.HTTP_200_OK)         
 
@@ -124,7 +124,7 @@ class UserViewSet(BaseViewSet):
         try:
             pk = kwargs.get('pk')
             
-            if not (any(role in self.roles_required['list_total'] for role in request.roles) or str(request.current_user_id) == pk):
+            if not has_permission(pk=pk, request=request, roles=self.roles_required['retrieve_total']):
                 return Response({"detail": "You do not have permission to perform this action."}, status=status.HTTP_403_FORBIDDEN)
             
             user = get_object_or_404(self.queryset, id=pk)
@@ -139,7 +139,7 @@ class UserViewSet(BaseViewSet):
             data = request.data.copy()
             pk = kwargs.get('pk')
 
-            if not (any(role in self.roles_required['list_total'] for role in request.roles) or str(request.current_user_id) == pk):
+            if not has_permission(pk=pk, request=request, roles=self.roles_required['update_total']):
                 return Response({"detail": "You do not have permission to perform this action."}, status=status.HTTP_403_FORBIDDEN)
             
             user = get_object_or_404(self.queryset, id=pk)
@@ -166,14 +166,7 @@ class UserViewSet(BaseViewSet):
         except Exception as e:
             # Rollback no keycloak em caso de falha
             if 'user_auth_service_id' in locals():
-                try:
-                    update_user_to_auth_service(user_id=user_auth_service_id,
-                                                payload={"email": user.email,
-                                                         "firstName": user.first_name,
-                                                         "lastName": user.last_name})
-                except Exception as rollback_error:
-                    log_exception('partial_update (rollback)', rollback_error)
-                    return Response({'message': 'Falha no rollback do Keycloak', 'errors': str(rollback_error)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                rollback_update_keycloak(user_auth_service_id, user)      
             
             return manage_exceptions(e, context='partial_update')
     
@@ -182,7 +175,7 @@ class UserViewSet(BaseViewSet):
             data = request.data.copy()
             pk = kwargs.get('pk')
 
-            if not (any(role in self.roles_required['list_total'] for role in request.roles) or str(request.current_user_id) == pk):
+            if not has_permission(pk=pk, request=request, roles=self.roles_required['update_total']):
                 return Response({"detail": "You do not have permission to perform this action."}, status=status.HTTP_403_FORBIDDEN)
             
             user = get_object_or_404(self.queryset, id=pk)
@@ -209,20 +202,13 @@ class UserViewSet(BaseViewSet):
         except Exception as e:
             # Rollback no keycloak em caso de falha
             if 'user_auth_service_id' in locals():
-                try:
-                    update_user_to_auth_service(user_id=user_auth_service_id,
-                                                payload={"email": user.email,
-                                                         "firstName": user.first_name,
-                                                         "lastName": user.last_name})
-                except Exception as rollback_error:
-                    log_exception('update (rollback)', rollback_error)
-                    return Response({'message': 'Falha no rollback do Keycloak', 'errors': str(rollback_error)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                rollback_update_keycloak(user_auth_service_id, user)  
             
             return manage_exceptions(e, context='update')
     
     
     @action(detail=True, methods=['put'])
-    def update_password(self, request, *args, **kwargs):
+    def update_password(self, request, *args, **kwargs): # colocar regra de permissão
         # Duvida para pesquisar depois: Esta função usa uma rota que o keycloak já disponibiliza normalemente. A questão é, neste caso eu devo aproveitar a API do keycloak
         # , ou seja, utilizar a própria rota do keycloak para fazer a troca da senha, ou eu devo criar esta rota na view igual eu fi aqui?
         # Esta dúvida se da principalmente pelo fato de eu querer usar o kong futuramente neste projeto, como ele é um gateway não teria necessidade de criar uma nova rota para tratar
@@ -235,7 +221,7 @@ class UserViewSet(BaseViewSet):
 
             pk = kwargs.get('pk')
 
-            if not (any(role in self.roles_required['update_password_total']  for role in request.roles) or str(request.current_user_id) == pk):
+            if not has_permission(pk=pk, request=request, roles=self.roles_required['update_password_total']):
                 return Response({"detail": "You do not have permission to perform this action."}, status=status.HTTP_403_FORBIDDEN)
             
             user = get_object_or_404(self.queryset, id=pk)
@@ -264,8 +250,8 @@ class UserPhotoViewSet(BaseViewSet):
         try:
             data = request.data.copy()
 
-            if not (any(role in self.roles_required['create_total'] for role in request.roles) or str(request.current_user_id) == data['user_id']):
-                return Response({"detail": "You do not have permission to perform this action."}, status=status.HTTP_403_FORBIDDEN) # dá pra transformar em uma função
+            if not has_permission(pk=data['user_id'], request=request, roles=self.roles_required['create_total']):
+                return Response({"detail": "You do not have permission to perform this action."}, status=status.HTTP_403_FORBIDDEN)
 
             file = request.FILES.get('photo')
             file_name, content_type = None, None
@@ -297,8 +283,8 @@ class UserAudioViewSet(BaseViewSet):
         try:
             data = request.data
 
-            if not (any(role in self.roles_required['create_total'] for role in request.roles) or str(request.current_user_id) == data['user_id']):
-                return Response({"detail": "You do not have permission to perform this action."}, status=status.HTTP_403_FORBIDDEN) # dá pra transformar em uma função
+            if not has_permission(pk=data['user_id'], request=request, roles=self.roles_required['create_total']):
+                return Response({"detail": "You do not have permission to perform this action."}, status=status.HTTP_403_FORBIDDEN)
 
             file = request.FILES.get('audio')
             file_name, content_type = None, None
