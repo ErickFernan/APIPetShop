@@ -3,7 +3,8 @@ from minio.error import S3Error
 
 from django.conf import settings
 
-from utils.logs_config import handle_exception
+from utils.logs_config import handle_exception, log_exception
+
 
 minio_client = Minio(
     settings.MINIO_ENDPOINT,
@@ -51,7 +52,7 @@ def delete_file(full_name):
             settings.MINIO_BUCKET_NAME,
             f"{full_name}",
         )
-        print(settings.MINIO_BUCKET_NAME+'/'+full_name)
+        # print(settings.MINIO_BUCKET_NAME+'/'+full_name)
         return True
     
     except S3Error as e: # Depois adicionar essa exception ao arquivo de exceptions e padronizar a saida
@@ -68,7 +69,6 @@ def delete_list_files(objects_name_list):
     """
     try:
         a=map(delete_file, objects_name_list)
-        print(list(a))
 
     except Exception as e:
         handle_exception('delete_list_files', e)

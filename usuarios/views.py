@@ -1,7 +1,7 @@
 from keycloak_config.keycloak_client import (assign_role_to_user, set_password, get_role_info, 
                                             add_user_to_auth_service, delete_user_to_auth_service, get_user_info, 
                                             update_user_to_auth_service, rollback_update_keycloak, rollback_create_keycloak,
-                                            get_user_info2)
+                                            get_user_info2, rollback_delete_keycloak)
 
 from django.db import transaction
 from django.shortcuts import get_object_or_404
@@ -93,6 +93,7 @@ class UserViewSet(BaseViewSet):
             with transaction.atomic():
 
                 user = get_object_or_404(self.queryset, id=pk)
+                print(user.id)
 
                 # Deletar usuário do keycloak
                 user_auth_service_id = get_user_info(username=user.username) # Colocar um rollback pra pelo menos não perder o usuario no keycloak, as fotos e audio a pessoa pode gravar de novo, não é tão importante
@@ -112,10 +113,21 @@ class UserViewSet(BaseViewSet):
 
                 # Deletar usuário do Django
                 user.delete()
+
+                a
                 
-            return Response({'message': 'Deleted successful!'}, status=status.HTTP_200_OK)         
+                return Response({'message': 'Deleted successful!'}, status=status.HTTP_200_OK)
+            
+            user_auth_service_id = 'Deuruim'          
 
         except Exception as e:
+            user = get_object_or_404(self.queryset, id=pk)
+            if 'user_auth_service_id' in locals():
+                print('aobaaaaaOIAJSOIJDoiajsioj')
+                print(user)
+                print(user.id)
+                rollback_delete_keycloak(user)
+            
             return manage_exceptions(e, context='destroy')
 
     def list(self, request, *args, **kwargs):

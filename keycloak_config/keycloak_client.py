@@ -1,8 +1,11 @@
+import requests
+
 from keycloak import KeycloakOpenID, KeycloakAdmin, KeycloakOpenIDConnection
 
 from django.conf import settings
 
-from utils.logs_config import handle_exception
+from utils.logs_config import handle_exception, log_exception
+from utils.exceptions import manage_exceptions
 
 
 keycloak_openid = KeycloakOpenID(
@@ -82,6 +85,27 @@ def update_user_to_auth_service(user_id, payload):
     except Exception as e:
         handle_exception('update_user_to_auth_service', e)
 
+def send_email_update_password(user_id):
+    try:
+        token = keycloak_connection.token
+
+        url = f"{settings.DJ_KC_SERVER_URL}/admin/realms/{settings.DJ_KC_REALM}/users/{user_id}/reset-password-email"
+        headers = {
+                "Authorization": f"Bearer {token['access_token']}"
+            }
+        a
+        response = requests.put(url, headers=headers, params={"client_id": "admin-rest-client"})
+        
+        if response.status_code == 204:
+            print("E-mail para resetar a senha enviado com sucesso!")
+        else:
+            print(f"Erro ao enviar e-mail: {response.text}")
+    
+    except Exception as e:
+        print('ERROOOOOOOOOOOOOO',e) # tá funcionando mas tenho que verificar os handle exceptions no rollbacks
+        manage_exceptions('send_email_update_password',e)
+        
+
 def rollback_update_keycloak(user_auth_service_id, user):
     """
     Função para realizar o rollback no Keycloak em caso de falha na operação principal.
@@ -120,6 +144,45 @@ def rollback_create_keycloak(user_auth_service_id):
     """
     try:
         delete_user_to_auth_service(user_auth_service_id)
+    except Exception as e:
+        log_exception('update (rollback)', e)
+        handle_exception('update_user_to_auth_service', e)
+
+
+def rollback_delete_keycloak(user):
+    """
+    Função para realizar o rollback no Keycloak em caso de falha na operação principal.
+    Neste caso ele retorna as pro estado original as informações que foram modificadas
+
+    Args:
+        user_auth_service_id (str): ID do usuário no Keycloak.
+        user (User): Instância do usuário para recuperar os dados de email, nome e sobrenome.
+
+    Returns:
+        Response ou None: Retorna uma resposta de erro caso o rollback falhe.
+    """
+    try:
+        user_auth_service_id = add_user_to_auth_service(username=user.username, 
+                                                        email=user.email, 
+                                                        firstName=user.first_name, 
+                                                        lastName=user.last_name)
+
+        user.auth_service_id = user_auth_service_id
+        user.save()
+
+        update_user_to_auth_service(user_id=get_user_info(username=user.username),
+                                                payload={"email": user.email,
+                                                         "firstName": user.first_name,
+                                                         "lastName": user.last_name,
+                                                         "attributes": {
+                                                            "django_uuid": [str(user.id)]
+                                                        }})
+
+        keycloak_admin.set_user_password(user_id=user.auth_service_id, password='password', temporary=True)                                               
+        
+        send_email_update_password(user_id=user_auth_service_id)
+        print(f"E-mail de redefinição de senha enviado para {user.username}.") # Este aqui tem que ser enviado para a solicitação. Criar um erro e tratar essa resposta no manage exceptions
+
     except Exception as e:
         log_exception('update (rollback)', e)
         handle_exception('update_user_to_auth_service', e)
