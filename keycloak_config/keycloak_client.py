@@ -36,6 +36,12 @@ def get_user_info(username):
     except Exception as e:
         handle_exception('get_user_info', e)
 
+def get_user_info2(username): # renomear
+    try:
+        return keycloak_admin.get_user(username)
+    except Exception as e:
+        handle_exception('get_user_info2', e)
+
 def assign_role_to_user(user_id, role):
     try:
         keycloak_admin.assign_realm_roles(user_id=user_id, roles=[role])
@@ -101,7 +107,7 @@ def rollback_update_keycloak(user_auth_service_id, user):
         log_exception('update (rollback)', e)
         handle_exception('update_user_to_auth_service', e)
 
-def rollback_delete_keycloak(user_auth_service_id):
+def rollback_create_keycloak(user_auth_service_id):
     """
     Função para realizar o rollback no Keycloak em caso de falha na operação principal.
     Neste caso ele deleta o usuário se ocorrer um erro

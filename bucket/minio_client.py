@@ -51,12 +51,25 @@ def delete_file(full_name):
             settings.MINIO_BUCKET_NAME,
             f"{full_name}",
         )
+        print(settings.MINIO_BUCKET_NAME+'/'+full_name)
         return True
     
-    except S3Error as e:
+    except S3Error as e: # Depois adicionar essa exception ao arquivo de exceptions e padronizar a saida
         log_exception('delete_file', f"S3Error occurred: {e.code} - {e.message}")
         return False
 
     except Exception as e:
         handle_exception('delete_file', e)
+        return False
+
+def delete_list_files(objects_name_list):
+    """
+    Função responsável pela deleção de uma lista de arquivos no Minio
+    """
+    try:
+        a=map(delete_file, objects_name_list)
+        print(list(a))
+
+    except Exception as e:
+        handle_exception('delete_list_files', e)
         return False

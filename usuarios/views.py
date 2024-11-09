@@ -1,9 +1,12 @@
 from keycloak_config.keycloak_client import (assign_role_to_user, set_password, get_role_info, 
                                             add_user_to_auth_service, delete_user_to_auth_service, get_user_info, 
-                                            update_user_to_auth_service, rollback_update_keycloak, rollback_delete_keycloak)
+                                            update_user_to_auth_service, rollback_update_keycloak, rollback_create_keycloak,
+                                            get_user_info2)
 
 from django.db import transaction
 from django.shortcuts import get_object_or_404
+
+from bucket.minio_client import delete_list_files
 
 from rest_framework import status
 from rest_framework.response import Response
@@ -76,7 +79,7 @@ class UserViewSet(BaseViewSet):
         except Exception as e:
             # Rollback no keycloak em caso de falha
             if 'user_auth_service_id' in locals():
-                rollback_delete_keycloak(user_auth_service_id)
+                rollback_create_keycloak(user_auth_service_id)
             
             return manage_exceptions(e, context='create')
 
@@ -92,15 +95,25 @@ class UserViewSet(BaseViewSet):
                 user = get_object_or_404(self.queryset, id=pk)
 
                 # Deletar usuário do keycloak
-                user_auth_service_id = get_user_info(username=user.username)
-                delete_user_to_auth_service(user_auth_service_id)
+                user_auth_service_id = get_user_info(username=user.username) # Colocar um rollback pra pelo menos não perder o usuario no keycloak, as fotos e audio a pessoa pode gravar de novo, não é tão importante
+                delete_user_to_auth_service(user_auth_service_id) # Vai ser um rollback quase igual o do update, mas vou ter q mudar para criar um user de novo com os mesmos dados
+
+                # Deletar audios relacionados ao usuário
+                audios = UserAudio.objects.filter(user_id=pk)
+                list_audios_path = [audio.audio_path for audio in audios]
+                audios.delete()
+                delete_list_files(objects_name_list=list_audios_path)
+
+                # Deletar fotos relacionadas ao usuário
+                photos = UserPhoto.objects.filter(user_id=pk)
+                list_photos_path = [photo.photo_path for photo in photos]
+                photos.delete()
+                delete_list_files(objects_name_list=list_photos_path)
 
                 # Deletar usuário do Django
                 user.delete()
-
-                # Criar para deletar os arquivos de audio e imagem que se relacionam com o user
-                   
-                return Response({'message': 'Deleted successful!'}, status=status.HTTP_200_OK)         
+                
+            return Response({'message': 'Deleted successful!'}, status=status.HTTP_200_OK)         
 
         except Exception as e:
             return manage_exceptions(e, context='destroy')
@@ -108,7 +121,7 @@ class UserViewSet(BaseViewSet):
     def list(self, request, *args, **kwargs):
         try:
             if any(role in self.roles_required['list_total'] for role in request.roles):
-                list_users = self.filter_queryset(self.queryset)
+                list_users = self.filter_queryset(self.queryset) # configurar os filtros depois
                 list_serializer = self.serializer_class(list_users, many=True)
                 return Response({'usuários': list_serializer.data}, status=status.HTTP_200_OK)
 
