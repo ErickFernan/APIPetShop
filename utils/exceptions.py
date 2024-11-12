@@ -61,5 +61,4 @@ def manage_exceptions(exception, context=''):
     if isinstance(exception, S3Error):
         return Response({"message": "upload_file", "detail": f"S3Error occurred: {exception.code} - {exception.message}", "errors": str(exception)}, status=status.HTTP_412_PRECONDITION_FAILED)
 
-    
     return Response({"detail": "An unexpected error occurred.", "errors": str(exception)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

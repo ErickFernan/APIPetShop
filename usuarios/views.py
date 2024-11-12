@@ -96,8 +96,8 @@ class UserViewSet(BaseViewSet):
             
             with transaction.atomic():
                 # Deletar usuário do keycloak
-                user_auth_service_id = get_user_info(username=user.username) # Colocar um rollback pra pelo menos não perder o usuario no keycloak, as fotos e audio a pessoa pode gravar de novo, não é tão importante
-                delete_user_to_auth_service(user_auth_service_id) # Vai ser um rollback quase igual o do update, mas vou ter q mudar para criar um user de novo com os mesmos dados
+                user_auth_service_id = get_user_info(username=user.username) 
+                delete_user_to_auth_service(user_auth_service_id)
 
                 # Deletar usuário do Django
                 user.delete()

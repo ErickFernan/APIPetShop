@@ -106,7 +106,6 @@ def send_email_update_password(user_id):
             print(f"Erro ao enviar e-mail: {response.text}")
     
     except Exception as e:
-        print('ERROOOOOOOOOOOOOO',e) # tá funcionando mas tenho que verificar os handle exceptions no rollbacks
         log_exception('send_email_update_password', e)
         
 

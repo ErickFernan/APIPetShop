@@ -33,7 +33,6 @@ def upload_file(file_data, file_name, content_type, folder_prefix):
             # part_size=10*1024*1024,
             content_type=content_type,
         )
-        # print(f"{folder_prefix}/{file_name}")
         return True
 
     except Exception as e:
