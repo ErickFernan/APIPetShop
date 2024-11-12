@@ -59,8 +59,8 @@ class ProductViewSet(BaseViewSet):
                 product = get_object_or_404(self.queryset, id=pk)
 
                 if product.photo_path:
-                    delete_success = delete_file(product.photo_path)
-                    if not delete_success:
+                    delete_success = delete_file(product.photo_path) # Ver esa fç
+                    if not delete_success: # essa linha nao vai ser necessária pois o erro é tratado na fç
                         raise Exception("Failed to delete the photo file.")
 
                 product.delete()

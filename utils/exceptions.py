@@ -53,7 +53,7 @@ def manage_exceptions(exception, context=''):
     if isinstance(exception, AudioValidationError):
         return Response({'message': "Invalid audio file.", "details" : str(exception)}, status=status.HTTP_400_BAD_REQUEST)
     
-    elif isinstance(exception, Http404):
+    if isinstance(exception, Http404):
         return Response({"detail": "User não encontrado."}, status=status.HTTP_404_NOT_FOUND)
     
     return Response({"detail": "An unexpected error occurred.", "errors": str(exception)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

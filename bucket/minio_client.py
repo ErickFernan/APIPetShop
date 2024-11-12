@@ -68,8 +68,11 @@ def delete_list_files(objects_name_list):
     Função responsável pela deleção de uma lista de arquivos no Minio
     """
     try:
-        a=map(delete_file, objects_name_list)
+        while objects_name_list:
+            file_name = objects_name_list.pop(0)
+            delete_file(file_name)
 
     except Exception as e:
+        if objects_name_list:
+            log_exception('delete_list_files', f'Os arquivos não foram excluidos: {objects_name_list}')
         handle_exception('delete_list_files', e)
-        return False
