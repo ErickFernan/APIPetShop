@@ -92,28 +92,21 @@ class UserViewSet(BaseViewSet):
 
             user = get_object_or_404(self.queryset, id=pk)
             user_id = user.id
+            list_audios_path = [audio.audio_path for audio in UserAudio.objects.filter(user_id=pk)]
+            list_photos_path = [photo.photo_path for photo in UserPhoto.objects.filter(user_id=pk)]
             
             with transaction.atomic():
                 # Deletar usuário do keycloak
                 user_auth_service_id = get_user_info(username=user.username) # Colocar um rollback pra pelo menos não perder o usuario no keycloak, as fotos e audio a pessoa pode gravar de novo, não é tão importante
                 delete_user_to_auth_service(user_auth_service_id) # Vai ser um rollback quase igual o do update, mas vou ter q mudar para criar um user de novo com os mesmos dados
 
-                # Deletar audios relacionados ao usuário
-                audios = UserAudio.objects.filter(user_id=pk)
-                list_audios_path = [audio.audio_path for audio in audios]
-                # delete_list_files(objects_name_list=list_audios_path)
-
-                # Deletar fotos relacionadas ao usuário
-                photos = UserPhoto.objects.filter(user_id=pk)
-                list_photos_path = [photo.photo_path for photo in photos]
-                delete_list_files(objects_name_list=list_photos_path + list_audios_path)
-                a
                 # Deletar usuário do Django
                 user.delete()
                 
-                return Response({'message': 'Deleted successful!'}, status=status.HTTP_200_OK)
-            
-            user_auth_service_id = 'Deuruim'          
+                # Deletar fotos e audios relacionadas ao usuário
+                delete_list_files(objects_name_list=list_photos_path + list_audios_path)
+                  
+            return Response({'message': 'Deleted successful!'}, status=status.HTTP_200_OK)       
 
         except Exception as e:
             if 'user_auth_service_id' in locals():
