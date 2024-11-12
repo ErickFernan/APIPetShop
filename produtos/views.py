@@ -1,6 +1,5 @@
 from django.shortcuts import get_object_or_404
 from django.db import transaction
-from django.http import Http404
 
 from django_filters.rest_framework import DjangoFilterBackend
 
@@ -17,8 +16,7 @@ from utils.validations import image_validation, validate_serializer_and_upload_f
 from utils.functions import extract_file_details
 from utils.views import BaseViewSet
 from utils.roles import ProdutosRoles
-from utils.exceptions import ImageValidationError
-from utils.logs_config import log_exception
+from utils.exceptions import manage_exceptions
 
 
 class ProductViewSet(BaseViewSet):
@@ -46,12 +44,9 @@ class ProductViewSet(BaseViewSet):
 
             return validate_serializer_and_upload_file(serializer, file, file_name, content_type, self.folder_prefix)
         
-        except ImageValidationError as e:
-            return Response({'message': str(e)}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
-            log_exception('create', e)
-            return Response({"detail": "An unexpected error occurred."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
+            return manage_exceptions(e, context='create')
+    
     def destroy(self, request, *args, **kwargs):
         try:
             with transaction.atomic():
@@ -59,19 +54,14 @@ class ProductViewSet(BaseViewSet):
                 product = get_object_or_404(self.queryset, id=pk)
 
                 if product.photo_path:
-                    delete_success = delete_file(product.photo_path) # Ver esa fç
-                    if not delete_success: # essa linha nao vai ser necessária pois o erro é tratado na fç
-                        raise Exception("Failed to delete the photo file.")
+                    delete_success = delete_file(product.photo_path)
 
                 product.delete()
 
                 return Response({'message': 'Deleted successful!'}, status=status.HTTP_200_OK)
 
-        except Http404:
-            return Response({"detail": "Produto não encontrado."}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
-            log_exception('destroy', e)
-            return Response({"detail": "An unexpected error occurred22."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return manage_exceptions(e, context='destroy')
 
     def update(self, request, *args, **kwargs):  
         try:
@@ -92,13 +82,8 @@ class ProductViewSet(BaseViewSet):
 
             return validate_serializer_and_upload_file(serializer, file, file_name, content_type, self.folder_prefix)
             
-        except ImageValidationError as e:
-            return Response({'message': str(e)}, status=status.HTTP_400_BAD_REQUEST)
-        except Http404:
-            return Response({"detail": "Produto não encontrado."}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
-            log_exception('update', e)
-            return Response({"detail": "An unexpected error occurred."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return manage_exceptions(e, context='update')
             
     def partial_update(self, request, *args, **kwargs):
         try:
@@ -119,14 +104,8 @@ class ProductViewSet(BaseViewSet):
 
             return validate_serializer_and_upload_file(serializer, file, file_name, content_type, self.folder_prefix)
             
-        except ImageValidationError as e:
-            return Response({'message': str(e)}, status=status.HTTP_400_BAD_REQUEST)
-        except Http404:
-            return Response({"detail": "Produto não encontrado."}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
-            log_exception('partial_update', e)
-            return Response({"detail": "An unexpected error occurred."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
+            return manage_exceptions(e, context='partial_update')
             
     def list(self, request):
         try:
@@ -140,8 +119,7 @@ class ProductViewSet(BaseViewSet):
             return Response({'produtos': list_serializer.data}, status=status.HTTP_200_OK)
 
         except Exception as e:
-            log_exception('list', e)
-            return Response({"detail": "An unexpected error occurred."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return manage_exceptions(e, context='list')
 
     def retrieve(self, request, *args, **kwargs):    
         try:
@@ -155,8 +133,5 @@ class ProductViewSet(BaseViewSet):
             list_serializer = ProductSerializerLimited(product)
             return Response({'produtos': list_serializer.data}, status=status.HTTP_200_OK)
 
-        except Http404:
-            return Response({"detail": "Produto não encontrado."}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
-            log_exception('retrieve', e)
-            return Response({"detail": "An unexpected error occurred."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return manage_exceptions(e, context='retrieve')

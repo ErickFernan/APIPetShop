@@ -15,7 +15,7 @@ from rest_framework.decorators import action
 from utils.views import BaseViewSet
 from utils.roles import UsuariosRoles
 from utils.logs_config import log_exception
-from utils.exceptions import KeycloakRollbackError, manage_exceptions
+from utils.exceptions import manage_exceptions
 from utils.validations import image_validation, audio_validation, validate_serializer_and_upload_file
 from utils.functions import extract_file_details, has_permission
 
