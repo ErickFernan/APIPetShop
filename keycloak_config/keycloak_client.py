@@ -185,8 +185,8 @@ def rollback_delete_keycloak(user, user_id):
 
         keycloak_admin.set_user_password(user_id=user.auth_service_id, password='password', temporary=True)                                               
         
-        response = send_email_update_password(user_id=user_auth_service_id)
-        print(f"E-mail de redefinição de senha enviado para {user.username}.") # Este aqui tem que ser enviado para a solicitação. Criar um erro e tratar essa resposta no manage exceptions
+        # response = send_email_update_password(user_id=user_auth_service_id)
+        print(f"E-mail de redefinição de senha enviado para {user.username}.")
         return response
 
     except Exception as e:

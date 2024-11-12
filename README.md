@@ -213,6 +213,8 @@ Esse TO DO funcionará como uma versão simplificada de sprint e backlog. Como e
 
 ### Tarefas em execução:
 - [ ] Personalização nas rotas da app usuarios
+- [ ] Padronizar rotas de produtos com nova regra
+- [ ] Adicionar filtros ao list de usuarios
 
 ### Backlog:
 - [ ] Personalização das rotas da app banhotosa

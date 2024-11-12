@@ -1,5 +1,6 @@
 from minio import Minio # Poderia usar o boto3, mas preferi o do próprio minio
 from minio.error import S3Error
+from django.http import Http404
 
 from django.conf import settings
 
@@ -40,7 +41,7 @@ def upload_file(file_data, file_name, content_type, folder_prefix):
         return False
 
     except Exception as e:
-        handle_exception('upload_file', e)
+        handle_exception('upload_file', e) # acho que isso vai quebrar, pq ele levanta uma exception
         return False
 
 def delete_file(full_name):
@@ -52,16 +53,10 @@ def delete_file(full_name):
             settings.MINIO_BUCKET_NAME,
             f"{full_name}",
         )
-        # print(settings.MINIO_BUCKET_NAME+'/'+full_name)
-        return True
-    
-    except S3Error as e: # Depois adicionar essa exception ao arquivo de exceptions e padronizar a saida
-        log_exception('delete_file', f"S3Error occurred: {e.code} - {e.message}")
-        return False
+        return True, None
 
     except Exception as e:
-        handle_exception('delete_file', e)
-        return False
+        return False, e
 
 def delete_list_files(objects_name_list):
     """
@@ -70,9 +65,11 @@ def delete_list_files(objects_name_list):
     try:
         while objects_name_list:
             file_name = objects_name_list.pop(0)
-            delete_file(file_name)
+            delete_success, e = delete_file(file_name)
+            if not delete_success:
+                raise e
 
     except Exception as e:
         if objects_name_list:
-            log_exception('delete_list_files', f'Os arquivos não foram excluidos: {objects_name_list}')
+            log_exception('delete_list_files', f'Os arquivos não foram excluidos: {file_name} {objects_name_list}')
         handle_exception('delete_list_files', e)

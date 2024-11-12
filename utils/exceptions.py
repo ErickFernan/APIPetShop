@@ -2,6 +2,8 @@ from utils.logs_config import log_exception
 
 from django.http import Http404
 
+from minio.error import S3Error
+
 from rest_framework.response import Response
 from rest_framework import status
 
@@ -55,5 +57,9 @@ def manage_exceptions(exception, context=''):
     
     if isinstance(exception, Http404):
         return Response({"detail": "User não encontrado."}, status=status.HTTP_404_NOT_FOUND)
+
+    if isinstance(exception, S3Error):
+        return Response({"message": "upload_file", "detail": f"S3Error occurred: {exception.code} - {exception.message}", "errors": str(exception)}, status=status.HTTP_412_PRECONDITION_FAILED)
+
     
     return Response({"detail": "An unexpected error occurred.", "errors": str(exception)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
