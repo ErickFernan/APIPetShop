@@ -55,7 +55,7 @@ class ProductViewSet(BaseViewSet):
 
                 if product.photo_path:
                     delete_success, e = delete_file(product.photo_path)
-                    if not delete_success: # essa linha nao vai ser necessária pois o erro é tratado na fç
+                    if not delete_success:
                         raise Exception(e)
 
                 product.delete()

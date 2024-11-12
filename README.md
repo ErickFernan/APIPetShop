@@ -285,6 +285,15 @@ hotel: service
 produtos: product
 - Tem que ver como faz para excluir os audios e fotos do usuário do bucket quando o usuário for excluido também
 
+RESUMAO: log exception escreve o log sem fazer nada, usar quando quer acrescentar um extra do erro no log
+
+handle exception faz o log do erro e levanta a exceção, pra não quebrar deve ser chamado dentro de um try
+
+manage exception contem uma lista de responses para tipos predefindos de exception, você chama no except de uma resposta de requisição http, que ele irá tratar o erro que recebeu.
+
+se quiser uma resposta personalizada do erro, você precisa carregar o return até a função da requisição http e  retornar la a resposta.
+
+
 ### Melhorias que um dia podem ser feitas (não prioritárias)
 - no app saúde verificar se o responsivel de um serviço é válido, por exemplo, um zelador não pode ser o resnponsável por uma cirurgia, então quando for criado o dado deve-se verificar isso
 - automatizar o tetment_cycle status de acordo com o serviço, por exemplo, uma vacina é aplicada e o ciclo já é finalizado????????? faz sentido?

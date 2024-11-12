@@ -24,7 +24,7 @@ def upload_file(file_data, file_name, content_type, folder_prefix):
 
         file_data.seek(0) # Reposiciona o ponteiro do arquivo para o início
         length = file_data.size 
-
+        
         minio_client.put_object(
             settings.MINIO_BUCKET_NAME,
             f"{folder_prefix}/{file_name}",
@@ -36,13 +36,8 @@ def upload_file(file_data, file_name, content_type, folder_prefix):
         # print(f"{folder_prefix}/{file_name}")
         return True
 
-    except S3Error as e:
-        log_exception('upload_file', f"S3Error occurred: {e.code} - {e.message}")
-        return False
-
     except Exception as e:
         handle_exception('upload_file', e) # acho que isso vai quebrar, pq ele levanta uma exception
-        return False
 
 def delete_file(full_name):
     """
