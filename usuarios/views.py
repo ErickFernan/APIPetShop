@@ -335,6 +335,12 @@ class UserPhotoViewSet(BaseViewSet):
         except Exception as e:
             return manage_exceptions(e, context='update')
 
+    def partial_update(self, request, *args, **kwargs):
+        try:
+            return  Response({"detail": "Utilize a rota PUT"}, status=status.HTTP_403_FORBIDDEN)
+
+        except Exception as e:
+            return manage_exceptions(e, context='update')
   
 class UserAudioViewSet(BaseViewSet):
     queryset = UserAudio.objects.all()
