@@ -73,7 +73,7 @@ class ProductViewSet(BaseViewSet):
             data = request.data
             file = request.FILES.get('photo')
             file_name, content_type = product.photo_path.split('/')[-1] if product.photo_path else None, None
-            print('')
+
             if file:
                 image_validation(file=file)
 

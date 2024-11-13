@@ -302,7 +302,6 @@ class UserPhotoViewSet(BaseViewSet):
                 return Response({'usuários': list_serializer.data}, status=status.HTTP_200_OK)
 
             else:
-                print(request.current_user_id)
                 list_user_photo = get_list_or_404(self.queryset, user_id=request.current_user_id)
                 list_serializer = self.serializer_class(list_user_photo, many=True)
                 return Response({'usuário': list_serializer.data}, status=status.HTTP_200_OK)
@@ -311,6 +310,30 @@ class UserPhotoViewSet(BaseViewSet):
             return manage_exceptions(e, context='list')
 
     
+    def update(self, request, *args, **kwargs):
+        try:
+            pk = kwargs.get('pk')
+            data = request.data.copy()
+        
+            if not has_permission(pk=pk, request=request, roles=self.roles_required['create_total']):
+                return Response({"detail": "You do not have permission to perform this action."}, status=status.HTTP_403_FORBIDDEN)
+            
+            user_photo = get_object_or_404(UserPhoto, id=pk)
+            file = request.FILES.get('photo')
+            file_name, content_type = user_photo.photo_path.split('/')[-1] if user_photo.photo_path else None, None
+
+            if file:
+                image_validation(file=file)
+
+                file_name, content_type = extract_file_details(file, user_photo)
+                data['photo_path'] = f"{self.folder_prefix}/{file_name}"
+
+            serializer = UserPhotoCreateSerializer(user_photo, data=data)
+
+            return validate_serializer_and_upload_file(serializer, file, file_name, content_type, self.folder_prefix)
+        
+        except Exception as e:
+            return manage_exceptions(e, context='update')
 
   
 class UserAudioViewSet(BaseViewSet):

@@ -57,13 +57,12 @@ def validate_serializer_and_upload_file(serializer, file, file_name, content_typ
     - Em caso de erro inesperado, captura a exceção e retorna erro genérico.
     """
     try:
-        print('ab')
         if serializer.is_valid():
-            print('h')
+
             if file and not upload_file(file, file_name, content_type, folder_prefix):
-                print('a')
+
                 return Response({"detail": "Failed to upload file to MinIO"}, status=status.HTTP_400_BAD_REQUEST)
-            print('b')
+
             serializer.save(user_id=user) if user else serializer.save()
             return Response({'message': 'Upload successful!', 'data': serializer.data}, status=status.HTTP_201_CREATED)
 
