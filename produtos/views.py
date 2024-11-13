@@ -73,10 +73,10 @@ class ProductViewSet(BaseViewSet):
             data = request.data
             file = request.FILES.get('photo')
             file_name, content_type = product.photo_path.split('/')[-1] if product.photo_path else None, None
-             
+            print('')
             if file:
-                is_valid, message = image_validation(file=file)
-            
+                image_validation(file=file)
+
                 file_name, content_type = extract_file_details(file, product)
                 data['photo_path'] = f"{self.folder_prefix}/{file_name}"
 
@@ -97,7 +97,7 @@ class ProductViewSet(BaseViewSet):
             file_name, content_type = product.photo_path.split('/')[-1] if product.photo_path else None, None
              
             if file:
-                is_valid, message = image_validation(file=file)
+                image_validation(file=file)
             
                 file_name, content_type = extract_file_details(file, product)
                 data['photo_path'] = f"{self.folder_prefix}/{file_name}"

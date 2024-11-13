@@ -4,9 +4,9 @@ from keycloak_config.keycloak_client import (assign_role_to_user, set_password, 
                                             get_user_info2, rollback_delete_keycloak)
 
 from django.db import transaction
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, get_list_or_404
 
-from bucket.minio_client import delete_list_files
+from bucket.minio_client import delete_list_files, upload_file
 
 from rest_framework import status
 from rest_framework.response import Response
@@ -280,7 +280,39 @@ class UserPhotoViewSet(BaseViewSet):
         except Exception as e:
             return manage_exceptions(e, context='create')
 
+    def retrieve(self, request, *args, **kwargs):
+        try:
+            pk = kwargs.get('pk')
             
+            if not has_permission(pk=pk, request=request, roles=self.roles_required['retrieve_total']):
+                return Response({"detail": "You do not have permission to perform this action."}, status=status.HTTP_403_FORBIDDEN)
+            
+            user_photo = get_object_or_404(self.queryset, id=pk)
+            user_photo_serializer = self.serializer_class(user_photo)
+            return Response({'usuário': user_photo_serializer.data}, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            return manage_exceptions(e, context='retrieve')
+
+    def list(self, request, *args, **kwargs):
+        try:
+            if any(role in self.roles_required['list_total'] for role in request.roles):
+                list_user_photo = self.filter_queryset(self.queryset) # configurar os filtros depois
+                list_serializer = self.serializer_class(list_user_photo, many=True)
+                return Response({'usuários': list_serializer.data}, status=status.HTTP_200_OK)
+
+            else:
+                print(request.current_user_id)
+                list_user_photo = get_list_or_404(self.queryset, user_id=request.current_user_id)
+                list_serializer = self.serializer_class(list_user_photo, many=True)
+                return Response({'usuário': list_serializer.data}, status=status.HTTP_200_OK)
+        
+        except Exception as e:
+            return manage_exceptions(e, context='list')
+
+    
+
+  
 class UserAudioViewSet(BaseViewSet):
     queryset = UserAudio.objects.all()
     serializer_class = UserAudioSerializer
