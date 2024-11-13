@@ -373,3 +373,69 @@ class UserAudioViewSet(BaseViewSet):
         
         except Exception as e:
             return manage_exceptions(e, context='create')
+
+    def retrieve(self, request, *args, **kwargs):
+        try:
+            pk = kwargs.get('pk')       
+            user_audio_id = self.queryset.filter(pk=pk).values_list('user_id', flat=True).first() # so carrega o campo desejado
+
+            if not user_audio_id:
+                return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
+
+            if not has_permission(pk=str(user_audio_id), request=request, roles=self.roles_required['retrieve_total']):
+                return Response({"detail": "You do not have permission to perform this action."}, status=status.HTTP_403_FORBIDDEN)
+
+            user_audio = self.queryset.get(pk=pk)  # recupera o objeto completo
+            user_audio_serializer = self.serializer_class(user_audio)
+            return Response({'usuário': user_audio_serializer.data}, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            return manage_exceptions(e, context='retrieve')
+
+    def list(self, request, *args, **kwargs):
+        try:
+            if any(role in self.roles_required['list_total'] for role in request.roles):
+                list_user_audio = self.filter_queryset(self.queryset) # configurar os filtros depois
+                list_serializer = self.serializer_class(list_user_audio, many=True)
+                return Response({'usuários': list_serializer.data}, status=status.HTTP_200_OK)
+
+            else:
+                list_user_audio = get_list_or_404(self.queryset, user_id=request.current_user_id)
+                list_serializer = self.serializer_class(list_user_audio, many=True)
+                return Response({'usuário': list_serializer.data}, status=status.HTTP_200_OK)
+        
+        except Exception as e:
+            return manage_exceptions(e, context='list')
+
+    
+    # def update(self, request, *args, **kwargs):
+    #     try:
+    #         pk = kwargs.get('pk')
+    #         data = request.data.copy()
+        
+    #         if not has_permission(pk=pk, request=request, roles=self.roles_required['create_total']):
+    #             return Response({"detail": "You do not have permission to perform this action."}, status=status.HTTP_403_FORBIDDEN)
+            
+    #         user_photo = get_object_or_404(UserPhoto, id=pk)
+    #         file = request.FILES.get('photo')
+    #         file_name, content_type = user_photo.photo_path.split('/')[-1] if user_photo.photo_path else None, None
+
+    #         if file:
+    #             image_validation(file=file)
+
+    #             file_name, content_type = extract_file_details(file, user_photo)
+    #             data['photo_path'] = f"{self.folder_prefix}/{file_name}"
+
+    #         serializer = UserPhotoCreateSerializer(user_photo, data=data)
+
+    #         return validate_serializer_and_upload_file(serializer, file, file_name, content_type, self.folder_prefix)
+        
+    #     except Exception as e:
+    #         return manage_exceptions(e, context='update')
+
+    # def partial_update(self, request, *args, **kwargs):
+    #     try:
+    #         return  Response({"detail": "Utilize a rota PUT"}, status=status.HTTP_403_FORBIDDEN)
+
+    #     except Exception as e:
+            # return manage_exceptions(e, context='update')
