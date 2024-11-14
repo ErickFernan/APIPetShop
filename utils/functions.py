@@ -55,6 +55,6 @@ def extract_file_details(file, product=None):
     return file_name, content_type
 
 def has_permission(request, pk, roles):
-    print(str(request.current_user_id) == pk)
+    # print(str(request.current_user_id) == pk)
     return any(role in roles for role in request.roles) or str(request.current_user_id) == pk
         

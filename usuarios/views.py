@@ -6,7 +6,7 @@ from keycloak_config.keycloak_client import (assign_role_to_user, set_password, 
 from django.db import transaction
 from django.shortcuts import get_object_or_404, get_list_or_404
 
-from bucket.minio_client import delete_list_files, upload_file
+from bucket.minio_client import delete_list_files, upload_file, delete_file
 
 from rest_framework import status
 from rest_framework.response import Response
@@ -61,7 +61,7 @@ class UserViewSet(BaseViewSet):
                     
                     serializer.validated_data['auth_service_id'] = user_auth_service_id
                     serializer.save()
-                    user = get_object_or_404(self.queryset, email=data['email'])
+                    user = get_object_or_404(self.get_queryset(), email=data['email'])
 
                     update_user_to_auth_service(user_id=get_user_info(username=user.username),
                                                 payload={"email": data.get('email', user.email),
@@ -89,7 +89,7 @@ class UserViewSet(BaseViewSet):
             if not has_permission(pk=pk, request=request, roles=self.roles_required['destroy_total']):
                 return Response({"detail": "You do not have permission to perform this action."}, status=status.HTTP_403_FORBIDDEN)
 
-            user = get_object_or_404(self.queryset, id=pk)
+            user = get_object_or_404(self.get_queryset(), id=pk)
             user_id = user.id
             list_audios_path = [audio.audio_path for audio in UserAudio.objects.filter(user_id=pk)]
             list_photos_path = [photo.photo_path for photo in UserPhoto.objects.filter(user_id=pk)]
@@ -117,12 +117,12 @@ class UserViewSet(BaseViewSet):
     def list(self, request, *args, **kwargs):
         try:
             if any(role in self.roles_required['list_total'] for role in request.roles):
-                list_users = self.filter_queryset(self.queryset) # configurar os filtros depois
+                list_users = self.filter_queryset(self.get_queryset()) # configurar os filtros depois
                 list_serializer = self.serializer_class(list_users, many=True)
                 return Response({'usuários': list_serializer.data}, status=status.HTTP_200_OK)
 
             else:
-                user = get_object_or_404(self.queryset, id=request.current_user_id)
+                user = get_object_or_404(self.get_queryset(), id=request.current_user_id)
                 user_serializer = self.serializer_class(user)
                 return Response({'usuário': user_serializer.data}, status=status.HTTP_200_OK)
         
@@ -136,7 +136,7 @@ class UserViewSet(BaseViewSet):
             if not has_permission(pk=pk, request=request, roles=self.roles_required['retrieve_total']):
                 return Response({"detail": "You do not have permission to perform this action."}, status=status.HTTP_403_FORBIDDEN)
             
-            user = get_object_or_404(self.queryset, id=pk)
+            user = get_object_or_404(self.get_queryset(), id=pk)
             user_serializer = self.serializer_class(user)
             return Response({'usuário': user_serializer.data}, status=status.HTTP_200_OK)
 
@@ -151,7 +151,7 @@ class UserViewSet(BaseViewSet):
             if not has_permission(pk=pk, request=request, roles=self.roles_required['update_total']):
                 return Response({"detail": "You do not have permission to perform this action."}, status=status.HTTP_403_FORBIDDEN)
             
-            user = get_object_or_404(self.queryset, id=pk)
+            user = get_object_or_404(self.get_queryset(), id=pk)
 
             if str(request.current_user_id) == pk:
                 data['role'], data['area'] = user.role, user.area
@@ -187,7 +187,7 @@ class UserViewSet(BaseViewSet):
             if not has_permission(pk=pk, request=request, roles=self.roles_required['update_total']):
                 return Response({"detail": "You do not have permission to perform this action."}, status=status.HTTP_403_FORBIDDEN)
             
-            user = get_object_or_404(self.queryset, id=pk)
+            user = get_object_or_404(self.get_queryset(), id=pk)
 
             if str(request.current_user_id) == str(user.auth_service_id):
                 data['role'], data['area'] = user.role, user.area
@@ -233,7 +233,7 @@ class UserViewSet(BaseViewSet):
             if not has_permission(pk=pk, request=request, roles=self.roles_required['update_password_total']):
                 return Response({"detail": "You do not have permission to perform this action."}, status=status.HTTP_403_FORBIDDEN)
             
-            user = get_object_or_404(self.queryset, id=pk)
+            user = get_object_or_404(self.get_queryset(), id=pk)
             set_password(user.auth_service_id, password)
             
             return Response({'message': 'Update successful!'}, status=status.HTTP_200_OK)
@@ -279,15 +279,45 @@ class UserPhotoViewSet(BaseViewSet):
         
         except Exception as e:
             return manage_exceptions(e, context='create')
+    
+    def destroy(self, request, *args, **kwargs): # Vou deixar funcionando simples, depois eu verifico se precisa mudar alguma lógica ou se precisa do rollback, ou se so deleta a imagem se o delete acontecer e eu coloco a condição de escrever no log se não consefuir
+        try:
+            with transaction.atomic():
+                pk = kwargs.get('pk')
+                user_photo_id = self.get_queryset().filter(pk=pk).values_list('user_id', flat=True).first() # so carrega o campo desejado
+
+                if not user_photo_id:
+                    return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
+
+                if not has_permission(pk=str(user_photo_id), request=request, roles=self.roles_required['retrieve_total']):
+                    return Response({"detail": "You do not have permission to perform this action."}, status=status.HTTP_403_FORBIDDEN)
+
+                user_photo = self.get_queryset().get(pk=pk)  # recupera o objeto completo
+
+                if user_photo.photo_path:
+                    delete_success, e = delete_file(user_photo.photo_path)
+                    if not delete_success:
+                        raise Exception(e)
+
+                user_photo.delete()
+
+                return Response({'message': 'Deleted successful!'}, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            return manage_exceptions(e, context='destroy')
 
     def retrieve(self, request, *args, **kwargs):
         try:
-            pk = kwargs.get('pk')
-            
-            if not has_permission(pk=pk, request=request, roles=self.roles_required['retrieve_total']):
+            pk = kwargs.get('pk')       
+            user_photo_id = self.get_queryset().filter(pk=pk).values_list('user_id', flat=True).first() # so carrega o campo desejado
+
+            if not user_photo_id:
+                return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
+
+            if not has_permission(pk=str(user_photo_id), request=request, roles=self.roles_required['retrieve_total']):
                 return Response({"detail": "You do not have permission to perform this action."}, status=status.HTTP_403_FORBIDDEN)
-            
-            user_photo = get_object_or_404(self.queryset, id=pk)
+
+            user_photo = self.get_queryset().get(pk=pk)  # recupera o objeto completo
             user_photo_serializer = self.serializer_class(user_photo)
             return Response({'usuário': user_photo_serializer.data}, status=status.HTTP_200_OK)
 
@@ -297,12 +327,12 @@ class UserPhotoViewSet(BaseViewSet):
     def list(self, request, *args, **kwargs):
         try:
             if any(role in self.roles_required['list_total'] for role in request.roles):
-                list_user_photo = self.filter_queryset(self.queryset) # configurar os filtros depois
+                list_user_photo = self.filter_queryset(self.get_queryset()) # configurar os filtros depois
                 list_serializer = self.serializer_class(list_user_photo, many=True)
                 return Response({'usuários': list_serializer.data}, status=status.HTTP_200_OK)
 
             else:
-                list_user_photo = get_list_or_404(self.queryset, user_id=request.current_user_id)
+                list_user_photo = get_list_or_404(self.get_queryset(), user_id=request.current_user_id)
                 list_serializer = self.serializer_class(list_user_photo, many=True)
                 return Response({'usuário': list_serializer.data}, status=status.HTTP_200_OK)
         
@@ -375,9 +405,10 @@ class UserAudioViewSet(BaseViewSet):
             return manage_exceptions(e, context='create')
 
     def retrieve(self, request, *args, **kwargs):
+        # rever isso aqui amanhã
         try:
             pk = kwargs.get('pk')       
-            user_audio_id = self.queryset.filter(pk=pk).values_list('user_id', flat=True).first() # so carrega o campo desejado
+            user_audio_id = self.get_queryset().filter(pk=pk).values_list('user_id', flat=True).first() # so carrega o campo desejado
 
             if not user_audio_id:
                 return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
@@ -385,7 +416,7 @@ class UserAudioViewSet(BaseViewSet):
             if not has_permission(pk=str(user_audio_id), request=request, roles=self.roles_required['retrieve_total']):
                 return Response({"detail": "You do not have permission to perform this action."}, status=status.HTTP_403_FORBIDDEN)
 
-            user_audio = self.queryset.get(pk=pk)  # recupera o objeto completo
+            user_audio = self.get_queryset().get(pk=pk)  # recupera o objeto completo
             user_audio_serializer = self.serializer_class(user_audio)
             return Response({'usuário': user_audio_serializer.data}, status=status.HTTP_200_OK)
 
@@ -395,18 +426,35 @@ class UserAudioViewSet(BaseViewSet):
     def list(self, request, *args, **kwargs):
         try:
             if any(role in self.roles_required['list_total'] for role in request.roles):
-                list_user_audio = self.filter_queryset(self.queryset) # configurar os filtros depois
+                list_user_audio = self.filter_queryset(self.get_queryset()) # configurar os filtros depois
                 list_serializer = self.serializer_class(list_user_audio, many=True)
                 return Response({'usuários': list_serializer.data}, status=status.HTTP_200_OK)
 
             else:
-                list_user_audio = get_list_or_404(self.queryset, user_id=request.current_user_id)
+                list_user_audio = get_list_or_404(self.get_queryset(), user_id=request.current_user_id)
                 list_serializer = self.serializer_class(list_user_audio, many=True)
                 return Response({'usuário': list_serializer.data}, status=status.HTTP_200_OK)
         
         except Exception as e:
             return manage_exceptions(e, context='list')
 
+    # def destroy(self, request, *args, **kwargs):
+    #     try:
+    #         with transaction.atomic():
+    #             pk = kwargs.get('pk')
+    #             product = get_object_or_404(self.get_queryset(), id=pk)
+
+    #             if product.photo_path:
+    #                 delete_success, e = delete_file(product.photo_path)
+    #                 if not delete_success:
+    #                     raise Exception(e)
+
+    #             product.delete()
+
+    #             return Response({'message': 'Deleted successful!'}, status=status.HTTP_200_OK)
+
+    #     except Exception as e:
+    #         return manage_exceptions(e, context='destroy')
     
     # def update(self, request, *args, **kwargs):
     #     try:

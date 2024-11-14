@@ -51,7 +51,7 @@ class ProductViewSet(BaseViewSet):
         try:
             with transaction.atomic():
                 pk = kwargs.get('pk')
-                product = get_object_or_404(self.queryset, id=pk)
+                product = get_object_or_404(self.get_queryset(), id=pk)
 
                 if product.photo_path:
                     delete_success, e = delete_file(product.photo_path)
@@ -68,7 +68,7 @@ class ProductViewSet(BaseViewSet):
     def update(self, request, *args, **kwargs):  
         try:
             pk = kwargs.get('pk')
-            product = get_object_or_404(self.queryset, id=pk)
+            product = get_object_or_404(self.get_queryset(), id=pk)
 
             data = request.data
             file = request.FILES.get('photo')
@@ -90,7 +90,7 @@ class ProductViewSet(BaseViewSet):
     def partial_update(self, request, *args, **kwargs):
         try:
             pk = kwargs.get('pk')
-            product = get_object_or_404(self.queryset, id=pk)
+            product = get_object_or_404(self.get_queryset(), id=pk)
 
             data = request.data
             file = request.FILES.get('photo')
@@ -111,7 +111,7 @@ class ProductViewSet(BaseViewSet):
             
     def list(self, request):
         try:
-            list_products = self.filter_queryset(self.queryset)
+            list_products = self.filter_queryset(self.get_queryset())
 
             if any(role in self.roles_required['list_retrive_total'] for role in request.roles):
                 list_serializer = self.serializer_class(list_products, many=True)
@@ -126,7 +126,7 @@ class ProductViewSet(BaseViewSet):
     def retrieve(self, request, *args, **kwargs):    
         try:
             pk = kwargs.get('pk')
-            product = get_object_or_404(self.queryset, id=pk)
+            product = get_object_or_404(self.get_queryset(), id=pk)
 
             if any(role in self.roles_required['list_retrive_total']  for role in request.roles):
                 list_serializer = self.serializer_class(product)
