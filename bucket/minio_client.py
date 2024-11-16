@@ -50,6 +50,7 @@ def delete_file(full_name):
         return True, None
 
     except Exception as e:
+        log_exception('delete_file', f'O arquivo pode não ter sido excluido: {full_name}, verifique!')
         return False, e
 
 def delete_list_files(objects_name_list):

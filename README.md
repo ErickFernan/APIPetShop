@@ -312,6 +312,8 @@ se quiser uma resposta personalizada do erro, você precisa carregar o return at
 
 [colocar url do video aqui, diferentemente do de configuração apenas o links sem o video]
 
+- Uma solução para prevenir erros na exclusão de arquivos foi utilizar o transaction.atomic deletando o user(ou o campo do django primeiro) e depois o objeto no minio, desta forma, se o user.delete() falhar o atomic volta os dados para a sua forma original do django e não acessa a parte de excluir os arquivos no minio. O que garante que se a imagem so será excluida se a informação não existir mais no banco do django. Além disso adicionei algumas mensagens de erros de exclusao no minio no log, pois assim, se necessaŕio, pode-se fazer uma varredura no log e uma limpeza de arquivos inuteis pode ser feita sem maiores problemas.
+
 <p align="justify">
 Apenas para fins de anotações, vou deixar uma lista de tecnologias que desejo estudar, embora nem todas se encaixem necessariamente neste projeto. Mantendo essa lista aqui, servirá como um lembrete, uma vez que pretendo revisitar este projeto com certa frequência:
 </p> 

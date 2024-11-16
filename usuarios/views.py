@@ -16,7 +16,7 @@ from utils.views import BaseViewSet
 from utils.roles import UsuariosRoles
 from utils.exceptions import manage_exceptions
 from utils.validations import image_validation, audio_validation, validate_serializer_and_upload_file
-from utils.functions import extract_file_details, has_permission
+from utils.functions import extract_file_photo_details, has_permission, extract_file_audio_details
 
 from usuarios.models import User, UserDocument, UserPhoto, UserAudio
 from usuarios.serializers import (UserSerializer, UserCreateSerializer, UserDocumentSerializer, 
@@ -96,7 +96,7 @@ class UserViewSet(BaseViewSet):
             
             with transaction.atomic():
                 # Deletar usuário do keycloak
-                user_auth_service_id = get_user_info(username=user.username) 
+                user_auth_service_id = get_user_info(username=user.username)  # Aqui é melhor fazer a deleção do keycloak primeiro e em caso de problema fazer o rollback para evitar usuários 'fantasmas', ou seja, que possuem acesso mas não estão cadastrados na base do django
                 delete_user_to_auth_service(user_auth_service_id)
 
                 # Deletar usuário do Django
@@ -270,7 +270,7 @@ class UserPhotoViewSet(BaseViewSet):
             if file:
                 image_validation(file=file)
 
-                file_name, content_type = extract_file_details(file)
+                file_name, content_type = extract_file_photo_details(file)
                 data['photo_path'] = f"{self.folder_prefix}/{file_name}"
 
             serializer = UserPhotoCreateSerializer(data=data)
@@ -286,20 +286,21 @@ class UserPhotoViewSet(BaseViewSet):
                 pk = kwargs.get('pk')
                 user_photo_id = self.get_queryset().filter(pk=pk).values_list('user_id', flat=True).first() # so carrega o campo desejado
 
-                if not user_photo_id:
-                    return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
-
                 if not has_permission(pk=str(user_photo_id), request=request, roles=self.roles_required['retrieve_total']):
                     return Response({"detail": "You do not have permission to perform this action."}, status=status.HTTP_403_FORBIDDEN)
 
+                if not user_photo_id:
+                    return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
+
                 user_photo = self.get_queryset().get(pk=pk)  # recupera o objeto completo
+                user_photo_path = user_photo.photo_path
+
+                user_photo.delete()
 
                 if user_photo.photo_path:
                     delete_success, e = delete_file(user_photo.photo_path)
                     if not delete_success:
                         raise Exception(e)
-
-                user_photo.delete()
 
                 return Response({'message': 'Deleted successful!'}, status=status.HTTP_200_OK)
 
@@ -311,11 +312,11 @@ class UserPhotoViewSet(BaseViewSet):
             pk = kwargs.get('pk')       
             user_photo_id = self.get_queryset().filter(pk=pk).values_list('user_id', flat=True).first() # so carrega o campo desejado
 
-            if not user_photo_id:
-                return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
-
             if not has_permission(pk=str(user_photo_id), request=request, roles=self.roles_required['retrieve_total']):
                 return Response({"detail": "You do not have permission to perform this action."}, status=status.HTTP_403_FORBIDDEN)
+
+            if not user_photo_id:
+                return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
 
             user_photo = self.get_queryset().get(pk=pk)  # recupera o objeto completo
             user_photo_serializer = self.serializer_class(user_photo)
@@ -344,18 +345,22 @@ class UserPhotoViewSet(BaseViewSet):
         try:
             pk = kwargs.get('pk')
             data = request.data.copy()
+            user_photo_id = self.get_queryset().filter(pk=pk).values_list('user_id', flat=True).first()
         
-            if not has_permission(pk=pk, request=request, roles=self.roles_required['create_total']):
+            if not has_permission(pk=str(user_photo_id), request=request, roles=self.roles_required['create_total']):
                 return Response({"detail": "You do not have permission to perform this action."}, status=status.HTTP_403_FORBIDDEN)
             
-            user_photo = get_object_or_404(UserPhoto, id=pk)
+            if not user_photo_id:
+                    return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
+
+            user_photo = self.get_queryset().get(pk=pk)
             file = request.FILES.get('photo')
             file_name, content_type = user_photo.photo_path.split('/')[-1] if user_photo.photo_path else None, None
-
+            
             if file:
                 image_validation(file=file)
 
-                file_name, content_type = extract_file_details(file, user_photo)
+                file_name, content_type = extract_file_photo_details(file, user_photo)
                 data['photo_path'] = f"{self.folder_prefix}/{file_name}"
 
             serializer = UserPhotoCreateSerializer(user_photo, data=data)
@@ -394,7 +399,7 @@ class UserAudioViewSet(BaseViewSet):
             if file:
                 audio_validation(file=file)
 
-                file_name, content_type = extract_file_details(file)
+                file_name, content_type = extract_file_photo_details(file)
                 data['audio_path'] = f"{self.folder_prefix}/{file_name}"
 
             serializer = UserAudioCreateSerializer(data=data)
@@ -404,17 +409,43 @@ class UserAudioViewSet(BaseViewSet):
         except Exception as e:
             return manage_exceptions(e, context='create')
 
+    def destroy(self, request, *args, **kwargs): # Vou deixar funcionando simples, depois eu verifico se precisa mudar alguma lógica ou se precisa do rollback, ou se so deleta a imagem se o delete acontecer e eu coloco a condição de escrever no log se não consefuir
+        try:
+            with transaction.atomic():
+                pk = kwargs.get('pk')
+                user_audio_id = self.get_queryset().filter(pk=pk).values_list('user_id', flat=True).first() # so carrega o campo desejado
+
+                if not has_permission(pk=str(user_audio_id), request=request, roles=self.roles_required['retrieve_total']):
+                    return Response({"detail": "You do not have permission to perform this action."}, status=status.HTTP_403_FORBIDDEN)
+
+                if not user_audio_id:
+                    return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
+
+                user_audio = self.get_queryset().get(pk=pk)  # recupera o objeto completo
+                user_audio_path = user_audio.audio_path
+
+                user_audio.delete()
+
+                if user_audio.audio_path:
+                    delete_success, e = delete_file(user_audio.audio_path)
+                    if not delete_success:
+                        raise Exception(e)
+
+                return Response({'message': 'Deleted successful!'}, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            return manage_exceptions(e, context='destroy')
+    
     def retrieve(self, request, *args, **kwargs):
-        # rever isso aqui amanhã
         try:
             pk = kwargs.get('pk')       
             user_audio_id = self.get_queryset().filter(pk=pk).values_list('user_id', flat=True).first() # so carrega o campo desejado
 
-            if not user_audio_id:
-                return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
-
             if not has_permission(pk=str(user_audio_id), request=request, roles=self.roles_required['retrieve_total']):
                 return Response({"detail": "You do not have permission to perform this action."}, status=status.HTTP_403_FORBIDDEN)
+
+            if not user_audio_id:
+                return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
 
             user_audio = self.get_queryset().get(pk=pk)  # recupera o objeto completo
             user_audio_serializer = self.serializer_class(user_audio)
@@ -437,53 +468,39 @@ class UserAudioViewSet(BaseViewSet):
         
         except Exception as e:
             return manage_exceptions(e, context='list')
-
-    # def destroy(self, request, *args, **kwargs):
-    #     try:
-    #         with transaction.atomic():
-    #             pk = kwargs.get('pk')
-    #             product = get_object_or_404(self.get_queryset(), id=pk)
-
-    #             if product.photo_path:
-    #                 delete_success, e = delete_file(product.photo_path)
-    #                 if not delete_success:
-    #                     raise Exception(e)
-
-    #             product.delete()
-
-    #             return Response({'message': 'Deleted successful!'}, status=status.HTTP_200_OK)
-
-    #     except Exception as e:
-    #         return manage_exceptions(e, context='destroy')
     
-    # def update(self, request, *args, **kwargs):
-    #     try:
-    #         pk = kwargs.get('pk')
-    #         data = request.data.copy()
+    def update(self, request, *args, **kwargs):
+        try:
+            pk = kwargs.get('pk')
+            data = request.data
+            user_audio_id = self.get_queryset().filter(pk=pk).values_list('user_id', flat=True).first()
         
-    #         if not has_permission(pk=pk, request=request, roles=self.roles_required['create_total']):
-    #             return Response({"detail": "You do not have permission to perform this action."}, status=status.HTTP_403_FORBIDDEN)
+            if not has_permission(pk=str(user_audio_id), request=request, roles=self.roles_required['create_total']):
+                return Response({"detail": "You do not have permission to perform this action."}, status=status.HTTP_403_FORBIDDEN)
             
-    #         user_photo = get_object_or_404(UserPhoto, id=pk)
-    #         file = request.FILES.get('photo')
-    #         file_name, content_type = user_photo.photo_path.split('/')[-1] if user_photo.photo_path else None, None
+            if not user_audio_id:
+                    return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
 
-    #         if file:
-    #             image_validation(file=file)
+            user_audio = self.get_queryset().get(pk=pk)
+            file = request.FILES.get('audio')
+            file_name, content_type = user_audio.audio_path.split('/')[-1] if user_audio.audio_path else None, None
+            
+            if file:
+                audio_validation(file=file)
 
-    #             file_name, content_type = extract_file_details(file, user_photo)
-    #             data['photo_path'] = f"{self.folder_prefix}/{file_name}"
+                file_name, content_type = extract_file_audio_details(file, user_audio)
+                data['audio_path'] = f"{self.folder_prefix}/{file_name}"
 
-    #         serializer = UserPhotoCreateSerializer(user_photo, data=data)
+            serializer = UserAudioCreateSerializer(user_audio, data=data)
 
-    #         return validate_serializer_and_upload_file(serializer, file, file_name, content_type, self.folder_prefix)
+            return validate_serializer_and_upload_file(serializer, file, file_name, content_type, self.folder_prefix)
         
-    #     except Exception as e:
-    #         return manage_exceptions(e, context='update')
+        except Exception as e:
+            return manage_exceptions(e, context='update')
 
-    # def partial_update(self, request, *args, **kwargs):
-    #     try:
-    #         return  Response({"detail": "Utilize a rota PUT"}, status=status.HTTP_403_FORBIDDEN)
+    def partial_update(self, request, *args, **kwargs):
+        try:
+            return  Response({"detail": "Utilize a rota PUT"}, status=status.HTTP_403_FORBIDDEN)
 
-    #     except Exception as e:
-            # return manage_exceptions(e, context='update')
+        except Exception as e:
+            return manage_exceptions(e, context='update')

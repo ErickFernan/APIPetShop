@@ -56,7 +56,7 @@ def manage_exceptions(exception, context=''):
         return Response({'message': "Invalid audio file.", "details" : str(exception)}, status=status.HTTP_400_BAD_REQUEST)
     
     if isinstance(exception, Http404):
-        return Response({"detail": "User não encontrado."}, status=status.HTTP_404_NOT_FOUND)
+        return Response({"detail": "Arquivo não encontrado."}, status=status.HTTP_404_NOT_FOUND)
 
     if isinstance(exception, S3Error):
         return Response({"message": "upload_file", "detail": f"S3Error occurred: {exception.code} - {exception.message}", "errors": str(exception)}, status=status.HTTP_412_PRECONDITION_FAILED)

@@ -46,11 +46,19 @@ def change_file_name(file_name):
     """
     return f'({uuid.uuid4()}.{os.path.splitext(file_name)[1]})'
 
-def extract_file_details(file, product=None):
+def extract_file_photo_details(file, product=None):
     """
     Retira informações referentes ao arquivo enviado para que o minio possa utilizar
     """
     file_name = product.photo_path.split('/')[-1] if product and product.photo_path else change_file_name(file.name)
+    content_type = file.content_type
+    return file_name, content_type
+
+def extract_file_audio_details(file, product=None):
+    """
+    Retira informações referentes ao arquivo enviado para que o minio possa utilizar
+    """
+    file_name = product.audio_path.split('/')[-1] if product and product.audio_path else change_file_name(file.name)
     content_type = file.content_type
     return file_name, content_type
 

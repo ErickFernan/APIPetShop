@@ -13,7 +13,7 @@ from produtos.filters import ProductFilter
 from bucket.minio_client import delete_file
 
 from utils.validations import image_validation, validate_serializer_and_upload_file
-from utils.functions import extract_file_details
+from utils.functions import extract_file_photo_details
 from utils.views import BaseViewSet
 from utils.roles import ProdutosRoles
 from utils.exceptions import manage_exceptions
@@ -37,7 +37,7 @@ class ProductViewSet(BaseViewSet):
             if file:
                 image_validation(file=file)
 
-                file_name, content_type = extract_file_details(file)
+                file_name, content_type = extract_file_photo_details(file)
                 data['photo_path'] = f"{self.folder_prefix}/{file_name}"
 
             serializer = self.serializer_class(data=data)
@@ -52,13 +52,14 @@ class ProductViewSet(BaseViewSet):
             with transaction.atomic():
                 pk = kwargs.get('pk')
                 product = get_object_or_404(self.get_queryset(), id=pk)
-
-                if product.photo_path:
-                    delete_success, e = delete_file(product.photo_path)
-                    if not delete_success:
-                        raise Exception(e)
+                product_photo_path = product.photo_path
 
                 product.delete()
+
+                if product.photo_path:
+                    delete_success, e = delete_file(product_photo_path)
+                    if not delete_success:
+                        raise Exception(e)
 
                 return Response({'message': 'Deleted successful!'}, status=status.HTTP_200_OK)
 
@@ -77,7 +78,7 @@ class ProductViewSet(BaseViewSet):
             if file:
                 image_validation(file=file)
 
-                file_name, content_type = extract_file_details(file, product)
+                file_name, content_type = extract_file_photo_details(file, product)
                 data['photo_path'] = f"{self.folder_prefix}/{file_name}"
 
             serializer = self.serializer_class(product, data=data)
@@ -99,7 +100,7 @@ class ProductViewSet(BaseViewSet):
             if file:
                 image_validation(file=file)
             
-                file_name, content_type = extract_file_details(file, product)
+                file_name, content_type = extract_file_photo_details(file, product)
                 data['photo_path'] = f"{self.folder_prefix}/{file_name}"
 
             serializer = self.serializer_class(product, data=data, partial=True)
