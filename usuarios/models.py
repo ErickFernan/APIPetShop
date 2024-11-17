@@ -105,7 +105,7 @@ class UserDocument(BaseModel):
         super().clean()
 
         if self.doc_type == self.Type.CPF:
-            StructureValidators.cpf_validator(self.doc_number)
+            StructureValidators.cpf_validator(self.doc_number) # Criar uma validação para verificar se o doctype em questão é único?
 
     def save(self, *args, **kwargs):
         self.clean()  # Chama a validação antes de salvar

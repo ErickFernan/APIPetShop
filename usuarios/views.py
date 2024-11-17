@@ -21,7 +21,7 @@ from utils.functions import extract_file_photo_details, has_permission, extract_
 from usuarios.models import User, UserDocument, UserPhoto, UserAudio
 from usuarios.serializers import (UserSerializer, UserCreateSerializer, UserDocumentSerializer, 
                                   UserPhotoSerializer, UserPhotoCreateSerializer, UserAudioSerializer, 
-                                  UserAudioCreateSerializer)
+                                  UserAudioCreateSerializer, UserDocumentCreateSerializer)
 
 
 class UserViewSet(BaseViewSet):
@@ -247,6 +247,101 @@ class UserDocumentViewSet(BaseViewSet):
     serializer_class = UserDocumentSerializer
     roles_required = UsuariosRoles.USERDOCUMENT_ROLES
 
+    def create(self, request):
+        try:
+            data = request.data.copy()
+
+            if not has_permission(pk=data['user_id'], request=request, roles=self.roles_required['create_total']):
+                return Response({"detail": "You do not have permission to perform this action."}, status=status.HTTP_403_FORBIDDEN)
+        
+            user = get_object_or_404(User, id=data['user_id'])
+            serializer = UserDocumentCreateSerializer(data=data)
+
+            return validate_serializer_and_upload_file(serializer=serializer, user=user)
+        
+        except Exception as e:
+            return manage_exceptions(e, context='create')
+    
+    def destroy(self, request, *args, **kwargs): # Vou deixar funcionando simples, depois eu verifico se precisa mudar alguma lógica ou se precisa do rollback, ou se so deleta a imagem se o delete acontecer e eu coloco a condição de escrever no log se não consefuir
+        try:
+            with transaction.atomic():
+                pk = kwargs.get('pk')
+                user_id_document = self.get_queryset().filter(pk=pk).values_list('user_id', flat=True).first() # so carrega o campo desejado
+
+                if not has_permission(pk=str(user_id_document), request=request, roles=self.roles_required['retrieve_total']):
+                    return Response({"detail": "You do not have permission to perform this action."}, status=status.HTTP_403_FORBIDDEN)
+
+                if not user_id_document:
+                    return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
+
+                user_document = self.get_queryset().get(pk=pk)  # recupera o objeto completo
+                user_document.delete()
+
+                return Response({'message': 'Deleted successful!'}, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            return manage_exceptions(e, context='destroy')
+
+    def retrieve(self, request, *args, **kwargs):
+        try:
+            pk = kwargs.get('pk')       
+            user_id_document = self.get_queryset().filter(pk=pk).values_list('user_id', flat=True).first() # so carrega o campo desejado
+
+            if not has_permission(pk=str(user_id_document), request=request, roles=self.roles_required['retrieve_total']):
+                return Response({"detail": "You do not have permission to perform this action."}, status=status.HTTP_403_FORBIDDEN)
+
+            if not user_id_document:
+                return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
+
+            user_document = self.get_queryset().get(pk=pk)  # recupera o objeto completo
+            user_document_serializer = self.serializer_class(user_document)
+            return Response({'usuário': user_document_serializer.data}, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            return manage_exceptions(e, context='retrieve')
+
+    def list(self, request, *args, **kwargs):
+        try:
+            if any(role in self.roles_required['list_total'] for role in request.roles):
+                list_user_document = self.filter_queryset(self.get_queryset()) # configurar os filtros depois
+                list_serializer = self.serializer_class(list_user_document, many=True)
+                return Response({'usuários': list_serializer.data}, status=status.HTTP_200_OK)
+
+            else:
+                list_user_document = get_list_or_404(self.get_queryset(), user_id=request.current_user_id)
+                list_serializer = self.serializer_class(list_user_document, many=True)
+                return Response({'usuário': list_serializer.data}, status=status.HTTP_200_OK)
+        
+        except Exception as e:
+            return manage_exceptions(e, context='list')
+    
+    def update(self, request, *args, **kwargs):
+        try:
+            pk = kwargs.get('pk')
+            data = request.data.copy()
+            user_id_document = self.get_queryset().filter(pk=pk).values_list('user_id', flat=True).first()
+        
+            if not has_permission(pk=str(user_id_document), request=request, roles=self.roles_required['create_total']):
+                return Response({"detail": "You do not have permission to perform this action."}, status=status.HTTP_403_FORBIDDEN)
+            
+            if not user_id_document:
+                    return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
+
+            user_document = self.get_queryset().get(pk=pk)
+            serializer = self.serializer_class(user_document, data=data)
+
+            return validate_serializer_and_upload_file(serializer=serializer)
+            
+        except Exception as e:
+            return manage_exceptions(e, context='partial_update')
+        
+    def partial_update(self, request, *args, **kwargs):
+        try:
+            return  Response({"detail": "Utilize a rota PUT"}, status=status.HTTP_403_FORBIDDEN)
+
+        except Exception as e:
+            return manage_exceptions(e, context='update')
+
 
 class UserPhotoViewSet(BaseViewSet):
     queryset = UserPhoto.objects.all()
@@ -284,12 +379,12 @@ class UserPhotoViewSet(BaseViewSet):
         try:
             with transaction.atomic():
                 pk = kwargs.get('pk')
-                user_photo_id = self.get_queryset().filter(pk=pk).values_list('user_id', flat=True).first() # so carrega o campo desejado
+                user_id_photo = self.get_queryset().filter(pk=pk).values_list('user_id', flat=True).first() # so carrega o campo desejado
 
-                if not has_permission(pk=str(user_photo_id), request=request, roles=self.roles_required['retrieve_total']):
+                if not has_permission(pk=str(user_id_photo), request=request, roles=self.roles_required['retrieve_total']):
                     return Response({"detail": "You do not have permission to perform this action."}, status=status.HTTP_403_FORBIDDEN)
 
-                if not user_photo_id:
+                if not user_id_photo:
                     return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
 
                 user_photo = self.get_queryset().get(pk=pk)  # recupera o objeto completo
@@ -310,12 +405,12 @@ class UserPhotoViewSet(BaseViewSet):
     def retrieve(self, request, *args, **kwargs):
         try:
             pk = kwargs.get('pk')       
-            user_photo_id = self.get_queryset().filter(pk=pk).values_list('user_id', flat=True).first() # so carrega o campo desejado
+            user_id_photo = self.get_queryset().filter(pk=pk).values_list('user_id', flat=True).first() # so carrega o campo desejado
 
-            if not has_permission(pk=str(user_photo_id), request=request, roles=self.roles_required['retrieve_total']):
+            if not has_permission(pk=str(user_id_photo), request=request, roles=self.roles_required['retrieve_total']):
                 return Response({"detail": "You do not have permission to perform this action."}, status=status.HTTP_403_FORBIDDEN)
 
-            if not user_photo_id:
+            if not user_id_photo:
                 return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
 
             user_photo = self.get_queryset().get(pk=pk)  # recupera o objeto completo
@@ -345,12 +440,12 @@ class UserPhotoViewSet(BaseViewSet):
         try:
             pk = kwargs.get('pk')
             data = request.data.copy()
-            user_photo_id = self.get_queryset().filter(pk=pk).values_list('user_id', flat=True).first()
+            user_id_photo = self.get_queryset().filter(pk=pk).values_list('user_id', flat=True).first()
         
-            if not has_permission(pk=str(user_photo_id), request=request, roles=self.roles_required['create_total']):
+            if not has_permission(pk=str(user_id_photo), request=request, roles=self.roles_required['create_total']):
                 return Response({"detail": "You do not have permission to perform this action."}, status=status.HTTP_403_FORBIDDEN)
             
-            if not user_photo_id:
+            if not user_id_photo:
                     return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
 
             user_photo = self.get_queryset().get(pk=pk)
@@ -413,12 +508,12 @@ class UserAudioViewSet(BaseViewSet):
         try:
             with transaction.atomic():
                 pk = kwargs.get('pk')
-                user_audio_id = self.get_queryset().filter(pk=pk).values_list('user_id', flat=True).first() # so carrega o campo desejado
+                user_id_audio = self.get_queryset().filter(pk=pk).values_list('user_id', flat=True).first() # so carrega o campo desejado
 
-                if not has_permission(pk=str(user_audio_id), request=request, roles=self.roles_required['retrieve_total']):
+                if not has_permission(pk=str(user_id_audio), request=request, roles=self.roles_required['retrieve_total']):
                     return Response({"detail": "You do not have permission to perform this action."}, status=status.HTTP_403_FORBIDDEN)
 
-                if not user_audio_id:
+                if not user_id_audio:
                     return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
 
                 user_audio = self.get_queryset().get(pk=pk)  # recupera o objeto completo
@@ -439,12 +534,12 @@ class UserAudioViewSet(BaseViewSet):
     def retrieve(self, request, *args, **kwargs):
         try:
             pk = kwargs.get('pk')       
-            user_audio_id = self.get_queryset().filter(pk=pk).values_list('user_id', flat=True).first() # so carrega o campo desejado
+            user_id_audio = self.get_queryset().filter(pk=pk).values_list('user_id', flat=True).first() # so carrega o campo desejado
 
-            if not has_permission(pk=str(user_audio_id), request=request, roles=self.roles_required['retrieve_total']):
+            if not has_permission(pk=str(user_id_audio), request=request, roles=self.roles_required['retrieve_total']):
                 return Response({"detail": "You do not have permission to perform this action."}, status=status.HTTP_403_FORBIDDEN)
 
-            if not user_audio_id:
+            if not user_id_audio:
                 return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
 
             user_audio = self.get_queryset().get(pk=pk)  # recupera o objeto completo
@@ -473,12 +568,12 @@ class UserAudioViewSet(BaseViewSet):
         try:
             pk = kwargs.get('pk')
             data = request.data
-            user_audio_id = self.get_queryset().filter(pk=pk).values_list('user_id', flat=True).first()
+            user_id_audio = self.get_queryset().filter(pk=pk).values_list('user_id', flat=True).first()
         
-            if not has_permission(pk=str(user_audio_id), request=request, roles=self.roles_required['create_total']):
+            if not has_permission(pk=str(user_id_audio), request=request, roles=self.roles_required['create_total']):
                 return Response({"detail": "You do not have permission to perform this action."}, status=status.HTTP_403_FORBIDDEN)
             
-            if not user_audio_id:
+            if not user_id_audio:
                     return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
 
             user_audio = self.get_queryset().get(pk=pk)

@@ -49,6 +49,11 @@ def manage_exceptions(exception, context=''):
     """
     log_exception(context, exception)
 
+    if isinstance(exception, KeyError):
+        if str(exception) == "'user_id'":
+            # return manage_exceptions(KeyError("'user_id' is required"), context='create')
+            return Response({'message': "'user_id' is required"}, status=status.HTTP_400_BAD_REQUEST)
+
     if isinstance(exception, ImageValidationError):
         return Response({'message': "Invalid image file.", "details" : str(exception)}, status=status.HTTP_400_BAD_REQUEST)
 

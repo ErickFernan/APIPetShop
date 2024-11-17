@@ -27,6 +27,13 @@ class UserDocumentSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class UserDocumentCreateSerializer(serializers.ModelSerializer):
+    # user_id = serializers.UUIDField(required=False, write_only=True)
+    class Meta:
+        model = UserDocument
+        fields = '__all__'
+
+
 class UserPhotoSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserPhoto
@@ -34,7 +41,7 @@ class UserPhotoSerializer(serializers.ModelSerializer):
 
 
 class UserPhotoCreateSerializer(serializers.ModelSerializer):
-    user_id = serializers.UUIDField(required=False, write_only=True)
+    user_id = serializers.UUIDField(required=False, write_only=True) # Required não deveria ser True? Eu preciso verificar esse user_id na outras rotas, n lembro pq coloquei, mas acho q ele não é necessário
     photo_path = serializers.CharField(required=False)
     photo = serializers.FileField(required=True, write_only=True) 
     class Meta:

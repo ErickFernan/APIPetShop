@@ -48,7 +48,7 @@ def audio_validation(file):
     except Exception as e:
         raise AudioValidationError()
 
-def validate_serializer_and_upload_file(serializer, file, file_name, content_type, folder_prefix, user=None):
+def validate_serializer_and_upload_file(serializer, file=None, file_name=None, content_type=None, folder_prefix=None, user=None): # conferir se não quebrou nada colocar os nones
     """
     Valida o serializer e realiza o upload do arquivo.
     - Se o serializer for válido, verifica se o arquivo existe.
