@@ -22,6 +22,7 @@ from utils.exceptions import manage_exceptions
 class ProductViewSet(BaseViewSet):
     filter_backends = [DjangoFilterBackend]
     filterset_class = ProductFilter
+    
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
     roles_required = ProdutosRoles.PRODUCT_ROLES

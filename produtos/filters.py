@@ -1,5 +1,5 @@
 import django_filters
-from .models import Product
+from produtos.models import Product
 
 class ProductFilter(django_filters.FilterSet):
     brand = django_filters.CharFilter(field_name='brand', lookup_expr='iexact')

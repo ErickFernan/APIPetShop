@@ -6,6 +6,8 @@ from keycloak_config.keycloak_client import (assign_role_to_user, set_password, 
 from django.db import transaction
 from django.shortcuts import get_object_or_404, get_list_or_404
 
+from django_filters.rest_framework import DjangoFilterBackend
+
 from bucket.minio_client import delete_list_files, upload_file, delete_file
 
 from rest_framework import status
@@ -19,12 +21,16 @@ from utils.validations import image_validation, audio_validation, validate_seria
 from utils.functions import extract_file_photo_details, has_permission, extract_file_audio_details
 
 from usuarios.models import User, UserDocument, UserPhoto, UserAudio
+from usuarios.filters import UserFilter, UserDocumentFilter, UserAudioFilter, UserPhotoFilter
 from usuarios.serializers import (UserSerializer, UserCreateSerializer, UserDocumentSerializer, 
                                   UserPhotoSerializer, UserPhotoCreateSerializer, UserAudioSerializer, 
                                   UserAudioCreateSerializer, UserDocumentCreateSerializer)
 
 
 class UserViewSet(BaseViewSet):
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = UserFilter
+
     queryset = User.objects.all()
     serializer_class = UserSerializer
     roles_required = UsuariosRoles.USER_ROLES
@@ -243,6 +249,9 @@ class UserViewSet(BaseViewSet):
 
 
 class UserDocumentViewSet(BaseViewSet):
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = UserDocumentFilter
+
     queryset = UserDocument.objects.all()
     serializer_class = UserDocumentSerializer
     roles_required = UsuariosRoles.USERDOCUMENT_ROLES
@@ -344,6 +353,9 @@ class UserDocumentViewSet(BaseViewSet):
 
 
 class UserPhotoViewSet(BaseViewSet):
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = UserPhotoFilter
+
     queryset = UserPhoto.objects.all()
     serializer_class = UserPhotoSerializer
     roles_required = UsuariosRoles.USERPHOTO_ROLES
@@ -473,6 +485,9 @@ class UserPhotoViewSet(BaseViewSet):
             return manage_exceptions(e, context='update')
   
 class UserAudioViewSet(BaseViewSet):
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = UserAudioFilter
+
     queryset = UserAudio.objects.all()
     serializer_class = UserAudioSerializer
     roles_required = UsuariosRoles.USERAUDIO_ROLES
