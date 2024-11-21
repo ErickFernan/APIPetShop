@@ -101,6 +101,9 @@ class UserDocument(BaseModel):
     doc_number = models.CharField(max_length=50)
     user_id = models.ForeignKey(User,on_delete=models.CASCADE, related_name='documents', editable=False)
 
+    class Meta:
+        unique_together = ('doc_type', 'doc_number') # muito bacana, essa config verifica se a combinação é unica
+
     def clean(self):
         super().clean()
 

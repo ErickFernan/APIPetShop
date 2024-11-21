@@ -1,10 +1,12 @@
 from utils.logs_config import log_exception
 
 from django.http import Http404
+from django.db.utils import IntegrityError
 
 from minio.error import S3Error
 
 from rest_framework.response import Response
+from rest_framework.exceptions import ValidationError
 from rest_framework import status
 
 
@@ -53,6 +55,12 @@ def manage_exceptions(exception, context=''):
         if str(exception) == "'user_id'":
             # return manage_exceptions(KeyError("'user_id' is required"), context='create')
             return Response({'message': "'user_id' is required"}, status=status.HTTP_400_BAD_REQUEST)
+
+    if isinstance(exception, IntegrityError):
+        return Response({'message': "Erro de integridade.", "details": str(exception)}, status=status.HTTP_400_BAD_REQUEST)
+
+    if isinstance(exception, ValidationError):
+        return Response({'message': "Erro de validação.", "details": exception.detail}, status=status.HTTP_400_BAD_REQUEST)
 
     if isinstance(exception, ImageValidationError):
         return Response({'message': "Invalid image file.", "details" : str(exception)}, status=status.HTTP_400_BAD_REQUEST)

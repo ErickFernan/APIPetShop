@@ -300,6 +300,12 @@ class UserDocumentViewSet(BaseViewSet):
                 if not user_id_document:
                     return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
 
+                # Verifica quantos documentos existem
+                user_document_count = self.get_queryset().filter(user_id=user_id_document).count()
+                # Se existir apenas esse documento aborta a exclusão
+                if user_document_count <= 1:
+                    return Response({"detail": "Cannot delete. The user must have at least one document."}, status=status.HTTP_400_BAD_REQUEST)
+
                 user_document = self.get_queryset().get(pk=pk)  # recupera o objeto completo
                 user_document.delete()
 
