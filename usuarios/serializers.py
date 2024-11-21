@@ -16,6 +16,9 @@ class UserCreateSerializer(serializers.ModelSerializer):
     password = serializers.CharField(required=True, write_only=True)
     auth_service_id = serializers.UUIDField(required=False, write_only=True)
     username = serializers.CharField(required=True, write_only=True)
+    doc_type = serializers.CharField(required=False, write_only=True)
+    doc_number = serializers.CharField(required=False, write_only=True)
+
     class Meta:
         model = User
         fields = '__all__'

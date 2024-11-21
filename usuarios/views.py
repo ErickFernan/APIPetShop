@@ -10,7 +10,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 
 from bucket.minio_client import delete_list_files, upload_file, delete_file
 
-from rest_framework import status
+from rest_framework import status, serializers
 from rest_framework.response import Response
 from rest_framework.decorators import action
 
@@ -18,7 +18,7 @@ from utils.views import BaseViewSet
 from utils.roles import UsuariosRoles
 from utils.exceptions import manage_exceptions
 from utils.validations import image_validation, audio_validation, validate_serializer_and_upload_file
-from utils.functions import extract_file_photo_details, has_permission, extract_file_audio_details
+from utils.functions import extract_file_photo_details, has_permission, extract_file_audio_details, validate_required_fields
 
 from usuarios.models import User, UserDocument, UserPhoto, UserAudio
 from usuarios.filters import UserFilter, UserDocumentFilter, UserAudioFilter, UserPhotoFilter
@@ -43,12 +43,18 @@ class UserViewSet(BaseViewSet):
         mesmo com o create 'público'. Não é uma solução das mais robustas, mas cumpre seu papel neste projeto.
         """
         data = request.data.copy()
-
+        
+        extra_required_fields = ['doc_type', 'doc_number']
+        errors = validate_required_fields(data, extra_required_fields)
+        if errors:
+            return Response(errors, status=status.HTTP_400_BAD_REQUEST)
+    
         # Verifica a role do token fornecido e já validado
         if not any(role in self.roles_required['create_total'] for role in request.roles):
             data['role'], data['area'] = 'user', 'user'
 
         serializer = UserCreateSerializer(data=data)
+        doc_type, doc_number = data.pop('doc_type')[0], data.pop('doc_number')[0]
         
         try:
             if serializer.is_valid():
@@ -77,6 +83,17 @@ class UserViewSet(BaseViewSet):
                                                             "django_uuid": [str(user.id)]
                                                         }})
                     
+                    # Criação do documento
+                    doc_serializer = UserDocumentCreateSerializer(
+                        data={
+                            'doc_type': doc_type,
+                            'doc_number': doc_number
+                    })
+
+                    if not doc_serializer.is_valid():
+                        raise serializers.ValidationError(doc_serializer.errors)
+                    doc_serializer.save(user_id=user)
+
                     return Response({'message': 'Create successful!', 'data': serializer.data}, status=status.HTTP_201_CREATED)
         
             return Response({'message': 'Create failed!', 'errors': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
@@ -271,7 +288,7 @@ class UserDocumentViewSet(BaseViewSet):
         except Exception as e:
             return manage_exceptions(e, context='create')
     
-    def destroy(self, request, *args, **kwargs): # Vou deixar funcionando simples, depois eu verifico se precisa mudar alguma lógica ou se precisa do rollback, ou se so deleta a imagem se o delete acontecer e eu coloco a condição de escrever no log se não consefuir
+    def destroy(self, request, *args, **kwargs):
         try:
             with transaction.atomic():
                 pk = kwargs.get('pk')
@@ -312,7 +329,7 @@ class UserDocumentViewSet(BaseViewSet):
     def list(self, request, *args, **kwargs):
         try:
             if any(role in self.roles_required['list_total'] for role in request.roles):
-                list_user_document = self.filter_queryset(self.get_queryset()) # configurar os filtros depois
+                list_user_document = self.filter_queryset(self.get_queryset()) # filtros ok
                 list_serializer = self.serializer_class(list_user_document, many=True)
                 return Response({'usuários': list_serializer.data}, status=status.HTTP_200_OK)
 
@@ -387,7 +404,7 @@ class UserPhotoViewSet(BaseViewSet):
         except Exception as e:
             return manage_exceptions(e, context='create')
     
-    def destroy(self, request, *args, **kwargs): # Vou deixar funcionando simples, depois eu verifico se precisa mudar alguma lógica ou se precisa do rollback, ou se so deleta a imagem se o delete acontecer e eu coloco a condição de escrever no log se não consefuir
+    def destroy(self, request, *args, **kwargs):
         try:
             with transaction.atomic():
                 pk = kwargs.get('pk')
@@ -435,7 +452,7 @@ class UserPhotoViewSet(BaseViewSet):
     def list(self, request, *args, **kwargs):
         try:
             if any(role in self.roles_required['list_total'] for role in request.roles):
-                list_user_photo = self.filter_queryset(self.get_queryset()) # configurar os filtros depois
+                list_user_photo = self.filter_queryset(self.get_queryset()) # filtro ok
                 list_serializer = self.serializer_class(list_user_photo, many=True)
                 return Response({'usuários': list_serializer.data}, status=status.HTTP_200_OK)
 
@@ -519,7 +536,7 @@ class UserAudioViewSet(BaseViewSet):
         except Exception as e:
             return manage_exceptions(e, context='create')
 
-    def destroy(self, request, *args, **kwargs): # Vou deixar funcionando simples, depois eu verifico se precisa mudar alguma lógica ou se precisa do rollback, ou se so deleta a imagem se o delete acontecer e eu coloco a condição de escrever no log se não consefuir
+    def destroy(self, request, *args, **kwargs):
         try:
             with transaction.atomic():
                 pk = kwargs.get('pk')

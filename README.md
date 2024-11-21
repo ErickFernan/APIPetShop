@@ -203,6 +203,10 @@ Esse TO DO funcionará como uma versão simplificada de sprint e backlog. Como e
 - [x] Bug *
 - [x] Implementar logging para facilitar manutenção em novas aplicações
 - [x] Aprimorar tratamento de exceções no cliente Keycloak e nas views de usuários(utils: validations, functions. produtos:views. keycloak_config: auth, permissio. bucket:minio_client, usuarios:views)
+- [x] Personalização nas rotas da app usuarios
+- [x] Padronizar rotas de produtos com nova regra
+- [x] Adicionar filtros aos lists dos modelos de usuários
+- [x] Exclusão simultânea de dados relacionados ao usuários tanto no django quanto no bucket
 
     (*) Pelo fato de eu usar um uuid diferente para o user salvo no keycloak e o user salvo no django eu preciso fazer uma consulta com o get (app usuarios - User) para recuperar esses valores e depois verificar se quem solicitou possui acesso ou não. No momento não é um problema, mas em uma aplicação maior pode gerar problemas de desempenho e risco de segurança. Para consertar isso eu posso adicionar o uuid do django nas informações do jwt token do keycloak. Outra solução seria estrutual, por exemplo, usar o mesmo uuid de usuário no keycloak e no django. Entretanto, esta seria uma solução mais trabalhosa. Etapas para correção do bug:
     - [x] Descobrir como configurar esse novos atributos(?) no keycloak
@@ -212,9 +216,10 @@ Esse TO DO funcionará como uma versão simplificada de sprint e backlog. Como e
 
 
 ### Tarefas em execução:
-- [ ] Personalização nas rotas da app usuarios
-- [ ] Padronizar rotas de produtos com nova regra
-- [ ] Adicionar filtros ao list de usuarios
+[ ] Validação de documento único
+[x] Obrigar a criação de usuário na view com um documento
+[ ] Permitir a exclusão de documento apenas se o usuário tiver mais de um cadastrado, se não só será excluido se o usuário também for.
+[ ] Não lembro se os documentos estão sendo apagados junto com o usuário, conferir depois
 
 ### Backlog:
 - [ ] Personalização das rotas da app banhotosa
@@ -274,7 +279,6 @@ ANOTAÇÕES:
 - verificar seta para o bot(vai depender de como vou salvar os arquivos no minIO)
 - Seria interessante verificar na hora de adicionar serviços no appointment verificar se o produto para aquele produto possui estoque, se não retornar um erro.
 - as funções para lidar com o tempo no agendamento estão pronta e estão em functions e validations da app utils, quando for fazer a views lembrar de usar.
-- Os campos de documento estão sendo criado na views e enviado para o serializer validar e salvar, analisar se devo fazer esta operação no models?
 - não quero deixar esse monte de migrations, pois foram ajustes e não melhorias, depois limpar no arquivo final e deixar uma única.
 - criar alguns dados para serem gerados junto com o docker-compose up, vai servir para facilitar se alguma pessoa quiser testar o projeto. As que devem receber estes valores são:
 
@@ -283,7 +287,6 @@ pet: breed, specie
 banho/tosa: product_used, service_type
 hotel: service
 produtos: product
-- Tem que ver como faz para excluir os audios e fotos do usuário do bucket quando o usuário for excluido também
 
 RESUMAO: log exception escreve o log sem fazer nada, usar quando quer acrescentar um extra do erro no log
 

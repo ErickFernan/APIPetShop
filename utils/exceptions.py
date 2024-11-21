@@ -49,7 +49,7 @@ def manage_exceptions(exception, context=''):
     """
     log_exception(context, exception)
 
-    if isinstance(exception, KeyError):
+    if isinstance(exception, KeyError): # Mudar a parte que usava esse erro para chamar a função de validação que está em utils
         if str(exception) == "'user_id'":
             # return manage_exceptions(KeyError("'user_id' is required"), context='create')
             return Response({'message': "'user_id' is required"}, status=status.HTTP_400_BAD_REQUEST)
