@@ -305,6 +305,7 @@ se quiser uma resposta personalizada do erro, você precisa carregar o return at
 - Apesar de muitas rotas públicas, todas elas precisam de um token válido, ou seja, gerado pelo keycloak e que passe pela instrospecção. Se em algum momento precisar mudar isso para não exigir token é só mudar a regra de como o django verifica o token.
 - Implementar logs específicos para quando HasRolePermission permite ou nega acesso, e para quando KeyCloakAuthentication falha, pode ser útil para auditorias e para detectar possíveis tentativas de acesso não autorizado.
 - Caso queria criar senhas mais robusta é possivel ir na adminstração do keycloak, authentication e por fim policies e escolher as regras que deseja para a senha de usuário.
+- Criar uma branch demonstrando em alguma tabela como implementar o softdelete
 
 ### Observações
 - O user foi modificado para salvar o id do usuário no keycloak, pois pode acontecer de inconsistencia nos dados, então para prevenir e deixar mais facil algum suporte vai ser necessário ter o id do user no keycloak sendo salvo
@@ -315,6 +316,43 @@ se quiser uma resposta personalizada do erro, você precisa carregar o return at
 
 - Uma solução para prevenir erros na exclusão de arquivos foi utilizar o transaction.atomic deletando o user(ou o campo do django primeiro) e depois o objeto no minio, desta forma, se o user.delete() falhar o atomic volta os dados para a sua forma original do django e não acessa a parte de excluir os arquivos no minio. O que garante que se a imagem so será excluida se a informação não existir mais no banco do django. Além disso adicionei algumas mensagens de erros de exclusao no minio no log, pois assim, se necessaŕio, pode-se fazer uma varredura no log e uma limpeza de arquivos inuteis pode ser feita sem maiores problemas.
 
+### HardDelete vs SoftDelete
+Uma boa prática em projetos comerciais é evitar a exclusão definitiva de registros no banco de dados. Para isso, utiliza-se frequentemente a exclusão lógica (soft delete), que adiciona campos ao modelo, como is_active (booleano) e/ou deleted_at (datetime). O campo is_active indica se o registro está ativo, enquanto deleted_at registra a data e hora da exclusão para fins de auditoria.
+
+Para gerenciar soft delete com chaves estrangeiras, pode-se sobrescrever o método delete dos modelos. Ao chamar esse método, o campo is_active é definido como False, e o campo deleted_at recebe o valor atual com now(). Assim, é possível usar self.orders.update(deleted_at=now()) dentro do delete personalizado para que o soft delete afete todos os registros relacionados. No entanto, em projetos grandes, reescrever o método delete em cada modelo pode ser inconveniente. Uma solução é criar um modelo abstrato com essa lógica e herdar esse comportamento nos demais modelos, eliminando a repetição de código.
+
+Embora o Django ofereça ferramentas como pre_delete e post_delete, ainda não explorei como aplicá-las e quais seriam seus usos mais adequados.
+
+#### Motivos para Não Implementar Soft Delete Neste Projeto
+Optei por não implementar soft delete neste projeto por se tratar de um projeto não comercial, onde a manutenção de registros históricos não é essencial. Além disso, isso me permitiu explorar alternativas para rollback de usuários em conjunto com o Keycloak. Se o soft delete estivesse implementado, bastaria desativar o usuário tanto no Django quanto no Keycloak, o que simplificaria a solução. No entanto, encarei isso como um desafio e decidi buscar uma abordagem que exigisse maior criatividade.
+
+#### Como Implementar o Soft Delete Neste Projeto
+Se fosse necessário implementar o soft delete, as alterações seriam as seguintes:
+
+Modificação do Modelo Base:
+Localizado em utils.models, o modelo base seria atualizado para incluir os campos deleted_at (datetime) e, opcionalmente, is_active (booleano). O campo deleted_at registraria o momento da exclusão. Um registro com deleted_at diferente de null seria considerado "excluído". O método delete também seria sobrescrito para atualizar esses campos em vez de remover o registro.
+
+Atualização dos Querysets:
+Os querysets padrão precisariam filtrar apenas os registros com is_active=True ou deleted_at=null. Dependendo da regra de negócio, seria possível criar diferentes categorias de acesso, permitindo ou restringindo a visualização de registros marcados como excluídos.
+
+Rollbacks e Integração com Keycloak:
+No Keycloak, seria utilizado o campo enabled para indicar a exclusão. Em vez de remover usuários, bastaria alterar o status para desativado. Isso simplificaria a lógica, evitando recriações desnecessárias de usuários durante rollbacks. Para restaurar um usuário, bastaria reativá-lo.
+
+Gerenciamento de Dados no Bucket:
+Dependendo da regra de negócio, os dados relacionados no bucket poderiam ser mantidos temporariamente. Uma solução genérica seria implementar um "agente de limpeza", que verificaria registros com deleted_at preenchido e, após um período configurado, removeria os dados tanto do banco quanto do bucket. Essa abordagem equilibraria a necessidade de auditoria com a prevenção de sobrecarga de dados inativos.
+
+Regra para Restauração de Contas:
+Ao restaurar contas excluídas, seriam consideradas três opções:
+
+- Reativar o usuário com os dados existentes.
+- Reativar o usuário atualizando seus dados.
+- Criar um novo usuário, mantendo os dados antigos como excluídos (o que poderia causar conflitos com campos únicos, como CPF e nome de usuário, mas garantiria um histórico completo).
+
+Para este projeto em particular, as duas primeiras opções seriam mais adequadas, já que evitam duplicidades e conflitos.
+
+
+
+### Extra
 <p align="justify">
 Apenas para fins de anotações, vou deixar uma lista de tecnologias que desejo estudar, embora nem todas se encaixem necessariamente neste projeto. Mantendo essa lista aqui, servirá como um lembrete, uma vez que pretendo revisitar este projeto com certa frequência:
 </p> 

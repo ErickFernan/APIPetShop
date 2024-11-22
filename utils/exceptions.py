@@ -51,10 +51,10 @@ def manage_exceptions(exception, context=''):
     """
     log_exception(context, exception)
 
-    if isinstance(exception, KeyError): # Mudar a parte que usava esse erro para chamar a função de validação que está em utils
+    if isinstance(exception, KeyError): # Mudar a parte que usava esse erro para chamar a função de validação que está em utils. Eu não me lembro qual era, tenho quase certeza que é alguma views em users, por isso vou adicionar uma nota aqui para que se o erro aparecer eu lembrar de atualziar
         if str(exception) == "'user_id'":
             # return manage_exceptions(KeyError("'user_id' is required"), context='create')
-            return Response({'message': "'user_id' is required"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'message': "'user_id' is required", "details": "Este erro está em manage_exceptions, lembre-se de modificar para utilizar a função em utils para tratar garantir que user_id está sendo enviado no formulario"}, status=status.HTTP_400_BAD_REQUEST)
 
     if isinstance(exception, IntegrityError):
         return Response({'message': "Erro de integridade.", "details": str(exception)}, status=status.HTTP_400_BAD_REQUEST)
