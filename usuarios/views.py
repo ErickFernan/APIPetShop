@@ -277,6 +277,11 @@ class UserDocumentViewSet(BaseViewSet):
         try:
             data = request.data.copy()
 
+            extra_required_fields = ['user_id']
+            errors = validate_required_fields(data, extra_required_fields)
+            if errors:
+                return Response(errors, status=status.HTTP_400_BAD_REQUEST)
+
             if not has_permission(pk=data['user_id'], request=request, roles=self.roles_required['create_total']):
                 return Response({"detail": "You do not have permission to perform this action."}, status=status.HTTP_403_FORBIDDEN)
         
@@ -388,6 +393,11 @@ class UserPhotoViewSet(BaseViewSet):
     def create(self, request):
         try:
             data = request.data.copy()
+
+            extra_required_fields = ['user_id']
+            errors = validate_required_fields(data, extra_required_fields)
+            if errors:
+                return Response(errors, status=status.HTTP_400_BAD_REQUEST)
 
             if not has_permission(pk=data['user_id'], request=request, roles=self.roles_required['create_total']):
                 return Response({"detail": "You do not have permission to perform this action."}, status=status.HTTP_403_FORBIDDEN)
@@ -520,6 +530,11 @@ class UserAudioViewSet(BaseViewSet):
     def create(self, request):
         try:
             data = request.data
+
+            extra_required_fields = ['user_id']
+            errors = validate_required_fields(data, extra_required_fields)
+            if errors:
+                return Response(errors, status=status.HTTP_400_BAD_REQUEST)
 
             if not has_permission(pk=data['user_id'], request=request, roles=self.roles_required['create_total']):
                 return Response({"detail": "You do not have permission to perform this action."}, status=status.HTTP_403_FORBIDDEN)

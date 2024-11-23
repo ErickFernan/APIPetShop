@@ -218,12 +218,12 @@ Esse TO DO funcionará como uma versão simplificada de sprint e backlog. Como e
     - [x] Modificar como a verificação é feita nas outras views.
 
 ### Tarefas em execução:
+- [ ] Personalização das rotas da app pet
 
 ### Backlog:
 - [ ] Personalização das rotas da app banhotosa
 - [ ] Personalização das rotas da app hotel
 - [ ] Personalização das rotas da app loja
-- [ ] Personalização das rotas da app pet
 - [ ] Personalização das rotas da app saude
 - [ ] Aplicar filtros nos lists das outras views
 

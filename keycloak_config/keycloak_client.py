@@ -86,7 +86,7 @@ def update_user_to_auth_service(user_id, payload):
     try:
         keycloak_admin.update_user(user_id, payload)
     except Exception as e:
-        handle_exception('update_user_to_auth_service', e)
+        handle_exception('update_user_to_auth_service', e) 
 
 def send_email_update_password(user_id):
     try:
@@ -132,7 +132,7 @@ def rollback_update_keycloak(user_auth_service_id, user):
         )
     except Exception as e:
         log_exception('update (rollback)', e)
-        handle_exception('update_user_to_auth_service', e)
+        # handle_exception('update_user_to_auth_service', e)
 
 def rollback_create_keycloak(user_auth_service_id):
     """
@@ -148,8 +148,8 @@ def rollback_create_keycloak(user_auth_service_id):
     try:
         delete_user_to_auth_service(user_auth_service_id)
     except Exception as e:
-        log_exception('update (rollback)', e)
-        handle_exception('update_user_to_auth_service', e)
+        log_exception('create (rollback)', e)
+        # handle_exception('update_user_to_auth_service', e)
 
 
 def rollback_delete_keycloak(user, user_id):
@@ -189,4 +189,4 @@ def rollback_delete_keycloak(user, user_id):
         return response
 
     except Exception as e:
-        log_exception('update (rollback)', e)
+        log_exception('delete (rollback)', e)
