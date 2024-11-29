@@ -121,7 +121,7 @@ class UsuariosRoles:
         'list': [],
         'list_total': RolesUtils.get_roles(RolesUtils.USER_COMMON_ROLES, ['estagiario']),
         'retrieve': [],
-        'retrieve_total': RolesUtils.get_roles(RolesUtils.USER_COMMON_ROLES, ['estagiario']),
+        'retrieve_total': RolesUtils.get_roles(RolesUtils.USER_COMMON_ROLES, ['estagiario']), # Acho que aqui eu deveria mudar pra list_retrieve_total, depois conferir
         'partial_update': [],
         'partial_update_total': ['superuser'],
         'create': [], # O create tem que ser publico mas so para o cargo user

@@ -221,6 +221,7 @@ Esse TO DO funcionará como uma versão simplificada de sprint e backlog. Como e
 - [ ] Personalização das rotas da app pet
 
 ### Backlog:
+- [ ] Criar uma personalização no list de pet para que se o token utilizado for de um médico mostrar apenas que sejam seus pacientes - Tarefa bonus
 - [ ] Personalização das rotas da app banhotosa
 - [ ] Personalização das rotas da app hotel
 - [ ] Personalização das rotas da app loja

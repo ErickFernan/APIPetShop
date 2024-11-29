@@ -426,7 +426,7 @@ class UserPhotoViewSet(BaseViewSet):
                 pk = kwargs.get('pk')
                 user_id_photo = self.get_queryset().filter(pk=pk).values_list('user_id', flat=True).first() # so carrega o campo desejado
 
-                if not has_permission(pk=str(user_id_photo), request=request, roles=self.roles_required['retrieve_total']):
+                if not has_permission(pk=str(user_id_photo), request=request, roles=self.roles_required['destroy_total']):
                     return Response({"detail": "You do not have permission to perform this action."}, status=status.HTTP_403_FORBIDDEN)
 
                 if not user_id_photo:
