@@ -210,6 +210,7 @@ Esse TO DO funcionará como uma versão simplificada de sprint e backlog. Como e
 - [x] Obrigar a criação de usuário na view com um documento
 - [x] Permitir a exclusão de documento apenas se o usuário tiver mais de um cadastrado, se não só será excluido se o usuário também for
 - [x] Validação de documento único (não pode haver valores de documento repetido para um mesmo tipo de documento)
+- [x] Personalização das rotas da app pet
 
     (*) Pelo fato de eu usar um uuid diferente para o user salvo no keycloak e o user salvo no django eu preciso fazer uma consulta com o get (app usuarios - User) para recuperar esses valores e depois verificar se quem solicitou possui acesso ou não. No momento não é um problema, mas em uma aplicação maior pode gerar problemas de desempenho e risco de segurança. Para consertar isso eu posso adicionar o uuid do django nas informações do jwt token do keycloak. Outra solução seria estrutual, por exemplo, usar o mesmo uuid de usuário no keycloak e no django. Entretanto, esta seria uma solução mais trabalhosa. Etapas para correção do bug:
     - [x] Descobrir como configurar esse novos atributos(?) no keycloak
@@ -218,7 +219,7 @@ Esse TO DO funcionará como uma versão simplificada de sprint e backlog. Como e
     - [x] Modificar como a verificação é feita nas outras views.
 
 ### Tarefas em execução:
-- [ ] Personalização das rotas da app pet
+- [ ] Modificar os filtros das rotas list(que possua filtro) em app_pet para filtrar por nome e não pelo id
 
 ### Backlog:
 - [ ] Criar uma personalização no list de pet para que se o token utilizado for de um médico mostrar apenas que sejam seus pacientes - Tarefa bonus

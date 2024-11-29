@@ -20,7 +20,7 @@ class Breed(BaseModel):
     nutrition =  models.TextField(blank=True, null=True)
     recommended_environment = models.TextField(blank=True, null=True)
     average_lifespan_years = models.PositiveSmallIntegerField(blank=True, null=True) 
-    species_id = models.ForeignKey(Specie, on_delete=models.CASCADE, related_name='breeds')
+    specie_id = models.ForeignKey(Specie, on_delete=models.CASCADE, related_name='breeds')
     
     def __str__(self):
         return f'{self.name}'

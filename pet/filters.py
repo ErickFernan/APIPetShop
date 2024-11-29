@@ -16,7 +16,7 @@ class PetFilter(django_filters.FilterSet):
         # fields = ['brand', 'product_type'] # Esse campo seria para criar filtros automaticos com o exact, o que não é o meu caso.
 
 class BreedFilter(django_filters.FilterSet):
-    specie_id = django_filters.CharFilter(field_name='species_id', lookup_expr='exact')
+    specie_id = django_filters.CharFilter(field_name='specie_id', lookup_expr='exact')
 
     class Meta:
         model = Breed
