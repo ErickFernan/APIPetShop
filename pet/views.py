@@ -168,7 +168,7 @@ class PetViewSet(BaseViewSet):
                 return Response({'pets': list_serializer.data}, status=status.HTTP_200_OK)
             # Posso criar um list_retrive_parcial, por exemplo para o médico ver apenas seus pacientes, vou pensar no caso
             # Vai ser interessante colocar, mas vou deixar pra quando as outras rotas tiverem completas
-            # Está como uma tarefa a se fazer no todo do readme
+            # Está como uma tarefa a se fazer no to do do readme
             else:
                 list_pets = get_list_or_404(self.get_queryset(), pet_owner_id=request.current_user_id)
                 list_serializer = self.serializer_class(list_pets, many=True)

@@ -63,16 +63,28 @@ def extract_file_audio_details(file, product=None):
     return file_name, content_type
 
 def has_permission(request, pk, roles):
-    # print(str(request.current_user_id) == pk)
+    print(any(role in roles for role in request.roles) or str(request.current_user_id) == pk)
     return any(role in roles for role in request.roles) or str(request.current_user_id) == pk
 
 
+# def validate_required_fields(data, required_fields):
+#     """
+#     Verifica se os campos obrigatórios estão presentes e não estão vazios.
+#     """
+#     errors = {}
+#     for field in required_fields:
+#         if field not in data or not str(data[field]).strip():
+#             errors[field] = f"This field is required and cannot be empty."
+#     return errors
+
+# Versão melhorada
 def validate_required_fields(data, required_fields):
     """
     Verifica se os campos obrigatórios estão presentes e não estão vazios.
+    Retorna um dicionário com os campos que apresentam erro.
     """
-    errors = {}
-    for field in required_fields:
-        if field not in data or not str(data[field]).strip():
-            errors[field] = f"This field is required and cannot be empty."
-    return errors
+    return {
+        field: "This field is required and cannot be empty."
+        for field in required_fields
+        if not str(data.get(field, "")).strip()
+    }
