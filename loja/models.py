@@ -17,8 +17,8 @@ class Sale(BaseModel):
 
 class SaleProduct(BaseModel):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
-    sale_id = models.ForeignKey(Sale, on_delete=models.CASCADE, related_name='sale_products', editable=False)
-    product_id = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='sale_products', editable=False)
+    sale_id = models.ForeignKey(Sale, on_delete=models.CASCADE, related_name='sale_products')
+    product_id = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='sale_products')
     quantity = models.PositiveSmallIntegerField()
 
     def __str__(self):

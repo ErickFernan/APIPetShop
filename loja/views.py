@@ -61,8 +61,9 @@ class SaleViewSet(BaseViewSet):
             if errors:
                 return Response(errors, status=status.HTTP_400_BAD_REQUEST)
             
-            if not has_permission(pk=data['seller_id'], request=request, roles=self.roles_required['create']):
-                return Response({"detail": "You do not have permission to perform this action."}, status=status.HTTP_403_FORBIDDEN)
+            # Esse aqui não precisa, mesma situação do create de SaleProduct
+            # if not has_permission(pk=data['seller_id'], request=request, roles=self.roles_required['create']):
+            #     return Response({"detail": "You do not have permission to perform this action."}, status=status.HTTP_403_FORBIDDEN)
 
             serializer = SaleCreateSerializer(data=data)
 
@@ -117,9 +118,9 @@ class SaleViewSet(BaseViewSet):
             if not purchase_id:
                 return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
 
-            pet = self.get_queryset().get(pk=pk)  # recupera o objeto completo
-            pet_serializer = self.serializer_class(pet)
-            return Response({'usuário': pet_serializer.data}, status=status.HTTP_200_OK)
+            sale = self.get_queryset().get(pk=pk)  # recupera o objeto completo
+            sale_serializer = self.serializer_class(sale)
+            return Response({'usuário': sale_serializer.data}, status=status.HTTP_200_OK)
 
         except Exception as e:
             return manage_exceptions(e, context='retrieve')
@@ -129,3 +130,92 @@ class SaleProductViewSet(BaseViewSet):
     queryset = SaleProduct.objects.all()
     serializer_class = SaleProductSerializer
     roles_required = LojaRoles.SALEPRODUCT_ROLES
+
+    def create(self, request):
+        try:
+            data = request.data
+
+            # Não precisa desse if, posi ficaria redundante. Só deve ser usado nos casos que um usuário pode acessar algum método create ou update
+            # if not has_permission(pk=None, request=request, roles=self.roles_required['create']):
+            #     return Response({"detail": "You do not have permission to perform this action."}, status=status.HTTP_403_FORBIDDEN)
+            
+            serializer = self.serializer_class(data=data)
+
+            return validate_serializer_and_upload_file(serializer=serializer)
+        
+        except Exception as e:
+            return manage_exceptions(e, context='create')
+
+    def update(self, request, *args, **kwargs):  
+        try:
+            pk = kwargs.get('pk')
+            sale_product = get_object_or_404(self.get_queryset(), id=pk)
+            data = request.data
+
+            serializer = self.serializer_class(sale_product, data=data)
+
+            return validate_serializer_and_upload_file(serializer=serializer)
+            
+        except Exception as e:
+            return manage_exceptions(e, context='update')
+        
+    def partial_update(self, request, *args, **kwargs):  
+        try:
+            pk = kwargs.get('pk')
+            sale_product = get_object_or_404(self.get_queryset(), id=pk)
+            data = request.data
+
+            serializer = self.serializer_class(sale_product, data=data, partial=True)
+
+            return validate_serializer_and_upload_file(serializer=serializer)
+            
+        except Exception as e:
+            return manage_exceptions(e, context='update')
+        
+    def list(self, request, *args, **kwargs):
+        try:
+            if any(role in self.roles_required['list_retrive_total'] for role in request.roles):
+                # list_sale_product = self.filter_queryset(self.get_queryset()) # preciso fazer o filtro para filtrar por nome tb
+                list_sale_product = self.get_queryset()  # Sem o filtro, retorna tudo
+                list_serializer = self.serializer_class(list_sale_product, many=True)
+                return Response({'usuários': list_serializer.data}, status=status.HTTP_200_OK)
+
+            else:
+                list_sale_product = get_list_or_404(self.get_queryset(), sale_id__purchase_id=request.current_user_id) # Esse caso vai ser chamado apenas se não for alguns dos usuários com acesso total, ou seja, se não for um superuser, estágiario ou atendente loja, dessa forma vai buscar pelo comprador(purchase)
+                list_serializer = self.serializer_class(list_sale_product, many=True)
+                return Response({'usuário': list_serializer.data}, status=status.HTTP_200_OK)
+        
+        except Exception as e:
+            return manage_exceptions(e, context='list')
+        
+    def retrieve(self, request, *args, **kwargs):
+        try:
+            pk = kwargs.get('pk')       
+            purchase_id = self.get_queryset().filter(pk=pk).values_list('sale_id__purchase_id', flat=True).first() # so carrega o campo desejado
+
+            if not has_permission(pk=str(purchase_id), request=request, roles=self.roles_required['list_retrive_total']):
+                return Response({"detail": "You do not have permission to perform this action."}, status=status.HTTP_403_FORBIDDEN)
+
+            if not purchase_id:
+                return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
+
+            sale_product = self.get_queryset().get(pk=pk)  # recupera o objeto completo
+            sale_product_serializer = self.serializer_class(sale_product)
+            return Response({'usuário': sale_product_serializer.data}, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            return manage_exceptions(e, context='retrieve')
+        
+    def destroy(self, request, *args, **kwargs):
+        try:
+            with transaction.atomic():
+                pk = kwargs.get('pk')
+                sale_product = get_object_or_404(self.get_queryset(), id=pk)
+
+                sale_product.delete()
+
+                return Response({'message': 'Deleted successful!'}, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            return manage_exceptions(e, context='destroy')
+        
