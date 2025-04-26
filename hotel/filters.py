@@ -1,6 +1,6 @@
 import django_filters
 
-from hotel.models import Service, Reservation
+from hotel.models import Service, Reservation, ReservationService
 
 from utils.custom_filters import DateToEndOfDayFilter
 
@@ -52,4 +52,37 @@ class ReservationFilter(django_filters.FilterSet):
         Filtra pelo nome próprio do comprador.
         """
         return queryset.filter(pet_id__pet_owner_id__first_name__iexact=value)
+    
+
+class ReservationServiceFilter(django_filters.FilterSet):
+    reservation_id = django_filters.CharFilter(field_name='reservation_id', lookup_expr='exact')
+    service_id = django_filters.CharFilter(field_name='service_id', lookup_expr='exact')
+
+    class Meta:
+        model = ReservationService
+        fields = []
+        # fields = ['brand', 'product_type'] # Esse campo seria para criar filtros automaticos com o exact, o que não é o meu caso.
+
+    # Filtro personalizado para buscar pelos nomes e não pelo id
+    service_name = django_filters.CharFilter(method='filter_service_name')
+    pet_name = django_filters.CharFilter(method='filter_pet_name')
+    pet_owner_first_name = django_filters.CharFilter(method='filter_pet_owner_first_name')
+
+    def filter_service_name(self, queryset, name, value):
+        """
+        Filtra pelo nome próprio do vendedor.
+        """
+        return queryset.filter(service_id__name__iexact=value)
+
+    def filter_pet_name(self, queryset, name, value):
+        """
+        Filtra pelo nome próprio do comprador.
+        """
+        return queryset.filter(reservation_id__pet_id__name__iexact=value)
+    
+    def filter_pet_owner_first_name(self, queryset, name, value):
+        """
+        Filtra pelo nome próprio do comprador.
+        """
+        return queryset.filter(reservation_id__pet_id__pet_owner_id__first_name__iexact=value)
     
