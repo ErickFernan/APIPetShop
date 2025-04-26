@@ -371,3 +371,5 @@ OBS.: Revisar os editable = false nos models, lembrando que ele apenas retira o 
 
 Editar no postman os token de user, qnd eu reiniciar o docker. Criar uma pasta com todos os tipos de user no postman, para facilitar os testes com token
 Mudar os digitos para o preço do hotel, pelo menos 4 digitos mais 2 decimais
+A lógica que eu vou seguir é que os usuários podem ver muitas coisas mas em questão de vendas precisa passar na mão de um funcionário, pois não há um sistema de pagamento implementado, então precissa passar na mão de um funcionário...
+Verificar a criação de breed se eu colocar vira lata em especies diferentes não é permitido, analisa se preciso verificar a combinação ao inves de apenas um campo

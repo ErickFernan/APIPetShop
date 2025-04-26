@@ -4,6 +4,8 @@ from django.db import models
 
 from utils.models import BaseModel
 from pet.models import Pet
+from usuarios.models import User
+
 
 class Reservation(BaseModel):
     class Status(models.TextChoices):
@@ -15,6 +17,7 @@ class Reservation(BaseModel):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
     start_date = models.DateField()
     end_date = models.DateField()
+    seller_id = models.ForeignKey(User, on_delete=models.CASCADE, related_name='seller_hotel', editable=False)
     pet_id = models.ForeignKey(Pet, on_delete=models.CASCADE, related_name='reservations', editable=False)
     status = models.CharField(choices=Status.choices, max_length=50)
 
