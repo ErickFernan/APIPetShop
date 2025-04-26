@@ -370,3 +370,4 @@ Apenas para fins de anotações, vou deixar uma lista de tecnologias que desejo 
 OBS.: Revisar os editable = false nos models, lembrando que ele apenas retira o campo do formulário e não que torna falso a edição do campo
 
 Editar no postman os token de user, qnd eu reiniciar o docker. Criar uma pasta com todos os tipos de user no postman, para facilitar os testes com token
+Mudar os digitos para o preço do hotel, pelo menos 4 digitos mais 2 decimais

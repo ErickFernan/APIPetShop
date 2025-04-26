@@ -9,7 +9,7 @@ from rest_framework.response import Response
 
 from loja.models import Sale, SaleProduct
 from loja.serializers import SaleSerializer, SaleCreateSerializer, SaleProductSerializer
-from loja.filters import SaleFilter
+from loja.filters import SaleFilter, SaleProductFilter
 
 from django.db import transaction
 from django.shortcuts import get_object_or_404, get_list_or_404
@@ -97,12 +97,12 @@ class SaleViewSet(BaseViewSet):
                 list_sales = self.filter_queryset(self.get_queryset()) # preciso fazer o filtro para filtrar por nome tb
                 # list_sales = self.get_queryset()  # Sem o filtro, retorna tudo
                 list_serializer = self.serializer_class(list_sales, many=True)
-                return Response({'usuários': list_serializer.data}, status=status.HTTP_200_OK)
+                return Response({'sale': list_serializer.data}, status=status.HTTP_200_OK)
 
             else:
                 list_sales = get_list_or_404(self.get_queryset(), purchase_id=request.current_user_id) # Esse caso vai ser chamado apenas se não for alguns dos usuários com acesso total, ou seja, se não for um superuser, estágiario ou atendente loja, dessa forma vai buscar pelo comprador(purchase)
                 list_serializer = self.serializer_class(list_sales, many=True)
-                return Response({'usuário': list_serializer.data}, status=status.HTTP_200_OK)
+                return Response({'sale': list_serializer.data}, status=status.HTTP_200_OK)
         
         except Exception as e:
             return manage_exceptions(e, context='list')
@@ -120,13 +120,16 @@ class SaleViewSet(BaseViewSet):
 
             sale = self.get_queryset().get(pk=pk)  # recupera o objeto completo
             sale_serializer = self.serializer_class(sale)
-            return Response({'usuário': sale_serializer.data}, status=status.HTTP_200_OK)
+            return Response({'sale': sale_serializer.data}, status=status.HTTP_200_OK)
 
         except Exception as e:
             return manage_exceptions(e, context='retrieve')
 
 
 class SaleProductViewSet(BaseViewSet):
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = SaleProductFilter
+
     queryset = SaleProduct.objects.all()
     serializer_class = SaleProductSerializer
     roles_required = LojaRoles.SALEPRODUCT_ROLES
@@ -135,7 +138,7 @@ class SaleProductViewSet(BaseViewSet):
         try:
             data = request.data
 
-            # Não precisa desse if, posi ficaria redundante. Só deve ser usado nos casos que um usuário pode acessar algum método create ou update
+            # Não precisa desse if, pois ficaria redundante. Só deve ser usado nos casos que um usuário pode acessar algum método create ou update
             # if not has_permission(pk=None, request=request, roles=self.roles_required['create']):
             #     return Response({"detail": "You do not have permission to perform this action."}, status=status.HTTP_403_FORBIDDEN)
             
@@ -175,15 +178,15 @@ class SaleProductViewSet(BaseViewSet):
     def list(self, request, *args, **kwargs):
         try:
             if any(role in self.roles_required['list_retrive_total'] for role in request.roles):
-                # list_sale_product = self.filter_queryset(self.get_queryset()) # preciso fazer o filtro para filtrar por nome tb
-                list_sale_product = self.get_queryset()  # Sem o filtro, retorna tudo
+                list_sale_product = self.filter_queryset(self.get_queryset()) # preciso fazer o filtro para filtrar por nome tb
+                # list_sale_product = self.get_queryset()  # Sem o filtro, retorna tudo
                 list_serializer = self.serializer_class(list_sale_product, many=True)
-                return Response({'usuários': list_serializer.data}, status=status.HTTP_200_OK)
+                return Response({'sale_product': list_serializer.data}, status=status.HTTP_200_OK)
 
             else:
                 list_sale_product = get_list_or_404(self.get_queryset(), sale_id__purchase_id=request.current_user_id) # Esse caso vai ser chamado apenas se não for alguns dos usuários com acesso total, ou seja, se não for um superuser, estágiario ou atendente loja, dessa forma vai buscar pelo comprador(purchase)
                 list_serializer = self.serializer_class(list_sale_product, many=True)
-                return Response({'usuário': list_serializer.data}, status=status.HTTP_200_OK)
+                return Response({'sale_product': list_serializer.data}, status=status.HTTP_200_OK)
         
         except Exception as e:
             return manage_exceptions(e, context='list')
@@ -201,7 +204,7 @@ class SaleProductViewSet(BaseViewSet):
 
             sale_product = self.get_queryset().get(pk=pk)  # recupera o objeto completo
             sale_product_serializer = self.serializer_class(sale_product)
-            return Response({'usuário': sale_product_serializer.data}, status=status.HTTP_200_OK)
+            return Response({'sale_product': sale_product_serializer.data}, status=status.HTTP_200_OK)
 
         except Exception as e:
             return manage_exceptions(e, context='retrieve')

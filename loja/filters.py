@@ -1,6 +1,6 @@
 import django_filters
 
-from loja.models import Sale
+from loja.models import Sale, SaleProduct
 
 from utils.custom_filters import DateToEndOfDayFilter
 
@@ -32,18 +32,27 @@ class SaleFilter(django_filters.FilterSet):
         return queryset.filter(purchase_id__first_name__iexact=value)
 
 
-# class BreedFilter(django_filters.FilterSet):
-#     specie_id = django_filters.CharFilter(field_name='specie_id', lookup_expr='exact')
+class SaleProductFilter(django_filters.FilterSet):
+    sale_id = django_filters.CharFilter(field_name='sale_id', lookup_expr='exact')
+    product_id = django_filters.CharFilter(field_name='product_id', lookup_expr='exact')
 
-#     # Filtro personalizado para buscar specie pelo nome
-#     specie_name = django_filters.CharFilter(method='filter_specie_name')
-#     class Meta:
-#         model = Breed
-#         fields = []
-#         # fields = ['brand', 'product_type'] # Esse campo seria para criar filtros automaticos com o exact, o que não é o meu caso.
+    # Filtro personalizado para buscar specie pelo nome
+    purchase_name = django_filters.CharFilter(method='filter_purchase_firstname')
+    seller_name = django_filters.CharFilter(method='filter_seller_firstname')
+    class Meta:
+        model = SaleProduct
+        fields = []
+        # fields = ['brand', 'product_type'] # Esse campo seria para criar filtros automaticos com o exact, o que não é o meu caso.
 
-#     def filter_specie_name(self, queryset, name, value): # agora só copiar? conferir depois
-#         """
-#         Filtra as raças com base no nome da espécie associada.
-#         """
-#         return queryset.filter(specie_id__name__iexact=value)
+    def filter_purchase_firstname(self, queryset, name, value): # agora só copiar? conferir depois
+        """
+        Filtra as raças com base no nome do comprador
+        """
+        return queryset.filter(sale_id__purchase_id__first_name__iexact=value)
+
+    def filter_seller_firstname(self, queryset, name, value): # agora só copiar? conferir depois
+        """
+        Filtra as raças com base no nome do vendedor
+        """
+        return queryset.filter(sale_id__seller_id__first_name__iexact=value)
+    

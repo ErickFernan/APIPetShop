@@ -24,7 +24,7 @@ class Reservation(BaseModel):
 class Service(BaseModel):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
     name = models.CharField(max_length=50, unique=True)
-    price_per_day = models.DecimalField(max_digits=4, decimal_places=2)
+    price_per_day = models.DecimalField(max_digits=6, decimal_places=2)
     description = models.TextField(blank=True, null=True)
 
     def __str__(self):
