@@ -373,3 +373,6 @@ Editar no postman os token de user, qnd eu reiniciar o docker. Criar uma pasta c
 Mudar os digitos para o preço do hotel, pelo menos 4 digitos mais 2 decimais
 A lógica que eu vou seguir é que os usuários podem ver muitas coisas mas em questão de vendas precisa passar na mão de um funcionário, pois não há um sistema de pagamento implementado, então precissa passar na mão de um funcionário...
 Verificar a criação de breed se eu colocar vira lata em especies diferentes não é permitido, analisa se preciso verificar a combinação ao inves de apenas um campo
+Outra melhoria futura é em relação ao tratamento de preços, é possível observar no uml da app banho/tosa foi feita uma correção para manter o histórico de preço dos
+serviços, onde existe um preço para o serviço e outro para quando o serviço executado foi salvo, assim, se o preço do serviço for atualizado outros já feitos
+terão um hitórico de preço correto. Sendo assim, seria necessaŕio fazer o mesmo nas outras apps. A situação não está errada, pois quando criei não considerei que os preços seriam atualizados, então nesse modelo estava correto, entretanto a opção de ter atualização é muito mais realista, portanto, vão ser tarefas adicionadas para melhorias futuras, pois o foco no momento é terminar a primeira versão.
