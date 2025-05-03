@@ -11,13 +11,18 @@ from produtos.models import Product
 
 class Appointment(BaseModel):    
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
-    pet_id = models.ForeignKey(Pet, on_delete=models.CASCADE, related_name='appointments')
+    pet_id = models.ForeignKey(Pet, on_delete=models.CASCADE, related_name='appointments', editable=False)
     func_id = models.ForeignKey(User, on_delete=models.CASCADE, related_name='appointments', editable=False) # Vou manter esse editable pois o mesmo será feito automaticamente pelo back-end
     appointment_time = models.TimeField(choices=Schedules.choices)
     date = models.DateField()
 
     def __str__(self):
         return f'{self.pet_id.name} ({self.appointment_time})'
+    
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['date', 'appointment_time', 'func_id'], name='unique_date_func_appointment_time')
+        ]
     
     
 class ServiceType(BaseModel):
@@ -38,7 +43,11 @@ class AppointmentService(models.Model):
     def __str__(self):
         return f'{self.name}'
     
-
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['appointment_id', 'service_type_id'], name='unique_appointment_service')
+        ]
+    
 class ProductUsed(BaseModel):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
     service_type_id = models.ForeignKey(ServiceType, on_delete=models.CASCADE, related_name='products_used')
@@ -47,4 +56,9 @@ class ProductUsed(BaseModel):
 
     def __str__(self):
         return f'{self.service_type_id.name} ({self.product_id.name})'
+    
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['product_id', 'service_type_id'], name='unique_product_id_service_type_id')
+        ]
     

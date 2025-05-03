@@ -54,7 +54,9 @@ class ReservationViewSet(BaseViewSet):
             
         except Exception as e:
             return manage_exceptions(e, context='update')
-        
+    
+    #FALTOU O RETRIEVE AQUI
+
     def partial_update(self, request, *args, **kwargs):  
         try:
             pk = kwargs.get('pk')

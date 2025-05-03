@@ -31,6 +31,7 @@ class BanhotosaRoles: # Adicionar doc string
         'update': RolesUtils.BANHOTOSA_GROOMER_ROLES,
         'destroy': RolesUtils.BANHOTOSA_GROOMER_ROLES,
     }
+    APPOINTMENTSERVICE_ROLES = SERVICETYPE_ROLES # Como modiquei depois, averiguar se está correto e eu nbão  preciso do campo list_retrieve_total
     PRODUCTUSED_ROLES = SERVICETYPE_ROLES
 
 
