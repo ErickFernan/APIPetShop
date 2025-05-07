@@ -200,7 +200,7 @@ class AppointmentServiceViewSet(BaseViewSet):
     def create(self, request):
         try:
             data = request.data
-            serializer = self.serializer_class(data=data)
+            serializer = AppointmentServiceSerializer(data=data)
 
             return validate_serializer_and_upload_file(serializer=serializer)
         

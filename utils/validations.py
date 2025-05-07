@@ -5,8 +5,9 @@ import magic
 
 from rest_framework import status
 from rest_framework.response import Response
+from rest_framework.exceptions import ValidationError
 
-from datetime import time, timedelta
+from datetime import time, timedelta, datetime
 
 from django.core.validators import RegexValidator
 
@@ -14,6 +15,8 @@ from bucket.minio_client import upload_file
 
 from utils.exceptions import ImageValidationError, AudioValidationError
 from utils.logs_config import handle_exception
+
+from django.apps import apps # Isso é importante para evitar importações diretas, ficar atento é algo muito importante
 
 
 def image_validation(file):
@@ -109,3 +112,59 @@ class StructureValidators():
                 'não pode começar ou terminar com um caractere especial, '
                 'e não pode ter caracteres especiais consecutivos.'
     )
+
+
+def validate_appointment_conflict(appointment, new_services=None):
+    """
+    Verifica conflitos de horário com base nos serviços de um appointment.
+
+    :param appointment: Objeto Appointment (com date, appointment_time, func_id)
+    :param new_services: Lista de instâncias de ServiceType (serviços novos)
+    :raise ValidationError: se houver conflito de horário
+    """
+    Appointment = apps.get_model('banhotosa', 'Appointment')
+    AppointmentService = apps.get_model('banhotosa', 'AppointmentService')
+    print('PASEEE')
+    print(type(appointment.date))
+    print(type(appointment.appointment_time))
+    appointment_start = datetime.combine(appointment.date, appointment.appointment_time)
+
+
+    existing_services = AppointmentService.objects.filter(appointment_id=appointment)
+    total_minutes = sum([
+        s.service_type_id.execution_time.hour * 60 + s.service_type_id.execution_time.minute
+        for s in existing_services
+    ])
+
+    if new_services:
+        total_minutes += sum([
+            s.execution_time.hour * 60 + s.execution_time.minute
+            for s in new_services
+        ])
+
+    if total_minutes == 0:
+        total_minutes = 30  # fallback
+
+    appointment_end = appointment_start + timedelta(minutes=total_minutes)
+    print(type(appointment.func_id))
+    other_appointments = Appointment.objects.filter(
+        date=appointment.date,
+        func_id=appointment.func_id
+    ).exclude(id=appointment.id)
+    
+    for appt in other_appointments:
+        appt_start = datetime.combine(appt.date, appt.appointment_time)
+
+        appt_services = AppointmentService.objects.filter(appointment_id=appt)
+        appt_total_minutes = sum([
+            s.service_type_id.execution_time.hour * 60 + s.service_type_id.execution_time.minute
+            for s in appt_services
+        ])
+        if appt_total_minutes == 0:
+            appt_total_minutes = 30
+
+        appt_end = appt_start + timedelta(minutes=appt_total_minutes)
+
+        if appointment_start < appt_end and appointment_end > appt_start:
+            raise ValidationError("Conflito de horário com outro agendamento.")
+        

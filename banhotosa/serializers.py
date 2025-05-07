@@ -1,3 +1,6 @@
+import uuid
+
+
 from rest_framework import serializers
 
 from django.shortcuts import get_object_or_404
@@ -9,6 +12,9 @@ from usuarios.models import User
 from pet.models import Pet
 
 from datetime import datetime, timedelta
+
+from utils.validations import validate_appointment_conflict
+
 
 class AppointmentSerializer(serializers.ModelSerializer):
     class Meta:
@@ -37,6 +43,31 @@ class AppointmentCreateSerializer(serializers.ModelSerializer): # Criado para n�
             **validated_data
         )
 
+    def validate(self, data):
+        func_id = data.get("func_id")
+        pet_id = data.get("pet_id")
+
+        teste_func_id = data["func_id"]
+        teste_pet_id = data["pet_id"]
+
+        if isinstance(func_id, uuid.UUID):
+            func = get_object_or_404(User, id=func_id)
+            data["func_id"] = func
+        if isinstance(pet_id, uuid.UUID):
+            pet = get_object_or_404(Pet, id=pet_id)
+            data["pet_id"] = pet
+
+        appointment = Appointment(**data)
+
+        appointment.appointment_time = datetime.strptime(appointment.appointment_time, "%H:%M").time() # preciso fazer isso pois ele chega como txt
+
+        validate_appointment_conflict(appointment)
+
+        data["func_id"] = teste_func_id
+        data["pet_id"] = teste_pet_id
+
+        return data
+
 
 class ServiceTypeSerializer(serializers.ModelSerializer):
     class Meta:
@@ -53,39 +84,7 @@ class AppointmentServiceSerializer(serializers.ModelSerializer):
         appointment = data['appointment_id']
         service = data['service_type_id']
 
-        if AppointmentService.objects.filter(appointment_id=appointment, service_type_id=service).exists():
-            raise serializers.ValidationError("Este serviço já está associado a este agendamento.")
-        print("appointment: ",appointment)
-        print("service :",service)
-
-        # Entre appointments diferentes ele está verificando corrreto?(pelo menos ta verificando) mas no mesmo appointment não, pois ele precisa calcular os horários daquel appointmente tb.
-
-        # Dados do agendamento atual
-        start_datetime = datetime.combine(appointment.date, appointment.appointment_time)
-        duration = timedelta(hours=service.execution_time.hour, minutes=service.execution_time.minute)
-        end_datetime = start_datetime + duration
-
-        # Buscar outros agendamentos do mesmo funcionário no mesmo dia
-        other_appointments = Appointment.objects.filter(
-            date=appointment.date,
-            func_id=appointment.func_id
-        ).exclude(id=appointment.id)
-        print("other_appointments: ",other_appointments)
-
-        for appt in other_appointments:
-            appt_start = datetime.combine(appt.date, appt.appointment_time)
-
-            # Somar duração total dos serviços desse outro agendamento
-            related_services = AppointmentService.objects.filter(appointment_id=appt.id)
-            total_minutes = sum([
-                s.service_type_id.execution_time.hour * 60 + s.service_type_id.execution_time.minute
-                for s in related_services
-            ])
-            appt_end = appt_start + timedelta(minutes=total_minutes)
-
-            # Verificar sobreposição
-            if start_datetime < appt_end and end_datetime > appt_start:
-                raise serializers.ValidationError("Conflito de horário com outro atendimento.")
+        validate_appointment_conflict(appointment, new_services=[service])
 
         return data
 

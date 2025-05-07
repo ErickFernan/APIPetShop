@@ -36,12 +36,13 @@ class ServiceType(BaseModel):
     
 
 class AppointmentService(models.Model):
+    # preciso corrigir aqui para uuid
     appointment_id = models.ForeignKey(Appointment, on_delete=models.CASCADE, related_name="services")
     service_type_id = models.ForeignKey(ServiceType, on_delete=models.CASCADE, related_name="appointments")
     charged_price = models.DecimalField(max_digits=5, decimal_places=2) # Esse preço é necessário para manter um histórico do preço, pois seria o preço salvo será aquele no momento da criação, o que vai permitir que o preço do serviço seja ajustado a qualquer momento sem prejudicar o histórico
 
     def __str__(self):
-        return f'{self.name}'
+        return f'{self.appointment_id} ({self.service_type_id})'
     
     class Meta:
         constraints = [
