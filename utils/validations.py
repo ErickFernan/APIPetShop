@@ -129,7 +129,6 @@ def validate_appointment_conflict(appointment, new_services=None):
     print(type(appointment.appointment_time))
     appointment_start = datetime.combine(appointment.date, appointment.appointment_time)
 
-
     existing_services = AppointmentService.objects.filter(appointment_id=appointment)
     total_minutes = sum([
         s.service_type_id.execution_time.hour * 60 + s.service_type_id.execution_time.minute

@@ -47,24 +47,21 @@ class AppointmentCreateSerializer(serializers.ModelSerializer): # Criado para n�
         func_id = data.get("func_id")
         pet_id = data.get("pet_id")
 
-        teste_func_id = data["func_id"]
-        teste_pet_id = data["pet_id"]
+        # buscar os objetos para validação
+        func = get_object_or_404(User, id=func_id)
+        pet = get_object_or_404(Pet, id=pet_id)
 
-        if isinstance(func_id, uuid.UUID):
-            func = get_object_or_404(User, id=func_id)
-            data["func_id"] = func
-        if isinstance(pet_id, uuid.UUID):
-            pet = get_object_or_404(Pet, id=pet_id)
-            data["pet_id"] = pet
+        # criar uma cópia do data para montar o Appointment
+        appointment_data = data.copy()
+        appointment_data["func_id"] = func
+        appointment_data["pet_id"] = pet
 
-        appointment = Appointment(**data)
+        appointment = Appointment(**appointment_data)
 
-        appointment.appointment_time = datetime.strptime(appointment.appointment_time, "%H:%M").time() # preciso fazer isso pois ele chega como txt
+        if isinstance(appointment.appointment_time, str):
+            appointment.appointment_time = datetime.strptime(appointment.appointment_time, "%H:%M").time()
 
         validate_appointment_conflict(appointment)
-
-        data["func_id"] = teste_func_id
-        data["pet_id"] = teste_pet_id
 
         return data
 

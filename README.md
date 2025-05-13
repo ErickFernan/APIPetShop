@@ -376,3 +376,6 @@ Verificar a criação de breed se eu colocar vira lata em especies diferentes n�
 Outra melhoria futura é em relação ao tratamento de preços, é possível observar no uml da app banho/tosa foi feita uma correção para manter o histórico de preço dos
 serviços, onde existe um preço para o serviço e outro para quando o serviço executado foi salvo, assim, se o preço do serviço for atualizado outros já feitos
 terão um hitórico de preço correto. Sendo assim, seria necessaŕio fazer o mesmo nas outras apps. A situação não está errada, pois quando criei não considerei que os preços seriam atualizados, então nesse modelo estava correto, entretanto a opção de ter atualização é muito mais realista, portanto, vão ser tarefas adicionadas para melhorias futuras, pois o foco no momento é terminar a primeira versão.
+
+modificar respostas que tenham arquivos/imagens -> Manter a abordagem atual, mas com URLs assinadas (presigned URLs).
+MinIO permite gerar presigned URLs, com tempo limitado, segurança e sem deixar os arquivos públicos.
