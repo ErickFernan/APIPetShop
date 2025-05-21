@@ -13,6 +13,9 @@ from django.shortcuts import get_object_or_404, get_list_or_404
 from rest_framework import status
 from rest_framework.response import Response
 
+from datetime import date
+
+
 class AppointmentViewSet(BaseViewSet):
     # filter_backends = [DjangoFilterBackend]
     # filterset_class = ReservationServiceFilter
@@ -130,7 +133,7 @@ class ServiceTypeViewSet(BaseViewSet):
         except Exception as e:
             return manage_exceptions(e, context='create')
         
-    def update(self, request, *args, **kwargs):  
+    def update(self, request, *args, **kwargs):
         try:
             pk = kwargs.get('pk')
             service_type = get_object_or_404(self.get_queryset(), id=pk)
@@ -143,7 +146,7 @@ class ServiceTypeViewSet(BaseViewSet):
         except Exception as e:
             return manage_exceptions(e, context='update')
         
-    def partial_update(self, request, *args, **kwargs):  
+    def partial_update(self, request, *args, **kwargs): # O execution time aqui afeta o agendamento, pois o mesmo é utilizado para calcular o tempo total do agendamento, ao atualizar este campo eu preciso verificar na agenda? Ou pensar em uma regra para essa att só valer em agendar novas?
         try:
             pk = kwargs.get('pk')
             service_type = get_object_or_404(self.get_queryset(), id=pk)
@@ -176,14 +179,19 @@ class ServiceTypeViewSet(BaseViewSet):
         except Exception as e:
             return manage_exceptions(e, context='retrieve')
         
-    def destroy(self, request, *args, **kwargs):
+    def destroy(self, request, *args, **kwargs): # Para melhorar o destroy, preciso verificar se o serviço está vinculado a algum agendamento posterior a tentativa de exclusão, por exemplo se tento excluir no dia 02/MAR mas existe um agenda para 03/MAR eu não posso fazer o delete, se sim, não posso deletar. Se fosse com soft delete, poderia apenas desativar o mesmo.
         try:
             with transaction.atomic():
                 pk = kwargs.get('pk')
-                service_type = get_object_or_404(self.get_queryset(), id=pk)
+                # service_type = get_object_or_404(self.get_queryset(), id=pk)
+                service_type = self.get_object()
 
+                # Verifica se existe algum Appointment futuro vinculado a esse ServiceType
+                if service_type.appointments.filter(appointment_id__date__gt=date.today()).exists(): # service_type.appointments -> retorna todos os AppointmentService vinculados a esse ServiceType
+                    # raise ValidationError("Não é possível excluir: este tipo de serviço está vinculado a agendamentos futuros.") # Criar um novo erro, por enquanto enviar uma resposta.
+                    return Response({'message': 'Não é possível excluir: este tipo de serviço está vinculado a agendamentos futuros.'}, status=status.HTTP_400_BAD_REQUEST)
+                
                 service_type.delete()
-
                 return Response({'message': 'Deleted successful!'}, status=status.HTTP_200_OK)
 
         except Exception as e:
@@ -195,7 +203,7 @@ class AppointmentServiceViewSet(BaseViewSet):
 
     queryset = AppointmentService.objects.all()
     serializer_class = AppointmentServiceSerializer
-    roles_required = BanhotosaRoles.APPOINTMENT_ROLES # mudar aqui para AppointmentServiceRoles quando criar a role
+    roles_required = BanhotosaRoles.APPOINTMENT_ROLES # mudar aqui para AppointmentServiceRoles quando criar a role, lembrar de add o groomer como acesso? na vdd, pensar nas regras na hora de criar.
 
     def create(self, request):
         try:
@@ -206,6 +214,60 @@ class AppointmentServiceViewSet(BaseViewSet):
         
         except Exception as e:
             return manage_exceptions(e, context='create')
+        
+    def update(self, request, *args, **kwargs):
+        return Response({'detail': 'Update not allowed for AppointmentService.'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
+    def partial_update(self, request, *args, **kwargs):
+        return Response({'detail': 'Partial Update not allowed for AppointmentService.'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+    
+    def destroy(self, request, *args, **kwargs):
+        try:  
+            with transaction.atomic():
+                pk = kwargs.get('pk')
+                appointment_service = get_object_or_404(self.get_queryset(), id=pk)
+
+                appointment_service.delete()
+
+                return Response({'message': 'Deleted successful!'}, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            return manage_exceptions(e, context='destroy')
+        
+    def list(self, request, *args, **kwargs):
+        try:
+            if any(role in self.roles_required['list_retrive_total'] for role in request.roles):
+                # list_appointments = self.filter_queryset(self.get_queryset())
+                list_appointments = self.get_queryset()  # Sem o filtro, retorna tudo
+                list_serializer = self.serializer_class(list_appointments, many=True)
+                return Response({'apointments': list_serializer.data}, status=status.HTTP_200_OK)
+
+            else:
+                list_appointments = get_list_or_404(self.get_queryset(), appointment_id__pet_id__pet_owner_id=request.current_user_id) # Esse caso vai ser chamado apenas se não for alguns dos usuários com acesso total, ou seja, se não for um superuser, estágiario ou atendente loja, dessa forma vai buscar pelo comprador(purchase)
+                list_serializer = self.serializer_class(list_appointments, many=True)
+                return Response({'apointments': list_serializer.data}, status=status.HTTP_200_OK)
+        
+        except Exception as e:
+            return manage_exceptions(e, context='list')
+        
+    def retrieve(self, request, *args, **kwargs):
+        try:
+            pk = kwargs.get('pk')       
+            owner_id = self.get_queryset().filter(pk=pk).values_list('appointment_id__pet_id__pet_owner_id', flat=True).first() # so carrega o campo desejado
+
+            if not has_permission(pk=str(owner_id), request=request, roles=self.roles_required['list_retrive_total']):
+                return Response({"detail": "You do not have permission to perform this action."}, status=status.HTTP_403_FORBIDDEN)
+
+            if not owner_id:
+                return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
+
+            appoitment = self.get_queryset().get(pk=pk)  # recupera o objeto completo
+            appoitment_serializer = self.serializer_class(appoitment)
+            return Response({'usuário': appoitment_serializer.data}, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            return manage_exceptions(e, context='retrieve')
+
 
 class ProductUsedViewSet(BaseViewSet):
     # filter_backends = [DjangoFilterBackend]

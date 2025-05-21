@@ -20,7 +20,22 @@ class AppointmentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Appointment
         fields = '__all__'
+        
+    def validate(self, data):
+        time_str = data.get("appointment_time")
+        appointment_data = data.copy()
 
+        if isinstance(time_str, str):
+            appointment_data["appointment_time"] = datetime.strptime(time_str, "%H:%M").time()
+
+        if self.instance:
+            # Atualiza os campos da instância com os novos valores (sem salvar)
+            for attr, value in appointment_data.items():
+                setattr(self.instance, attr, value)
+
+            validate_appointment_conflict(self.instance)
+        return data
+    
 
 class AppointmentCreateSerializer(serializers.ModelSerializer): # Criado para não permitir a edição dos ids no update depois de criado
     func_id = serializers.UUIDField(write_only=True)

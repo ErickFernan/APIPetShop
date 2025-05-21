@@ -213,6 +213,7 @@ Esse TO DO funcionará como uma versão simplificada de sprint e backlog. Como e
 - [x] Personalização das rotas da app pet
 - [x] Modificar os filtros das rotas list(que possua filtro) em app_pet para filtrar por nome e não pelo id
 - [x] Personalização das rotas da app loja
+- [ ] Personalização das rotas da app hotel
 
     (*) Pelo fato de eu usar um uuid diferente para o user salvo no keycloak e o user salvo no django eu preciso fazer uma consulta com o get (app usuarios - User) para recuperar esses valores e depois verificar se quem solicitou possui acesso ou não. No momento não é um problema, mas em uma aplicação maior pode gerar problemas de desempenho e risco de segurança. Para consertar isso eu posso adicionar o uuid do django nas informações do jwt token do keycloak. Outra solução seria estrutual, por exemplo, usar o mesmo uuid de usuário no keycloak e no django. Entretanto, esta seria uma solução mais trabalhosa. Etapas para correção do bug:
     - [x] Descobrir como configurar esse novos atributos(?) no keycloak
@@ -220,12 +221,14 @@ Esse TO DO funcionará como uma versão simplificada de sprint e backlog. Como e
     - [x] Modificar a views para salvar o valor quando criar o usuário
     - [x] Modificar como a verificação é feita nas outras views.
 
+    (**) Reestruturação nas regras de att dados em serviços de banhotosa, escrever comentários e o que foi feito para resolver aqui.
+
 ### Tarefas em execução:
-- [ ] Personalização das rotas da app hotel
+- [ ] Personalização das rotas da app banhotosa
+- [ ] Bug **
 
 ### Backlog:
 - [ ] Criar uma personalização no list de pet para que se o token utilizado for de um médico mostrar apenas que sejam seus pacientes - Tarefa bonus
-- [ ] Personalização das rotas da app banhotosa
 - [ ] Personalização das rotas da app saude
 - [ ] Aplicar filtros nos lists das outras views
 
@@ -379,3 +382,20 @@ terão um hitórico de preço correto. Sendo assim, seria necessaŕio fazer o me
 
 modificar respostas que tenham arquivos/imagens -> Manter a abordagem atual, mas com URLs assinadas (presigned URLs).
 MinIO permite gerar presigned URLs, com tempo limitado, segurança e sem deixar os arquivos públicos.
+
+Preciso conferir se os updates precisam fazer a verificação também
+
+fazer uma rota que retorna os horários filtrando pelo pet, dono, e groomer
+
+consertar o campo id em appointmentservice, esqueci de colocar id como um uuid
+
+Existe um problema critico na att de Services do banho/tosa, pois ao atualizar o campo de execution_time ele iria bagunçar completamente a agenda. Neste caso a att de tempo do serviço deveria ser feita criando um novo serviço e não atualizando o antigo. Colocar para calcular isso ficaria muito complexo na agenda e tornaria dificil para o usuário, pois já existe os horário definidos e se um tempo maior for necessário, um serviço "encavalaria" em outro horário e se tornaria um caos. A melhor opção, pelo menos no momento, é obrigar um novo serviço com um novo tempo a ser criado. Entretanto, ainda preciso poder att o campo de base_price. o que posso fazer? Bloquear a edição do campo execution_time e permitir que o resto seja editado. Para melhorar a experiência posso verificar no create do service se o nome do mesmo já existe, se já existir ele vai pegar o antigo e adicionar ao nome "desatualizado" ai futuramento posso criar um método que esporadicamente busca os serviços desatualizados e limpam do banco sem comprometer os novos. Essa estratégia funcionária ainda melhor se eu estivesse usando o soft delete, mas como este projeto não é para ser vendido, não faz diferença.
+Comentar sobre a regra do delete no services de banho/tosa
+criar tarefa para resolver a att do execution_time de servicos em banho/tosa!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>
+Qual seria uma boa abordagem para a fç de limpar serviços inativos? buscar pela palavra inativa no nome do serviço e verificar se esse serviço não está selecionado para uma data futura do da solicitação do delete, se as condições forem satisfeitas a rotina pode limpar esses serviços desatualizados.
+A mesma coisa para o delete de serviço:
+Para melhorar o destroy, preciso verificar se o serviço está vinculado a algum agendamento posterior a tentativa de exclusão, por exemplo se tento excluir no dia 02/MAR mas existe um agenda para 03/MAR eu não posso fazer o delete, se sim, não posso deletar. Se fosse com soft delete, poderia apenas desativar o mesmo.
+
+💡 Nota de Design (exemplo para horá de escrever no readme)
+O campo execution_time do modelo ServiceType não pode ser alterado após a criação. Essa decisão foi tomada para garantir a integridade da agenda, já que o tempo de execução impacta diretamente a alocação de horários dos funcionários.
+Para atualizar o tempo de um serviço, o sistema exige a criação de um novo tipo de serviço, mantendo o histórico dos agendamentos passados. Isso evita conflitos, sobreposição de horários e inconsistência nos dados.

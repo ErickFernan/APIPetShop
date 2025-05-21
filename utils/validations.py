@@ -124,9 +124,7 @@ def validate_appointment_conflict(appointment, new_services=None):
     """
     Appointment = apps.get_model('banhotosa', 'Appointment')
     AppointmentService = apps.get_model('banhotosa', 'AppointmentService')
-    print('PASEEE')
-    print(type(appointment.date))
-    print(type(appointment.appointment_time))
+
     appointment_start = datetime.combine(appointment.date, appointment.appointment_time)
 
     existing_services = AppointmentService.objects.filter(appointment_id=appointment)
@@ -145,7 +143,7 @@ def validate_appointment_conflict(appointment, new_services=None):
         total_minutes = 30  # fallback
 
     appointment_end = appointment_start + timedelta(minutes=total_minutes)
-    print(type(appointment.func_id))
+
     other_appointments = Appointment.objects.filter(
         date=appointment.date,
         func_id=appointment.func_id
