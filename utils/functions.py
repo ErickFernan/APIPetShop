@@ -88,3 +88,12 @@ def validate_required_fields(data, required_fields):
         for field in required_fields
         if not str(data.get(field, "")).strip()
     }
+
+
+"""Aqui preciso criar a função que vai ser responsável por buscar os servicços desatualizados do banho/tosa e, se possivel, 
+fazer a exclusão dos mesmos. A ideia por tras dessa função dever ser: faz a busca de todos os serviços que possuem a flag de desatualizado,
+no nome, algo como nome_do_serviço desatualizado(ou outro nome melhor). Depois de obtido o resultado ele verifica se os mesmos possuem
+alogum serviço agendado numa data futura desta consulta, se houver ele ignora se não ele exclui do registo.
+Uma outra ideia que pode-se fazer futuramente para melhorar ainda mais pode ser o bot fazer a pesquisa e criar agendamentos para a excluão
+em conjunto com um sistema que não permita que os serviços que possuam o nome desatualizado sejam utilizados, retornando um erro 
+ou algo do tipo. Se necessário, nas buscas, pode-se usar expressões regulares para encontrar os serviços desatualizados."""

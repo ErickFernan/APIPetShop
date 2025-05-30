@@ -85,7 +85,20 @@ class ServiceTypeSerializer(serializers.ModelSerializer):
     class Meta:
         model = ServiceType
         fields = '__all__'
+        # read_only_fields = ('execution_time',)  # só na edição
 
+    def update(self, instance, validated_data):
+        if 'execution_time' in validated_data:
+            raise serializers.ValidationError({
+                "execution_time": "Este campo não pode ser alterado. Se precisar alterá-lo, crie um novo serviço."
+            })
+    
+        # Aplica os outros campos
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+    
+        instance.save()
+        return instance
 
 class AppointmentServiceSerializer(serializers.ModelSerializer):
     class Meta:

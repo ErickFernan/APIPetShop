@@ -226,6 +226,7 @@ Esse TO DO funcionará como uma versão simplificada de sprint e backlog. Como e
 ### Tarefas em execução:
 - [ ] Personalização das rotas da app banhotosa
 - [ ] Bug **
+- [ ] filtros banho/tosa
 
 ### Backlog:
 - [ ] Criar uma personalização no list de pet para que se o token utilizado for de um médico mostrar apenas que sejam seus pacientes - Tarefa bonus
@@ -239,6 +240,10 @@ Em upgrades vou separar tarefas grande que precisarão ser dividas em outras sub
 - [ ] Adicionar o Kong ao projeto
 - [ ] Criar um sistema que irá preencher caracteristicas (hábitos, alimentação, etc) das raças dos pets usando o llama3 com o lmstudio, detalhes pensar futuramente.
 - [ ] Criar uma aplicação extra completa (front e back) com um serviço de chat por texto e voz.
+- [ ] Criar uma função em utils que seja responsável por filtar serviços(banho/tosa) desatualizados e excluir os mesmos(mais detalhes do funcionamento se encontram no diretório utils arquivo functions.py).
+- [ ] Corrigir o partial em update(PUT) de serviços de banho/tosa.
+- [ ] Meu modelo de log para erros no termnal não fico muito bom, melhorar futuramente.
+- [ ] Melhoria na redundância em create do servicetype de banho/tosa
 
 ### IMPORTANTE:
 <p align="justify">
@@ -389,7 +394,7 @@ fazer uma rota que retorna os horários filtrando pelo pet, dono, e groomer
 
 consertar o campo id em appointmentservice, esqueci de colocar id como um uuid
 
-Existe um problema critico na att de Services do banho/tosa, pois ao atualizar o campo de execution_time ele iria bagunçar completamente a agenda. Neste caso a att de tempo do serviço deveria ser feita criando um novo serviço e não atualizando o antigo. Colocar para calcular isso ficaria muito complexo na agenda e tornaria dificil para o usuário, pois já existe os horário definidos e se um tempo maior for necessário, um serviço "encavalaria" em outro horário e se tornaria um caos. A melhor opção, pelo menos no momento, é obrigar um novo serviço com um novo tempo a ser criado. Entretanto, ainda preciso poder att o campo de base_price. o que posso fazer? Bloquear a edição do campo execution_time e permitir que o resto seja editado. Para melhorar a experiência posso verificar no create do service se o nome do mesmo já existe, se já existir ele vai pegar o antigo e adicionar ao nome "desatualizado" ai futuramento posso criar um método que esporadicamente busca os serviços desatualizados e limpam do banco sem comprometer os novos. Essa estratégia funcionária ainda melhor se eu estivesse usando o soft delete, mas como este projeto não é para ser vendido, não faz diferença.
+Existe um problema critico na att de Services do banho/tosa, pois ao atualizar o campo de execution_time ele iria bagunçar completamente a agenda. Neste caso a att de tempo do serviço deveria ser feita criando um novo serviço e não atualizando o antigo. Colocar para calcular isso ficaria muito complexo na agenda e tornaria dificil para o usuário, pois já existe os horário definidos e se um tempo maior for necessário, um serviço "encavalaria" em outro horário e se tornaria um caos. A melhor opção, pelo menos no momento, é obrigar um novo serviço com um novo tempo a ser criado. Entretanto, ainda preciso poder att o campo de base_price. o que posso fazer? Bloquear a edição do campo execution_time e permitir que o resto seja editado. Para melhorar a experiência posso verificar no create do service se o nome do mesmo já existe, se já existir ele vai pegar o antigo e adicionar ao nome "desatualizado" ai futuramente posso criar um método que esporadicamente busca os serviços desatualizados e limpam do banco sem comprometer os novos. Essa estratégia funcionária ainda melhor se eu estivesse usando o soft delete, mas como este projeto não é para ser vendido, não faz diferença.
 Comentar sobre a regra do delete no services de banho/tosa
 criar tarefa para resolver a att do execution_time de servicos em banho/tosa!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>
 Qual seria uma boa abordagem para a fç de limpar serviços inativos? buscar pela palavra inativa no nome do serviço e verificar se esse serviço não está selecionado para uma data futura do da solicitação do delete, se as condições forem satisfeitas a rotina pode limpar esses serviços desatualizados.

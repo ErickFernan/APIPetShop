@@ -126,9 +126,31 @@ class ServiceTypeViewSet(BaseViewSet):
     def create(self, request):
         try:
             data = request.data
-            serializer = self.serializer_class(data=data)
+            name = data.get("name")
+            new_execution_time = data.get("execution_time")
+            print(data)
+            
+            # Busca serviço com mesmo nome
+            existing_service = self.queryset.filter(name=name).first()
+            with transaction.atomic():
+                if existing_service:
+                    if str(existing_service.execution_time) == str(new_execution_time):
+                        print("A")
+                        return Response(
+                            {"detail": "Já existe um serviço com esse nome e tempo de execução igual. Utilize o update para atualizar os campos"},
+                            status=status.HTTP_400_BAD_REQUEST
+                        )
+                    else:
+                        print("B")
+                        # Renomeia o antigo para "(desatualizado)"
+                        existing_service.name = f"{existing_service.name} (desatualizado)"
+                        existing_service.save()
 
-            return validate_serializer_and_upload_file(serializer=serializer)
+                # Cria o novo serviço
+                serializer = self.serializer_class(data=data)
+                serializer.is_valid(raise_exception=True) # Está redundante pois validate_serializer_and_upload_file já válida o serializer,mas como está em outro bloco o rollback não funcionaria. Futuramente, algo a ser corrigido.
+
+                return validate_serializer_and_upload_file(serializer=serializer)
         
         except Exception as e:
             return manage_exceptions(e, context='create')
@@ -139,14 +161,14 @@ class ServiceTypeViewSet(BaseViewSet):
             service_type = get_object_or_404(self.get_queryset(), id=pk)
             data = request.data
 
-            serializer = self.serializer_class(service_type, data=data)
+            serializer = self.serializer_class(service_type, data=data, partial=True) # Partial=True é uma gambiarra por conta de tempo que irei arrumar depois, inclusive deixei a tarefa criada no backlog. Pelas regras de negócio o campo execution_time não pode ser atualizado, então para não limitar a att apenas ao verbo patch vou liberar a att parcial por enquanto.
 
             return validate_serializer_and_upload_file(serializer=serializer)
             
         except Exception as e:
             return manage_exceptions(e, context='update')
         
-    def partial_update(self, request, *args, **kwargs): # O execution time aqui afeta o agendamento, pois o mesmo é utilizado para calcular o tempo total do agendamento, ao atualizar este campo eu preciso verificar na agenda? Ou pensar em uma regra para essa att só valer em agendar novas?
+    def partial_update(self, request, *args, **kwargs): # Resolvi verificando no serializer, se tentar att o campo execution time uma msg de erro é retornada # O execution time aqui afeta o agendamento, pois o mesmo é utilizado para calcular o tempo total do agendamento, ao atualizar este campo eu preciso verificar na agenda? Ou pensar em uma regra para essa att só valer em agendar novas?
         try:
             pk = kwargs.get('pk')
             service_type = get_object_or_404(self.get_queryset(), id=pk)

@@ -61,6 +61,7 @@ def validate_serializer_and_upload_file(serializer, file=None, file_name=None, c
     """
     try:
         if serializer.is_valid():
+        # if serializer.is_valid(raise_exception=True): # TESTAR ESSE QUANDO CHEGAR(AVALIAR SE É A MELHOR OPÇÃO para usar o transaction.atomic)
 
             if file and not upload_file(file, file_name, content_type, folder_prefix):
 
