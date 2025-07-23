@@ -6,9 +6,11 @@ from utils.functions import has_permission, validate_required_fields
 
 from banhotosa.models import Appointment, ServiceType, ProductUsed, AppointmentService
 from banhotosa.serializers import AppointmentSerializer, ServiceTypeSerializer, ProductUsedSerializer, AppointmentServiceSerializer, AppointmentCreateSerializer
+from banhotosa.filters import AppointmentFilter, ServiceTypeFilter, ProductUsedFilter, AppointmentServiceFilter
 
 from django.db import transaction
 from django.shortcuts import get_object_or_404, get_list_or_404
+from django_filters.rest_framework import DjangoFilterBackend
 
 from rest_framework import status
 from rest_framework.response import Response
@@ -17,8 +19,8 @@ from datetime import date
 
 
 class AppointmentViewSet(BaseViewSet):
-    # filter_backends = [DjangoFilterBackend]
-    # filterset_class = ReservationServiceFilter
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = AppointmentFilter
 
     queryset = Appointment.objects.all()
     serializer_class = AppointmentSerializer
@@ -70,8 +72,8 @@ class AppointmentViewSet(BaseViewSet):
     def list(self, request, *args, **kwargs):
         try:
             if any(role in self.roles_required['list_retrive_total'] for role in request.roles):
-                # list_appointments = self.filter_queryset(self.get_queryset())
-                list_appointments = self.get_queryset()  # Sem o filtro, retorna tudo
+                list_appointments = self.filter_queryset(self.get_queryset())
+                # list_appointments = self.get_queryset()  # Sem o filtro, retorna tudo
                 list_serializer = self.serializer_class(list_appointments, many=True)
                 return Response({'apointments': list_serializer.data}, status=status.HTTP_200_OK)
 
@@ -116,8 +118,8 @@ class AppointmentViewSet(BaseViewSet):
         
 
 class ServiceTypeViewSet(BaseViewSet):
-    # filter_backends = [DjangoFilterBackend]
-    # filterset_class = ReservationServiceFilter
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = ServiceTypeFilter
 
     queryset = ServiceType.objects.all()
     serializer_class = ServiceTypeSerializer
@@ -183,8 +185,8 @@ class ServiceTypeViewSet(BaseViewSet):
 
     def list(self, request, *args, **kwargs):
         try:
-            # list_service_type = self.filter_queryset(self.get_queryset()) # preciso fazer o filtro para filtrar por nome tb
-            list_service_type = self.get_queryset()  # Sem o filtro, retorna tudo
+            list_service_type = self.filter_queryset(self.get_queryset()) # preciso fazer o filtro para filtrar por nome tb
+            # list_service_type = self.get_queryset()  # Sem o filtro, retorna tudo
             list_serializer = self.serializer_class(list_service_type, many=True)
             return Response({'serviços': list_serializer.data}, status=status.HTTP_200_OK)
 
@@ -220,8 +222,8 @@ class ServiceTypeViewSet(BaseViewSet):
             return manage_exceptions(e, context='destroy')
 
 class AppointmentServiceViewSet(BaseViewSet):
-    # filter_backends = [DjangoFilterBackend]
-    # filterset_class = ReservationServiceFilter   !!!!!!!!!!!!!! preço Preciso pegar automaticamente esse valor !!!!!!!!!!!!
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = AppointmentServiceFilter   # !!!!!!!!!!!!!! preço Preciso pegar automaticamente esse valor !!!!!!!!!!!!
 
     queryset = AppointmentService.objects.all()
     serializer_class = AppointmentServiceSerializer
@@ -259,8 +261,8 @@ class AppointmentServiceViewSet(BaseViewSet):
     def list(self, request, *args, **kwargs):
         try:
             if any(role in self.roles_required['list_retrive_total'] for role in request.roles):
-                # list_appointments = self.filter_queryset(self.get_queryset())
-                list_appointments = self.get_queryset()  # Sem o filtro, retorna tudo
+                list_appointments = self.filter_queryset(self.get_queryset())
+                # list_appointments = self.get_queryset()  # Sem o filtro, retorna tudo
                 list_serializer = self.serializer_class(list_appointments, many=True)
                 return Response({'apointments': list_serializer.data}, status=status.HTTP_200_OK)
 
@@ -292,8 +294,8 @@ class AppointmentServiceViewSet(BaseViewSet):
 
 
 class ProductUsedViewSet(BaseViewSet):
-    # filter_backends = [DjangoFilterBackend]
-    # filterset_class = ReservationServiceFilter
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = ProductUsedFilter
 
     queryset = ProductUsed.objects.all()
     serializer_class = ProductUsedSerializer
@@ -337,8 +339,8 @@ class ProductUsedViewSet(BaseViewSet):
 
     def list(self, request, *args, **kwargs):
         try:
-            # list_product_used = self.filter_queryset(self.get_queryset()) # preciso fazer o filtro para filtrar por nome tb
-            list_product_used = self.get_queryset()  # Sem o filtro, retorna tudo
+            list_product_used = self.filter_queryset(self.get_queryset()) # preciso fazer o filtro para filtrar por nome tb
+            # list_product_used = self.get_queryset()  # Sem o filtro, retorna tudo
             list_serializer = self.serializer_class(list_product_used, many=True)
             return Response({'produtos usados': list_serializer.data}, status=status.HTTP_200_OK)
 

@@ -232,6 +232,7 @@ Esse TO DO funcionará como uma versão simplificada de sprint e backlog. Como e
 - [ ] Criar uma personalização no list de pet para que se o token utilizado for de um médico mostrar apenas que sejam seus pacientes - Tarefa bonus
 - [ ] Personalização das rotas da app saude
 - [ ] Aplicar filtros nos lists das outras views
+- [ ] Corrigir o id para uuid em banhotosa/appointmentService(Fazer na primeira versão), testar os filtros do appointmentService, não deu pra testar pois estar usadno id normal dá bug
 
 ### Upgrades:
 Em upgrades vou separar tarefas grande que precisarão ser dividas em outras subtarefas.
@@ -404,3 +405,29 @@ Para melhorar o destroy, preciso verificar se o serviço está vinculado a algum
 💡 Nota de Design (exemplo para horá de escrever no readme)
 O campo execution_time do modelo ServiceType não pode ser alterado após a criação. Essa decisão foi tomada para garantir a integridade da agenda, já que o tempo de execução impacta diretamente a alocação de horários dos funcionários.
 Para atualizar o tempo de um serviço, o sistema exige a criação de um novo tipo de serviço, mantendo o histórico dos agendamentos passados. Isso evita conflitos, sobreposição de horários e inconsistência nos dados.
+
+
+
+
+↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓
+Depois de um tempo parado sem mexer no projeto voltei para o mesmo e na primeira mudança fui adicionar um arquivo de filtros e notei que seria melhor
+
+Ao inves de criar o filtro desta forma:
+```
+...
+pet_name = django_filters.CharFilter(method='filter_pet_name')
+def filter_pet_name(self, queryset, name, value): 
+        """
+        Filtra as raças com base no nome do pet.
+        """
+        return queryset.filter(pet_id__name__iexact=value)
+...
+```
+Fica muito mais elegante fazer:
+```
+...
+pet_name2 = django_filters.CharFilter(field_name='pet_id__name', lookup_expr='icontains')
+...
+```
+
+Logo seria uma refatoração interessante, modificar todos sos filtros simples como esse para a forma reduzida, pois a leitura fica simplificada e mantem o outro estilo apenas para filtros mais complexos
