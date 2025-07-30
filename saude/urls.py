@@ -6,7 +6,7 @@ from saude.views import TreatmentCycleViewSet, ServiceViewSet, ExamTypeViewSet, 
 router = routers.DefaultRouter()
 router.register(r'treatment_cicle', TreatmentCycleViewSet, basename='treatment_cicle')
 router.register(r'service', ServiceViewSet, basename='service')
-router.register(r'exam_type', ServiceViewSet, basename='exam_type')
+router.register(r'exam_type', ExamTypeViewSet, basename='exam_type')
 router.register(r'exam', ExamViewSet, basename='exam')
 
 urlpatterns = [

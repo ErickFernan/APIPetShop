@@ -26,7 +26,7 @@ class AppointmentViewSet(BaseViewSet):
     serializer_class = AppointmentSerializer
     roles_required = BanhotosaRoles.APPOINTMENT_ROLES
 
-    def create(self, request): # preciso criar uma regra no save para verificar se conflitos de agenda.
+    def create(self, request): 
         try:
             data = request.data.copy()
             data['func_id'] = request.current_user_id
@@ -137,13 +137,11 @@ class ServiceTypeViewSet(BaseViewSet):
             with transaction.atomic():
                 if existing_service:
                     if str(existing_service.execution_time) == str(new_execution_time):
-                        print("A")
                         return Response(
                             {"detail": "Já existe um serviço com esse nome e tempo de execução igual. Utilize o update para atualizar os campos"},
                             status=status.HTTP_400_BAD_REQUEST
                         )
                     else:
-                        print("B")
                         # Renomeia o antigo para "(desatualizado)"
                         existing_service.name = f"{existing_service.name} (desatualizado)"
                         existing_service.save()

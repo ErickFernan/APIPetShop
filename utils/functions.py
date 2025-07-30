@@ -1,4 +1,5 @@
 import os
+import magic
 import uuid
 
 from rest_framework import status
@@ -44,7 +45,7 @@ def change_file_name(file_name):
     """
     troca o nome do arquivo original por um uuid
     """
-    return f'({uuid.uuid4()}.{os.path.splitext(file_name)[1]})'
+    return f'{uuid.uuid4()}{os.path.splitext(file_name)[1]}'
 
 def extract_file_photo_details(file, product=None):
     """
@@ -53,6 +54,37 @@ def extract_file_photo_details(file, product=None):
     file_name = product.photo_path.split('/')[-1] if product and product.photo_path else change_file_name(file.name)
     content_type = file.content_type
     return file_name, content_type
+
+def extract_file_photo_pdf_details(file, product=None):
+    """
+    Extrai o nome base do arquivo e corrige a extensão com base no conteúdo real do arquivo.
+    """
+    # Detecta MIME type real do conteúdo
+    mime_type = magic.from_buffer(file.read(1024), mime=True)
+    file.seek(0)  # reposiciona para não atrapalhar leitura posterior
+
+    # Mapeia MIME para extensão correta
+    extension_map = {
+        'application/pdf': 'pdf',
+        'image/jpeg': 'jpg',
+        'image/png': 'png',
+    }
+
+    try:
+        extension = extension_map[mime_type]
+    except KeyError:
+        raise ValueError(f"MIME type não suportado: {mime_type}")
+
+    # Define nome base do arquivo (sem extensão)
+    if product and product.result_path:
+        base_name = os.path.splitext(os.path.basename(product.result_path))[0]
+    else:
+        base_name = os.path.splitext(change_file_name(file.name))[0]
+
+    # Monta nome final com extensão correta
+    file_name = f"{base_name}.{extension}"
+
+    return file_name, mime_type
 
 def extract_file_audio_details(file, product=None):
     """

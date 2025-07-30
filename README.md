@@ -213,7 +213,10 @@ Esse TO DO funcionará como uma versão simplificada de sprint e backlog. Como e
 - [x] Personalização das rotas da app pet
 - [x] Modificar os filtros das rotas list(que possua filtro) em app_pet para filtrar por nome e não pelo id
 - [x] Personalização das rotas da app loja
-- [ ] Personalização das rotas da app hotel
+- [x] Personalização das rotas da app hotel
+- [x] Personalização das rotas da app banhotosa
+- [x] filtros banho/tosa
+- [x] Personalização das rotas da app saude
 
     (*) Pelo fato de eu usar um uuid diferente para o user salvo no keycloak e o user salvo no django eu preciso fazer uma consulta com o get (app usuarios - User) para recuperar esses valores e depois verificar se quem solicitou possui acesso ou não. No momento não é um problema, mas em uma aplicação maior pode gerar problemas de desempenho e risco de segurança. Para consertar isso eu posso adicionar o uuid do django nas informações do jwt token do keycloak. Outra solução seria estrutual, por exemplo, usar o mesmo uuid de usuário no keycloak e no django. Entretanto, esta seria uma solução mais trabalhosa. Etapas para correção do bug:
     - [x] Descobrir como configurar esse novos atributos(?) no keycloak
@@ -224,27 +227,31 @@ Esse TO DO funcionará como uma versão simplificada de sprint e backlog. Como e
     (**) Reestruturação nas regras de att dados em serviços de banhotosa, escrever comentários e o que foi feito para resolver aqui.
 
 ### Tarefas em execução:
-- [ ] Personalização das rotas da app banhotosa
-- [ ] Bug **
-- [ ] filtros banho/tosa
+
+- [ ] Bug ** (foi resolvido mas tenho que escrever aqui)
+- [ ] filtros rotas app saude
 
 ### Backlog:
 - [ ] Criar uma personalização no list de pet para que se o token utilizado for de um médico mostrar apenas que sejam seus pacientes - Tarefa bonus
-- [ ] Personalização das rotas da app saude
-- [ ] Aplicar filtros nos lists das outras views
 - [ ] Corrigir o id para uuid em banhotosa/appointmentService(Fazer na primeira versão), testar os filtros do appointmentService, não deu pra testar pois estar usadno id normal dá bug
+- [ ] Faltou implementar o retrieve em hotel/views/reservationviewset
+- [ ] Corrigir ciclo_id no models de service em saude
+- [ ] Em saude/exam se eu faço o update de um resultado de exame em um formato diferente do anteriormente salvo ele faz todas as atualizações necessarias no banco de dados e no minio(então o acesso a imagem continua garantido) mas ao inves de substituir ele faz o upload da imagem com o mesmo nome e no formato diferente, portanto precisa configurar para que quando acontecer esse tipo de update o arquivo antigo seja excluido. Pois isso irá gerar lixo e consequentente uso de armazenamento de forma inutil
 
 ### Upgrades:
 Em upgrades vou separar tarefas grande que precisarão ser dividas em outras subtarefas.
 - [ ] criação de testes unitários com pytest
 - [ ] Criação do bot
 - [ ] Adicionar o Kong ao projeto
-- [ ] Criar um sistema que irá preencher caracteristicas (hábitos, alimentação, etc) das raças dos pets usando o llama3 com o lmstudio, detalhes pensar futuramente.
+- [ ] Criar um sistema que irá preencher caracteristicas (hábitos, alimentação, etc) das raças dos pets usando o llama com o lmstudio, detalhes pensar futuramente.
 - [ ] Criar uma aplicação extra completa (front e back) com um serviço de chat por texto e voz.
 - [ ] Criar uma função em utils que seja responsável por filtar serviços(banho/tosa) desatualizados e excluir os mesmos(mais detalhes do funcionamento se encontram no diretório utils arquivo functions.py).
 - [ ] Corrigir o partial em update(PUT) de serviços de banho/tosa.
-- [ ] Meu modelo de log para erros no termnal não fico muito bom, melhorar futuramente.
+- [ ] Meu modelo de log para erros no termnal não fico muito bom, melhorar futuramente. Avaliar usar uma api de log.
 - [ ] Melhoria na redundância em create do servicetype de banho/tosa
+- [ ] Aplicar um banco de dados nosql no projeto(mongodb)
+- [ ] Criar um sistema de gerenciamento de filas
+- [ ] Verificar se o uml está atualizado
 
 ### IMPORTANTE:
 <p align="justify">
@@ -395,7 +402,7 @@ fazer uma rota que retorna os horários filtrando pelo pet, dono, e groomer
 
 consertar o campo id em appointmentservice, esqueci de colocar id como um uuid
 
-Existe um problema critico na att de Services do banho/tosa, pois ao atualizar o campo de execution_time ele iria bagunçar completamente a agenda. Neste caso a att de tempo do serviço deveria ser feita criando um novo serviço e não atualizando o antigo. Colocar para calcular isso ficaria muito complexo na agenda e tornaria dificil para o usuário, pois já existe os horário definidos e se um tempo maior for necessário, um serviço "encavalaria" em outro horário e se tornaria um caos. A melhor opção, pelo menos no momento, é obrigar um novo serviço com um novo tempo a ser criado. Entretanto, ainda preciso poder att o campo de base_price. o que posso fazer? Bloquear a edição do campo execution_time e permitir que o resto seja editado. Para melhorar a experiência posso verificar no create do service se o nome do mesmo já existe, se já existir ele vai pegar o antigo e adicionar ao nome "desatualizado" ai futuramente posso criar um método que esporadicamente busca os serviços desatualizados e limpam do banco sem comprometer os novos. Essa estratégia funcionária ainda melhor se eu estivesse usando o soft delete, mas como este projeto não é para ser vendido, não faz diferença.
+bug ** - Existe um problema critico na att de Services do banho/tosa, pois ao atualizar o campo de execution_time ele iria bagunçar completamente a agenda. Neste caso a att de tempo do serviço deveria ser feita criando um novo serviço e não atualizando o antigo. Colocar para calcular isso ficaria muito complexo na agenda e tornaria dificil para o usuário, pois já existe os horário definidos e se um tempo maior for necessário, um serviço "encavalaria" em outro horário e se tornaria um caos. A melhor opção, pelo menos no momento, é obrigar um novo serviço com um novo tempo a ser criado. Entretanto, ainda preciso poder att o campo de base_price. o que posso fazer? Bloquear a edição do campo execution_time e permitir que o resto seja editado. Para melhorar a experiência posso verificar no create do service se o nome do mesmo já existe, se já existir ele vai pegar o antigo e adicionar ao nome "desatualizado" ai futuramente posso criar um método que esporadicamente busca os serviços desatualizados e limpam do banco sem comprometer os novos. Essa estratégia funcionária ainda melhor se eu estivesse usando o soft delete, mas como este projeto não é para ser vendido, não faz diferença.
 Comentar sobre a regra do delete no services de banho/tosa
 criar tarefa para resolver a att do execution_time de servicos em banho/tosa!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>
 Qual seria uma boa abordagem para a fç de limpar serviços inativos? buscar pela palavra inativa no nome do serviço e verificar se esse serviço não está selecionado para uma data futura do da solicitação do delete, se as condições forem satisfeitas a rotina pode limpar esses serviços desatualizados.

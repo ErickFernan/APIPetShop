@@ -31,6 +31,16 @@ class AudioValidationError(Exception):
         log_exception('AudioValidationError', message)
         super().__init__(self.message)
 
+class ImagePDFValidationError(Exception):
+    """
+    Exceção personalizada para validação no upload de pdf/imagem.
+    Já possui o log configurado.
+    """
+    def __init__(self, message="The uploaded audio format is invalid, unsupported, or corrupted. Please verify your file and upload a valid audio file [JPEG or PNG] or [PDF]."):
+        self.message = message
+        log_exception('ImagePDFValidationError', message)
+        super().__init__(self.message)
+
 
 class KeycloakRollbackError(Exception):
     """

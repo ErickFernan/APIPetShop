@@ -56,6 +56,8 @@ class ReservationViewSet(BaseViewSet):
             return manage_exceptions(e, context='update')
     
     #FALTOU O RETRIEVE AQUI
+    def retrieve(self, request, *args, **kwargs):
+        return Response({'detail': 'Retrieve not work.'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
     def partial_update(self, request, *args, **kwargs):  
         try:

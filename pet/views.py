@@ -87,13 +87,13 @@ class PetViewSet(BaseViewSet):
                 if not pet_id_photo:
                     return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
 
-                user_photo = self.get_queryset().get(pk=pk)  # recupera o objeto completo
-                user_photo_path = user_photo.photo_path
+                pet_photo = self.get_queryset().get(pk=pk)  # recupera o objeto completo
+                pet_photo_path = pet_photo.photo_path
 
-                user_photo.delete()
+                pet_photo.delete()
 
-                if user_photo.photo_path:
-                    delete_success, e = delete_file(user_photo.photo_path)
+                if pet_photo.photo_path:
+                    delete_success, e = delete_file(pet_photo.photo_path)
                     if not delete_success:
                         raise Exception(e)
 
@@ -107,7 +107,7 @@ class PetViewSet(BaseViewSet):
             pk = kwargs.get('pk')
             data = request.data
             owner_id = self.get_queryset().filter(pk=pk).values_list('pet_owner_id', flat=True).first()
-            print(owner_id)
+
             if not has_permission(pk=owner_id, request=request, roles=self.roles_required['create']):
                 return Response({"detail": "You do not have permission to perform this action."}, status=status.HTTP_403_FORBIDDEN)
 

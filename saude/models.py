@@ -1,6 +1,7 @@
 import uuid
 
 from django.db import models
+from rest_framework.exceptions import ValidationError
 
 from utils.models import BaseModel
 from usuarios.models import User
@@ -21,6 +22,9 @@ class TreatmentCycle(BaseModel):
     dignosis = models.TextField(blank=True, null=True)
     status = models.CharField(choices=Status.choices, max_length=50)
 
+    class Meta:
+        unique_together = ('pet_id', 'start_date')
+
     def __str__(self):
         return f'{self.pet_id.name} ({self.status})'
 
@@ -33,7 +37,7 @@ class Service(BaseModel):
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
     responsible_id = models.ForeignKey(User, on_delete=models.CASCADE, related_name='responsible_services', editable=False)
-    assistant_id = models.ForeignKey(User, on_delete=models.CASCADE, related_name='assistant_services', editable=False, blank=True, null=True)
+    assistant_id = models.ForeignKey(User, on_delete=models.CASCADE, related_name='assistant_services', blank=True, null=True)
     service_type = models.CharField(choices=Type.choices, max_length=50)
     description = models.TextField(blank=True, null=True)
     prescription = models.TextField(blank=True, null=True)
@@ -44,6 +48,42 @@ class Service(BaseModel):
 
     def __str__(self):
         return f'{self.service_type} ({self.responsible_id})'
+
+    def clean(self):
+        super().clean()
+
+        # Verifica se o assistente é diferente do responsável
+        if self.assistant_id and self.assistant_id == self.responsible_id:
+            raise ValidationError("O assistente não pode ser o mesmo que o responsável.")
+
+        # Verifica se o papel do assistente é válido
+        if self.assistant_id:
+            valid_assistant_roles = {
+                User.Role.ATENDENTE_SAUDE,
+                User.Role.ASSIST_VET,
+                User.Role.ESTAGIARIO,
+            }
+
+            if self.assistant_id.role not in valid_assistant_roles:
+                raise ValidationError(f"O assistente deve ter um dos papéis: {', '.join(valid_assistant_roles)}.")
+
+        # Verifica se o papel do responsavel é válido
+        if self.responsible_id:
+            valid_responsible_roles = {
+                User.Role.MEDICO_VET
+                # Aqui devo colocar outros quando o sistema crescer, por exemplo um profissional de raiox, ressonancia, fisioterapeuta etc...
+                # Caso o sistema cresca, pode-se fazer a mesma verificação que fiz nos usuário, permitindo apenas combinações especificas de responsável e assistente, mas por enquanto esta é suficiente.
+            }
+
+            if self.responsible_id.role not in valid_responsible_roles:
+                    raise ValidationError(f"O responsável deve ter um dos papéis: {', '.join(valid_responsible_roles)}.")
+
+    def save(self, *args, **kwargs):
+        self.full_clean()  # Usa full_clean() para validar os campos e o modelo
+        super().save(*args, **kwargs)
+
+    class Meta:
+        unique_together = ('responsible_id', 'ciclo_id')
 
 class ExamType(BaseModel):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)

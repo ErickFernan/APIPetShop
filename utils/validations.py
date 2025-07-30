@@ -13,7 +13,7 @@ from django.core.validators import RegexValidator
 
 from bucket.minio_client import upload_file
 
-from utils.exceptions import ImageValidationError, AudioValidationError
+from utils.exceptions import ImageValidationError, AudioValidationError, ImagePDFValidationError
 from utils.logs_config import handle_exception
 
 from django.apps import apps # Isso é importante para evitar importações diretas, ficar atento é algo muito importante
@@ -50,6 +50,44 @@ def audio_validation(file):
     
     except Exception as e:
         raise AudioValidationError()
+    
+
+# pip install PyPDF2
+
+from PIL import Image
+import magic
+from PyPDF2 import PdfReader
+# from django.core.exceptions import ValidationError
+
+def pdf_image_validation(file):
+    """
+    Valida se o arquivo é uma imagem (JPEG/PNG) ou um PDF válido.
+    - Para imagens: verifica tipo MIME e se está corrompida.
+    - Para PDFs: tenta abrir e acessar metadados com PyPDF2.
+    """
+    try:
+        mime = magic.from_buffer(file.read(1024), mime=True)
+        file.seek(0)
+
+        if mime not in ['image/jpeg', 'image/png', 'application/pdf']:
+            raise ImageValidationError()
+
+        if mime in ['image/jpeg', 'image/png']:
+            with Image.open(file) as img:
+                img.verify()  # Confirma se imagem está corrompida
+            file.seek(0)
+
+        elif mime == 'application/pdf':
+            try:
+                reader = PdfReader(file)
+                _ = reader.metadata  # Tenta acessar metadados como teste
+            except Exception:
+                raise ImageValidationError()
+            file.seek(0)
+
+    except Exception as e:
+        raise ImagePDFValidationError()
+
 
 def validate_serializer_and_upload_file(serializer, file=None, file_name=None, content_type=None, folder_prefix=None, user=None): # conferir se não quebrou nada colocar os nones
     """
