@@ -217,6 +217,7 @@ Esse TO DO funcionará como uma versão simplificada de sprint e backlog. Como e
 - [x] Personalização das rotas da app banhotosa
 - [x] filtros banho/tosa
 - [x] Personalização das rotas da app saude
+- [x] filtros rotas app saude
 
     (*) Pelo fato de eu usar um uuid diferente para o user salvo no keycloak e o user salvo no django eu preciso fazer uma consulta com o get (app usuarios - User) para recuperar esses valores e depois verificar se quem solicitou possui acesso ou não. No momento não é um problema, mas em uma aplicação maior pode gerar problemas de desempenho e risco de segurança. Para consertar isso eu posso adicionar o uuid do django nas informações do jwt token do keycloak. Outra solução seria estrutual, por exemplo, usar o mesmo uuid de usuário no keycloak e no django. Entretanto, esta seria uma solução mais trabalhosa. Etapas para correção do bug:
     - [x] Descobrir como configurar esse novos atributos(?) no keycloak
@@ -229,7 +230,6 @@ Esse TO DO funcionará como uma versão simplificada de sprint e backlog. Como e
 ### Tarefas em execução:
 
 - [ ] Bug ** (foi resolvido mas tenho que escrever aqui)
-- [ ] filtros rotas app saude
 
 ### Backlog:
 - [ ] Criar uma personalização no list de pet para que se o token utilizado for de um médico mostrar apenas que sejam seus pacientes - Tarefa bonus

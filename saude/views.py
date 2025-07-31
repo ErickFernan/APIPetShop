@@ -6,6 +6,8 @@ from utils.functions import has_permission, validate_required_fields, extract_fi
 
 from saude.models import TreatmentCycle, Service, ExamType, Exam
 from saude.serializers import TreatmentCycleSerializer, ServiceSerializer, ExamTypeSerializer, ExamSerializer, TreatmentCycleCreateSerializer, ServiceCreateSerializer, ExamCreateSerializer
+from saude.filters import TreatmentCycleFilter, ServiceFilter, ExamTypeFilter, ExamFilter
+
 
 from django_filters.rest_framework import DjangoFilterBackend
 
@@ -19,8 +21,8 @@ from bucket.minio_client import delete_file
 
 
 class TreatmentCycleViewSet(BaseViewSet):
-    # filter_backends = [DjangoFilterBackend]
-    # filterset_class = TreatmentCycleFilter
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = TreatmentCycleFilter
 
     queryset = TreatmentCycle.objects.all()
     serializer_class = TreatmentCycleSerializer
@@ -72,8 +74,8 @@ class TreatmentCycleViewSet(BaseViewSet):
     def list(self, request, *args, **kwargs):
         try:
             if any(role in self.roles_required['list_retrive_total'] for role in request.roles):
-                # list_cicles = self.filter_queryset(self.get_queryset())
-                list_cicles = self.get_queryset()  # Sem o filtro, retorna tudo
+                list_cicles = self.filter_queryset(self.get_queryset())
+                # list_cicles = self.get_queryset()  # Sem o filtro, retorna tudo
                 list_serializer = self.serializer_class(list_cicles, many=True)
                 return Response({'TreatmenCycles': list_serializer.data}, status=status.HTTP_200_OK)
 
@@ -117,8 +119,8 @@ class TreatmentCycleViewSet(BaseViewSet):
             return manage_exceptions(e, context='destroy')
 
 class ServiceViewSet(BaseViewSet):
-    # filter_backends = [DjangoFilterBackend]
-    # filterset_class = ServiceFilter
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = ServiceFilter
 
     queryset = Service.objects.all()
     serializer_class = ServiceSerializer
@@ -170,8 +172,8 @@ class ServiceViewSet(BaseViewSet):
     def list(self, request, *args, **kwargs):
         try:
             if any(role in self.roles_required['list_retrive_total'] for role in request.roles):
-                # list_services = self.filter_queryset(self.get_queryset())
-                list_services = self.get_queryset()  # Sem o filtro, retorna tudo
+                list_services = self.filter_queryset(self.get_queryset())
+                # list_services = self.get_queryset()  # Sem o filtro, retorna tudo
                 list_serializer = self.serializer_class(list_services, many=True)
                 return Response({'Services': list_serializer.data}, status=status.HTTP_200_OK)
 
@@ -215,16 +217,16 @@ class ServiceViewSet(BaseViewSet):
             return manage_exceptions(e, context='destroy')
 
 class ExamTypeViewSet(BaseViewSet): # não vai ser preciso personalizar, as regras de role são suficientes
-    # filter_backends = [DjangoFilterBackend]
-    # filterset_class = ExamTypeFilter
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = ExamTypeFilter
     
     queryset = ExamType.objects.all()
     serializer_class = ExamTypeSerializer
     roles_required = SaudeRoles.EXAMTYPE_ROLES
 
 class ExamViewSet(BaseViewSet):
-    # filter_backends = [DjangoFilterBackend]
-    # filterset_class = ExamFilter
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = ExamFilter
 
     queryset = Exam.objects.all()
     serializer_class = ExamSerializer
@@ -310,8 +312,8 @@ class ExamViewSet(BaseViewSet):
     def list(self, request, *args, **kwargs):
         try:
             if any(role in self.roles_required['list_retrive_total'] for role in request.roles):
-                # list_exams = self.filter_queryset(self.get_queryset())
-                list_exams = self.get_queryset()  # Sem o filtro, retorna tudo
+                list_exams = self.filter_queryset(self.get_queryset())
+                # list_exams = self.get_queryset()  # Sem o filtro, retorna tudo
                 list_serializer = self.serializer_class(list_exams, many=True)
                 return Response({'Exams': list_serializer.data}, status=status.HTTP_200_OK)
 
