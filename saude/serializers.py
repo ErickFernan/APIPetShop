@@ -40,7 +40,7 @@ class ServiceSerializer(serializers.ModelSerializer):
 class ServiceCreateSerializer(serializers.ModelSerializer): # Criado para não permitir a edição dos ids no update depois de criado
     responsible_id = serializers.UUIDField(write_only=True)
     start_date = serializers.DateField(write_only=True)
-    ciclo_id = serializers.UUIDField(write_only=True)
+    cycle_id = serializers.UUIDField(write_only=True)
 
     class Meta:
         model = Service
@@ -49,15 +49,15 @@ class ServiceCreateSerializer(serializers.ModelSerializer): # Criado para não p
     def create(self, validated_data):
         responsible_id = validated_data.pop('responsible_id')
         start_date = validated_data.pop('start_date')
-        ciclo_id = validated_data.pop('ciclo_id')
+        cycle_id = validated_data.pop('cycle_id')
 
         responsible = get_object_or_404(User, id=responsible_id)
-        cicle = get_object_or_404(TreatmentCycle, id=ciclo_id)
+        cicle = get_object_or_404(TreatmentCycle, id=cycle_id)
 
         return Service.objects.create(
             responsible_id=responsible,
             start_date=start_date,
-            ciclo_id=cicle,
+            cycle_id=cicle,
             **validated_data
         )
 

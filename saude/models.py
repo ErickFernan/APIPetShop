@@ -44,7 +44,7 @@ class Service(BaseModel):
     start_date = models.DateField(editable=False)
     return_date = models.DateField()
     notes = models.TextField(blank=True, null=True)
-    ciclo_id = models.ForeignKey(TreatmentCycle, on_delete=models.CASCADE, related_name='related_services', editable=False)
+    cycle_id = models.ForeignKey(TreatmentCycle, on_delete=models.CASCADE, related_name='related_services', editable=False)
 
     def __str__(self):
         return f'{self.service_type} ({self.responsible_id})'
@@ -83,7 +83,7 @@ class Service(BaseModel):
         super().save(*args, **kwargs)
 
     class Meta:
-        unique_together = ('responsible_id', 'ciclo_id')
+        unique_together = ('responsible_id', 'cycle_id')
 
 class ExamType(BaseModel):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
@@ -99,4 +99,4 @@ class Exam(BaseModel):
     service_id = models.ForeignKey(Service, on_delete=models.CASCADE, related_name='related_exams', editable=False)
 
     def __str__(self):
-        return f'{self.exam_type_id.name} ({self.service_id.ciclo_id.pet_id.name})'
+        return f'{self.exam_type_id.name} ({self.service_id.cycle_id.pet_id.name})'

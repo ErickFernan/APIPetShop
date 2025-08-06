@@ -130,7 +130,7 @@ class ServiceViewSet(BaseViewSet):
         try:
             data = request.data.copy()
 
-            extra_required_fields = ['responsible_id', 'start_date', 'ciclo_id']
+            extra_required_fields = ['responsible_id', 'start_date', 'cycle_id']
             errors = validate_required_fields(data, extra_required_fields)
             if errors:
                 return Response(errors, status=status.HTTP_400_BAD_REQUEST)
@@ -178,7 +178,7 @@ class ServiceViewSet(BaseViewSet):
                 return Response({'Services': list_serializer.data}, status=status.HTTP_200_OK)
 
             else:
-                list_services = get_list_or_404(self.get_queryset(), ciclo_id__pet_id__pet_owner_id=request.current_user_id) # Esse caso vai ser chamado apenas se não for alguns dos usuários com acesso total, ou seja, se não for um superuser, estágiario ou atendente loja, dessa forma vai buscar pelo comprador(purchase)
+                list_services = get_list_or_404(self.get_queryset(), cycle_id__pet_id__pet_owner_id=request.current_user_id) # Esse caso vai ser chamado apenas se não for alguns dos usuários com acesso total, ou seja, se não for um superuser, estágiario ou atendente loja, dessa forma vai buscar pelo comprador(purchase)
                 list_serializer = self.serializer_class(list_services, many=True)
                 return Response({'Services': list_serializer.data}, status=status.HTTP_200_OK)
         
@@ -188,7 +188,7 @@ class ServiceViewSet(BaseViewSet):
     def retrieve(self, request, *args, **kwargs):
         try:
             pk = kwargs.get('pk')       
-            pet_owner_id = self.get_queryset().filter(pk=pk).values_list('ciclo_id__pet_id__pet_owner_id', flat=True).first() # so carrega o campo desejado
+            pet_owner_id = self.get_queryset().filter(pk=pk).values_list('cycle_id__pet_id__pet_owner_id', flat=True).first() # so carrega o campo desejado
 
             if not has_permission(pk=str(pet_owner_id), request=request, roles=self.roles_required['list_retrive_total']):
                 return Response({"detail": "You do not have permission to perform this action."}, status=status.HTTP_403_FORBIDDEN)
@@ -318,7 +318,7 @@ class ExamViewSet(BaseViewSet):
                 return Response({'Exams': list_serializer.data}, status=status.HTTP_200_OK)
 
             else:
-                list_exams = get_list_or_404(self.get_queryset(), service_id__ciclo_id__pet_id__pet_owner_id=request.current_user_id) # Esse caso vai ser chamado apenas se não for alguns dos usuários com acesso total, ou seja, se não for um superuser, estágiario ou atendente loja, dessa forma vai buscar pelo comprador(purchase)
+                list_exams = get_list_or_404(self.get_queryset(), service_id__cycle_id__pet_id__pet_owner_id=request.current_user_id) # Esse caso vai ser chamado apenas se não for alguns dos usuários com acesso total, ou seja, se não for um superuser, estágiario ou atendente loja, dessa forma vai buscar pelo comprador(purchase)
                 list_serializer = self.serializer_class(list_exams, many=True)
                 return Response({'Exams': list_serializer.data}, status=status.HTTP_200_OK)
         
@@ -328,7 +328,7 @@ class ExamViewSet(BaseViewSet):
     def retrieve(self, request, *args, **kwargs):
         try:
             pk = kwargs.get('pk')       
-            pet_owner_id = self.get_queryset().filter(pk=pk).values_list('service_id__ciclo_id__pet_id__pet_owner_id', flat=True).first() # so carrega o campo desejado
+            pet_owner_id = self.get_queryset().filter(pk=pk).values_list('service_id__cycle_id__pet_id__pet_owner_id', flat=True).first() # so carrega o campo desejado
 
             if not has_permission(pk=str(pet_owner_id), request=request, roles=self.roles_required['list_retrive_total']):
                 return Response({"detail": "You do not have permission to perform this action."}, status=status.HTTP_403_FORBIDDEN)
