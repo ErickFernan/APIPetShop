@@ -55,9 +55,23 @@ class ReservationViewSet(BaseViewSet):
         except Exception as e:
             return manage_exceptions(e, context='update')
     
-    #FALTOU O RETRIEVE AQUI
     def retrieve(self, request, *args, **kwargs):
-        return Response({'detail': 'Retrieve not work.'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+        try:
+            pk = kwargs.get('pk')       
+            pet_owner_id = self.get_queryset().filter(pk=pk).values_list('pet_id__pet_owner_id', flat=True).first() # so carrega o campo desejado
+
+            if not has_permission(pk=str(pet_owner_id), request=request, roles=self.roles_required['list_retrive_total']):
+                return Response({"detail": "You do not have permission to perform this action."}, status=status.HTTP_403_FORBIDDEN)
+
+            if not pet_owner_id:
+                return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
+
+            reservation = self.get_queryset().get(pk=pk)  # recupera o objeto completo
+            reservation_serializer = self.serializer_class(reservation)
+            return Response({'reservation': reservation_serializer.data}, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            return manage_exceptions(e, context='retrieve')
 
     def partial_update(self, request, *args, **kwargs):  
         try:
