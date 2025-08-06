@@ -5,7 +5,8 @@ from hotel.models import Service, Reservation, ReservationService
 from utils.custom_filters import DateToEndOfDayFilter
 
 class ServiceFilter(django_filters.FilterSet):
-    name = django_filters.CharFilter(field_name='seller_id', lookup_expr='exact')
+    name = django_filters.CharFilter(field_name='name', lookup_expr='icontains')
+    description = django_filters.CharFilter(field_name='description', lookup_expr='icontains')
     price_per_day_min = django_filters.CharFilter(field_name='price_per_day', lookup_expr='gte')
     price_per_day_max = django_filters.CharFilter(field_name='price_per_day', lookup_expr='lte')
 
