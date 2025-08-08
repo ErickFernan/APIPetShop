@@ -11,7 +11,7 @@ prestação de serviços pagos, integração em produtos comerciais ou qualquer 
 
 Contribuições são bem-vindas!  
 Se você deseja utilizar este software comercialmente, entre em contato para negociar os termos:
-[dverickfernan@gmail.com ou erickfernan.dev.br]
+dverickfernan@gmail.com ou <https://erickfernan.dev.br>.
 
 ---
 
@@ -24,4 +24,4 @@ written permission from the author.
 
 Contributions are welcome!  
 If you wish to use this software commercially, please contact me to discuss terms:
-[dverickfernan@gmail.com or erickfernan.dev.br]
+dverickfernan@gmail.com or <https://erickfernan.dev.br>.
