@@ -1,442 +1,323 @@
-# APIPetShop
+# 🐶 APIPetShop
 
-## Introdução:
-<p align="justify"> 
-Recentemente, decidi aplicar os conhecimentos que adquiri ao longo de dois anos de trabalho e, ao mesmo tempo, utilizar este projeto para estudar novas ferramentas, criando algo para meu portfólio. Para isso, imaginei uma situação do mundo real e desenvolvi uma solução. Assim, surgiu a ideia de criar uma API para um petshop.
+<p align="justify">
+Uma API RESTful robusta e modular para gerenciamento completo de um petshop, desenvolvida com Django REST Framework e encapsulada em Docker para máxima portabilidade.
 </p>
 
-<p align="justify"> 
-O projeto abrange as principais funções relacionadas a pets, reunidas em um único serviço: banho e tosa, atendimento veterinário, venda de produtos pet e hotel para pets.
+---
+
+## 👋 Introdução
+
+<p align="justify">
+APIPetShop é uma solução de back-end projetada para simular um ambiente de software real para um petshop. O projeto nasceu do desejo de aplicar conhecimentos práticos e, ao mesmo tempo, explorar novas tecnologias em um contexto de portfólio.
 </p>
 
-<p align="justify"> 
-Após definir o escopo do projeto, escolhi as tecnologias que utilizaria, conforme ilustrado na Figura 1 abaixo. A proposta é que este sistema funcione como um ambiente de desenvolvimento completo, encapsulado em um Docker-compose, para facilitar o download, as melhorias e os testes.
+<p align="justify">
+A API centraliza as principais operações de um petshop, incluindo:
 </p>
 
-![Modelo desejado](readme_images/petshopapicompleto.drawio.svg)
-<p align="center"> 
-figura 1 - Modelo completo
+- **Serviços de Estética:** 🛁 Gestão de agendamentos para banho e tosa.
+- **Atendimento Veterinário:** 🩺 Controle de consultas, exames, cirurgias e tratamentos.
+- **Loja:** 🛍️ Gerenciamento de estoque e venda de produtos.
+- **Hotel Pet:** 🏨 Controle de hospedagem, reservas e disponibilidade.
+
+---
+
+## 🏗️ Arquitetura do Sistema
+
+<p align="justify">
+O projeto foi planejado para ser um ambiente de desenvolvimento completo e de fácil reprodução, utilizando Docker-compose. A arquitetura foi dividida em duas fases:
 </p>
 
-## Especificações:
-
-* Keycloak: 
-<p align="justify"> 
-- O Keycloak é uma excelente ferramenta de autenticação e autorização, oferecendo diversos recursos nessa área. Neste projeto, sua principal função será gerenciar a autenticação e autorização dos serviços, além de aproveitar funcionalidades relacionadas a usuários, como envio de e-mails, autenticação em dois fatores e controle de contas.
-</p>
-
-* FakeSMTP: 
-<p align="justify"> 
-- Como este é um ambiente de desenvolvimento, optei por usar o FakeSMTP para simular as funções que dependem de e-mail. Ele será um auxiliar nos testes, mas, em um ambiente de produção, poderá ser facilmente substituído por um serviço de SMTP da empresa.
-</p>
-
-* PostgreSQL (PSQL): 
-<p align="justify"> 
-- Será o banco de dados principal do sistema.
-</p>
-
-* MinIO: 
-<p align="justify"> 
-- Funcionará como o bucket de armazenamento para imagens, documentos e outros dados importantes.
-</p>
-
-* PetshopAPI: 
-<p align="justify"> 
-- Este será o núcleo do projeto. Todas as aplicações definidas estarão concentradas aqui, sendo responsável pelas rotas REST, utilizando o Django REST Framework (DRF).
-</p>
-
-* Kong: 
-<p align="justify"> 
-- O Kong é uma ferramenta que ainda estou explorando, sendo um dos motivos pelos quais iniciei este projeto. A ideia é que ele funcione como um API Gateway, unificando o projeto e gerenciando a comunicação entre os serviços. No entanto, como ainda não tenho familiaridade suficiente, decidi simplificar o modelo original (Figura 1) para o apresentado na Figura 2, removendo o Kong temporariamente. Assim, posso concluir o projeto com as habilidades que já possuo e, posteriormente, estudar e implementar o Kong.
-</p>
-
-<p align="justify"> 
-Essa alteração foi feita por praticidade, sem impactos negativos no desenvolvimento. Além disso, me permitirá explorar práticas como o uso de branches e testar o squash commit, outra técnica que tenho interesse em aplicar.
+### Modelo Atual (Simplificado)
+<p align="justify">
+Atualmente, o projeto opera com uma arquitetura simplificada para focar no desenvolvimento do core da aplicação. Nesta fase, a <strong>PetshopAPI</strong> se comunica diretamente com os outros serviços.
 </p>
 
 ![Modelo Simplificado](readme_images/petshopapisimplificado.drawio.svg)
-<p align="center"> 
-figura 2 - Modelo simplificado
+<p align="center">Figura 1 - Modelo Simplificado</p>
+
+### Modelo Planejado (Completo)
+<p align="justify">
+A visão final do projeto inclui o <strong>Kong</strong> como um API Gateway. Ele será responsável por unificar a comunicação, gerenciar o tráfego entre os serviços, e adicionar uma camada extra de segurança e observabilidade.
 </p>
 
-## Detalhamento
-<p align="justify">
-Definido como o projeto será iniciado, vou detalhar algumas funções e particularidades dos serviços "PetshopAPI" e "Bot de Preços".
-</p> 
+![Modelo Completo](readme_images/petshopapicompleto.drawio.svg)
+<p align="center">Figura 2 - Modelo Completo</p>
 
-* Bot de Preços:
+---
+
+## 🛠️ Tecnologias Utilizadas
+
+| Ferramenta | Propósito |
+| :--- | :--- |
+| **Django REST (DRF)** | Framework principal para a construção da `PetshopAPI`, gerenciando rotas, serializers e views. |
+| **PostgreSQL** | Banco de dados relacional principal para persistência dos dados da aplicação. |
+| **Keycloak** | Gerenciador de identidade e acesso, responsável pela autenticação e autorização (OAuth 2.0 / OIDC). As regras de segurança, como complexidade de senhas, são centralizadas e configuráveis diretamente nele. |
+| **MinIO** | Bucket de armazenamento S3-compatível para imagens, documentos e outros arquivos. |
+| **Docker & Docker-compose**| Contentorização de todo o ambiente, garantindo portabilidade e facilidade na configuração. |
+| **FakeSMTP** | Servidor SMTP de desenvolvimento para simular e testar o envio de e-mails. |
+| **Kong (Planejado)** | API Gateway para orquestrar e proteger a comunicação entre os microsserviços. |
+| **Flask & BeautifulSoup (Planejado)** | Utilizados no desenvolvimento do `Bot de Preços`. |
+| **MongoDB (Planejado)** | Banco de dados NoSQL para armazenar dados não relacionais, como logs, cache e estatísticas. |
+| **RabbitMQ + Celery (Planejado)** | Gerenciamento de tarefas assíncronas e filas, como envio de e-mails e geração de relatórios. |
+
+---
+
+## 💡 Detalhes do Design e Funcionalidades
+
+### 🧱 PetshopAPI: Uma Arquitetura Modular
 
 <p align="justify">
-O funcionamento do bot ainda não está completamente definido, mas a ideia básica é que ele será desenvolvido como um serviço em Flask juntamente com o BeautifulSoup. Ele terá uma rota REST onde o usuário, que precisa estar autenticado e autorizado, enviará as especificações e detalhes do que deseja buscar em formato JSON. O bot processará essas informações, executará a busca e gerará uma planilha Excel com os dados coletados.
+O núcleo do projeto, a <strong>PetshopAPI</strong>, foi desenhado com uma abordagem modular para garantir flexibilidade e desacoplamento. O sistema é dividido em sete aplicações Django, cada uma com uma responsabilidade específica:
 </p>
 
-<p align="justify">
-Essas informações serão armazenadas no bucket MinIO e/ou enviadas por e-mail ao usuário quando prontas. Alternativamente, o bot poderá enviar um link para download ou o próprio arquivo diretamente. Ainda preciso definir melhor alguns detalhes, mas essa é a ideia geral de como o bot deverá funcionar.
-</p> 
+- **APP Usuários:** Gerencia usuários, perfis, permissões e dados relacionados.
+- **APP Pet:** Armazena e gerencia informações dos pets e seus tutores.
+- **APP Produtos:** Centraliza o cadastro de produtos, servindo como fonte única de dados.
+- **APP Loja:** Controla o estoque e as vendas de produtos da loja.
+- **APP Banho/Tosa:** Gerencia os agendamentos e serviços de banho e tosa.
+- **APP Hotel:** Administra as reservas e a ocupação do hotel para pets.
+- **APP Saúde:** Focada no atendimento veterinário (consultas, exames, etc.).
 
-* PetshopAPI:
-
 <p align="justify">
-Como mencionado anteriormente, o PetshopAPI será uma API desenvolvida utilizando o Django REST Framework (DRF), que centralizará as principais funcionalidades que um petshop poderia necessitar. Durante a modelagem do projeto, optei por um design modular, visando a fácil integração e desacoplamento de funcionalidades. Para isso, o sistema será dividido em sete aplicações, cada uma focada em um aspecto específico do negócio:
+A separação da <strong>APP Produtos</strong> é uma decisão de design estratégica. Ela permite que módulos como <strong>Loja</strong> e <strong>Banho/Tosa</strong> consumam os mesmos produtos de uma fonte única, evitando redundância e facilitando a gestão.
 </p>
 
-1. APP Usuários: 
+![Diagrama UML da API](readme_images/PETSHOPAPIUML.svg)
+<p align="center">Figura 3 - Diagrama UML da API</p>
+
+### 🔑 Convenções do Diagrama UML
+- `+` **Público:** Atributos que podem ser alterados livremente.
+- `-` **Privado/Restrito:** Atributos modificáveis apenas por métodos internos.
+- `#` **Protegido:** Atributos que, uma vez definidos, não devem ser alterados.
+- `*` **Lista Pré-definida:** O campo aceita apenas valores de uma lista de opções, garantindo a consistência dos dados.
+
+### 🤖 Bot de Preços (Serviço Planejado)
 <p align="justify">
-- Gerencia toda a parte relacionada aos usuários do sistema, como registro, autenticação e controle de permissões.
-</p> 
+Um serviço auxiliar será desenvolvido em <strong>Flask</strong> e <strong>BeautifulSoup</strong> para automatizar a coleta de preços de produtos. Através de uma rota REST, um usuário autorizado poderá solicitar uma busca que resultará em uma planilha Excel, armazenada no <strong>MinIO</strong> ou enviada por e-mail.
+</p>
 
-2. APP Saúde: 
+---
+
+## 🚀 Iniciando o Projeto
 <p align="justify">
-- Focada no atendimento médico dos pets, incluindo exames, consultas, cirurgias e tratamentos.
-</p> 
+Para executar o projeto em sua máquina local, siga os passos abaixo.
+</p>
 
-3. APP Pet: 
-<p align="justify">
-- Responsável por armazenar e gerenciar informações sobre os pets, como tutor, características e perfil.
-</p> 
+**Pré-requisitos:**
+- Docker
+- Docker Compose
 
-4. APP Banho/Tosa: 
-<p align="justify">
-- Cuida da parte de serviços de banho e tosa, com gestão de agendamentos e execução desses serviços.
+---
 
-5. APP Hotel: 
-<p align="justify">
-- Garante o controle da hospedagem de pets, incluindo disponibilidade de quartos, reservas e check-ins.
-</p> 
+### Passos para Instalação e Configuração
 
-6. APP Loja: 
-<p align="justify">
-- Gerencia o estoque e a venda de produtos pet, abrangendo desde o cadastro de produtos até a conclusão das vendas.
-</p> 
+#### 1. Setup Inicial do Projeto
 
-7. APP Produtos: 
-<p align="justify">
-- Centraliza as informações dos produtos vendidos ou utilizados nos serviços, funcionando como um banco de dados compartilhado entre as outras aplicações.
-</p> 
+```bash
+# Clone o repositório e acesse a pasta do projeto
+git clone [https://github.com/seu-usuario/APIPetShop.git](https://github.com/seu-usuario/APIPetShop.git)
+cd APIPetShop
 
-![UML API](readme_images/PETSHOPAPIUML.svg)
-<p align="center"> 
-figura 3 - Diagrama UML
-</p> 
+# Selecione a branch de desenvolvimento (Opcional)
+# Por padrão, você estará na branch 'main'. Para usar a versão em desenvolvimento:
+git checkout apisimplificada
 
-<p align="justify">
-Você pode estar se perguntando por que existe uma aplicação dedicada apenas para os produtos. A razão é que, para garantir a modularidade e a flexibilidade do sistema, as aplicações que compartilham serviços comuns, como Banho/Tosa e Loja, precisam de um intermediário central. Ao separar os dados dos produtos em uma aplicação própria, é possível integrar diferentes serviços que utilizam essas mesmas informações, evitando redundâncias e facilitando a manutenção.
-</p> 
-
-<p align="justify">
-Se observar o diagrama UML na Figura 3, verá que tanto a aplicação de Banho/Tosa quanto a de Loja utilizam as mesmas informações sobre produtos. Isso justifica a necessidade de uma aplicação separada para produtos, permitindo que, por exemplo, uma clínica veterinária que não ofereça serviços de banho e tosa ainda possa utilizar o sistema sem complicações. Nesse caso, bastaria não incluir a APP Banho/Tosa na implementação, e o restante do sistema continuaria funcionando normalmente.
-</p> 
-
-<p align="justify">
-Esse design também facilita a personalização e expansão do sistema. Um petshop que não ofereça um serviço específico, como saúde ou hospedagem, pode adquirir apenas os módulos necessários. Se futuramente decidir expandir seus serviços, basta adicionar os módulos correspondentes sem necessidade de grandes adaptações ou retrabalho. Essa flexibilidade oferece uma solução prática tanto para o presente quanto para futuras expansões do negócio.
-</p> 
-
-<p align="justify">
-Para concluir a análise do diagrama UML apresentado na Figura 3, vou comentar algumas definições importantes adotadas neste projeto. Utilizei os caracteres #, + e - para definir o tipo de acesso aos dados, sendo:
-</p> 
-
-#: Variáveis privadas que, após serem modificadas, não podem ser alteradas novamente.
-
-+: Variáveis públicas, que podem ser alteradas a qualquer momento.
-
--: Informações restritas, que só podem ser modificadas por métodos internos ou agentes específicos.
-
-<p align="justify">
-Se você observar o UML, notará que algumas variáveis possuem um *. Esse asterisco indica que as opções para essas variáveis serão uma lista pré-definida, permitindo ao usuário apenas selecionar valores dentre os já estabelecidos. Adotei essa abordagem para garantir maior consistência nos dados, evitando duplicidades ou erros de digitação. Todas as variáveis com * são relativamente estáveis e não exigem mudanças frequentes, então definir listas prévias não será um problema. No entanto, caso seja necessário, essas listas poderão ser transformadas em tabelas editáveis, permitindo aos usuários adicionar ou remover valores. Inicialmente, optei por essa abordagem mais rígida por considerar que ela é suficiente para o contexto. 
-</p> 
-
-<p align="justify">
-A única exceção a essa regra será no app de pet shop, pois a quantidade de espécies e raças de animais atendidos pode ser extensa. Tentando criar uma lista pré-definida, correria-se o risco de omitir muitas opções importantes. Por isso, adotei uma abordagem mais flexível, criando tabelas editáveis. Dessa forma, é possível começar com uma base inicial e, ao longo do tempo, os usuários podem complementar e expandir as informações conforme necessário, garantindo mais precisão e abrangência.
-</p> 
-
-<p align="justify">
-Outro ponto importante é que a APP Usuários contém tabelas relacionadas a fotos e áudios dos usuários. Esses dados serão utilizados futuramente para implementar funcionalidades de acesso por reconhecimento de voz e imagem. No entanto, essa parte será desenvolvida somente após a conclusão do sistema completo, incluindo a integração com o Kong. Quando chegar a essa etapa, bem como em outras melhorias futuras, descreverei detalhadamente o que foi feito e como. Já adicionei esse modelo ao banco de dados para evitar a necessidade de modificar o diagrama UML posteriormente.
-</p> 
-
-<p align="justify">
-Em relação à autenticação e autorização, será utilizado o Keycloak para gerenciar as credenciais dos usuários de maneira eficiente e segura. Quando um usuário é criado, ele é registrado tanto no Keycloak quanto no banco de dados próprio do projeto. No Keycloak, são armazenadas apenas informações básicas, como nome, e-mail e funções (roles). Todas as demais informações relacionadas ao usuário são armazenadas no banco de dados da API, garantindo uma separação clara entre os dados de autenticação e os dados específicos da aplicação.
-</p> 
-
-<p align="justify">
-Uma outra melhoria planejada é a integração da API com o Llama 3 no LMStudio para gerar textos automaticamente com IA. A ideia é criar uma rota com um prompt predefinido, onde o usuário insere apenas informações-chave. Assim, os dados sobre as características de cada raça serão gerados automaticamente, permitindo o preenchimento dessas informações de forma mais rápida e eficiente. Se a resposta da IA não for satisfatória, o administrador poderá ajustá-la manualmente para garantir a qualidade das informações. Além disso, outra funcionalidade será oferecer ao usuário comum a possibilidade de acessar informações e dicas relacionadas ao seu pet, tornando a experiência mais personalizada e acolhedora.
-</p> 
-
-## TO DO:
-<p align="justify">
-Como mencionei anteriormente, este projeto de portfólio será utilizado para explorar e estudar novas ferramentas. Por esse motivo, ele será constantemente aprimorado e receberá novas funcionalidades com frequência. Para manter a organização do desenvolvimento, adotarei um TO DO separado em algumas categorias categorias: Tarefas concluidas, Tarefas em execução, Backlog e Upgrades.
-</p> 
-
-<p align="justify">
-Esse TO DO funcionará como uma versão simplificada de sprint e backlog. Como estou desenvolvendo este projeto de forma independente e não pretendo utilizar ferramentas de SCRUM, optei por essa abordagem prática para garantir a organização e não perder de vista as ideias que surgirem ao longo do processo.
-</p> 
-
-### Tarefas concluídas:
-- [x] Modelar serviços do projeto
-- [x] Modelar banco de dados
-- [x] Criar o readme
-- [x] Inicializar projeto DJANGO da API
-- [x] Criar o docker-compose do projeto geral e Dockerfile do serviço DRF.
-- [x] Criar json com configurações iniciais do keycloak
-- [x] Criar .env e envexample.txt
-- [x] Criar configuração do minIO
-- [x] Função upload_file minIO
-- [x] Configurações iniciais do projeto DRF
-- [x] Criar validação de imagem
-- [x] Implementar os modelos de banco de dados no projeto
-- [x] Implementar os serializers
-- [x] Implementar as views - básicas, sem a personalização de rotas ainda (CRUD - padrão do DJANGO)
-- [x] Adiconar o swagger
-- [x] Criar função para mudar o nome do arquivo salvo no banco para um uuid
-- [x] Função delete_file minIO + view delete em produtos
-- [x] Função update_file minIO + view update em produtos
-- [x] Implementar autenticação e autorização com o keycloak
-- [x] Implementar o django-filter em list de produtos
-- [x] Bug: Na view de produtos existia a possibilidade de a imagem ser salva sem o produto ser salvo no banco
-- [x] Arquivo de roles devidamente configurado
-- [x] Aplicar regras de autenticação e autorização geral em todas as views
-- [x] Personalização das rotas da app produtos
-- [x] Adicionar descrição das funções criadas em utils, bucket, keycloak etc
-- [x] Criação de regras no models de usuarios para não deixar roles e áreas sem relação se misturarem
-- [x] Bug o username do keycloak é imutável, então não posso utilizar o email pra isso
-- [x] Criar funções de chamada para o Keycloak para facilitar manutenção
-- [x] Adicionar ID do Keycloak ao modelo User para evitar inconsistências
-- [x] Bug *
-- [x] Implementar logging para facilitar manutenção em novas aplicações
-- [x] Aprimorar tratamento de exceções no cliente Keycloak e nas views de usuários(utils: validations, functions. produtos:views. keycloak_config: auth, permissio. bucket:minio_client, usuarios:views)
-- [x] Personalização nas rotas da app usuarios
-- [x] Padronizar rotas de produtos com nova regra
-- [x] Adicionar filtros aos lists dos modelos de usuários
-- [x] Exclusão simultânea de dados relacionados ao usuários tanto no django quanto no bucket
-- [x] Obrigar a criação de usuário na view com um documento
-- [x] Permitir a exclusão de documento apenas se o usuário tiver mais de um cadastrado, se não só será excluido se o usuário também for
-- [x] Validação de documento único (não pode haver valores de documento repetido para um mesmo tipo de documento)
-- [x] Personalização das rotas da app pet
-- [x] Modificar os filtros das rotas list(que possua filtro) em app_pet para filtrar por nome e não pelo id
-- [x] Personalização das rotas da app loja
-- [x] Personalização das rotas da app hotel
-- [x] Personalização das rotas da app banhotosa
-- [x] filtros banho/tosa
-- [x] Personalização das rotas da app saude
-- [x] filtros rotas app saude
-- [x] Corrigir ciclo_id no models de service em saude
-- [x] Faltou implementar o retrieve em hotel/views/reservationviewset
-- [x] Corrigir o id para uuid em banhotosa/appointmentService(Fazer na primeira versão), testar os filtros do appointmentService, não deu pra testar pois estar usando id normal dá bug
-
-    (*) Pelo fato de eu usar um uuid diferente para o user salvo no keycloak e o user salvo no django eu preciso fazer uma consulta com o get (app usuarios - User) para recuperar esses valores e depois verificar se quem solicitou possui acesso ou não. No momento não é um problema, mas em uma aplicação maior pode gerar problemas de desempenho e risco de segurança. Para consertar isso eu posso adicionar o uuid do django nas informações do jwt token do keycloak. Outra solução seria estrutual, por exemplo, usar o mesmo uuid de usuário no keycloak e no django. Entretanto, esta seria uma solução mais trabalhosa. Etapas para correção do bug:
-    - [x] Descobrir como configurar esse novos atributos(?) no keycloak
-    - [x] Verificar como fazer esta configuração no json de criação do keycloak - para ficar automatizado. OBS, não ficou 100% automatizado, mas ficou bem simplificado utilizando o postman + interface keycloak
-    - [x] Modificar a views para salvar o valor quando criar o usuário
-    - [x] Modificar como a verificação é feita nas outras views.
-
-    (**) Reestruturação nas regras de att dados em serviços de banhotosa, escrever comentários e o que foi feito para resolver aqui.
-
-### Tarefas em execução:
-
-- [ ] Bug ** (foi resolvido mas tenho que escrever aqui)
-- [ ] Verificação das imagens do readme
-- [ ] Revisar e organizar o readme para subir a primeira versão para a branch principal
-
-### Backlog:
-- [ ] Criar uma personalização no list de pet para que se o token utilizado for de um médico mostrar apenas que sejam seus pacientes - Tarefa bonus
-- [ ] Em saude/exam se eu faço o update de um resultado de exame em um formato diferente do anteriormente salvo ele faz todas as atualizações necessarias no banco de dados e no minio(então o acesso a imagem continua garantido) mas ao inves de substituir ele faz o upload da imagem com o mesmo nome e no formato diferente, portanto precisa configurar para que quando acontecer esse tipo de update o arquivo antigo seja excluido. Pois isso irá gerar lixo e consequentente uso de armazenamento de forma inutil
-
-### Upgrades:
-Em upgrades vou separar tarefas grande que precisarão ser dividas em outras subtarefas.
-- [ ] criação de testes unitários com pytest
-- [ ] Criação do bot
-- [ ] Adicionar o Kong ao projeto
-- [ ] Criar um sistema que irá preencher caracteristicas (hábitos, alimentação, etc) das raças dos pets usando o llama com o lmstudio, detalhes pensar futuramente.
-- [ ] Criar uma aplicação extra completa (front e back) com um serviço de chat por texto e voz.
-- [ ] Criar uma função em utils que seja responsável por filtar serviços(banho/tosa) desatualizados e excluir os mesmos(mais detalhes do funcionamento se encontram no diretório utils arquivo functions.py).
-- [ ] Corrigir o partial em update(PUT) de serviços de banho/tosa.
-- [ ] Meu modelo de log para erros no termnal não fico muito bom, melhorar futuramente. Avaliar usar uma api de log.
-- [ ] Melhoria na redundância em create do servicetype de banho/tosa
-- [ ] Aplicar um banco de dados nosql no projeto(mongodb)
-- [ ] Criar um sistema de gerenciamento de filas
-- [ ] Verificar se o uml está atualizado
-
-### IMPORTANTE:
-<p align="justify">
-Para facilitar a organização e testar o uso de squash commits, o projeto seguirá a estrutura de branches descrita abaixo. A branch main será onde a versão mais recente e estável do projeto será mergeada e ficará disponível publicamente no GitHub.
-</p> 
-
-<p align="justify">
-No entanto, cada atualização ou melhoria será feita em branches separadas, permitindo manter um histórico das versões anteriores. Se você deseja testar uma versão estável, use a branch main ou uma branch já concluida. Para executar melhorias em andamento ou acessar uma versão anterior estável, será necessário selecionar a branch correspondente. Abaixo estão as branches disponíveis e suas descrições:
-</p> 
-
-<p align="justify">
-Além disso, observe que usei, na maioria das views, o BaseViewSet (que é basicamente uma ModelViewSet do django). No entanto, essa pode não ser a melhor prática. Caso você decida utilizá-lo, certifique-se de que todas as rotas disponibilizadas estão funcionando conforme o planejado. Se não estiverem, considere o uso de mixins para garantir a disponibilidade apenas das rotas que você escolher. Eu estou usando o ModelViewSet porque este é um ambiente de testes e desenvolvimento para mim; em produção, é importante estar atento a esse detalhe.
-</p> 
-
-#### Branchs:
-- main: No momento possui apenas arquivos básicos e o readme sem nenhuma configuração
-- apisimplificada: Onde estou desenvolvendo o projeto simplificado da figura 2.
-
-### Executando o projeto:
-Para testar e executar o projeto em sua máquina local, siga o passo a passo abaixo:
+# Crie e configure seu arquivo de variáveis de ambiente
+cp .envexample.txt .env
 
 ```
-Código explicativo aqui:
-faça o clone deste repositório
-selecione a branch que deseja executar
-...
+💡 Importante: Abra o arquivo .env e preencha todas as variáveis com as suas configurações locais (senhas, portas, etc.).
+
+#### 2. Execução do Ambiente
+
+```bash
+# Suba os contêineres com Docker Compose
+# O comando --build garante que a imagem da sua API seja reconstruída com as últimas alterações.
+docker-compose up --build
 ```
 
-Quando pronto colocar um vídeo demonstrativo
+💡 Importante: Após a conclusão, os serviços estarão disponíveis nos endereços indicados no terminal.
 
-Além disso pretendo adicionar algumas documentações do projeto, como o link das rotas testadas pelo postman assim como o swagger
+#### 3. Configuração Pós-Inicialização do Keycloak
 
-Na parte de grupos vou definir a seguinte logica:
+Para que a integração entre a API e o Keycloak funcione corretamente, alguns passos manuais são necessários na primeira execução. Utilize a coleção do Postman fornecida para facilitar o processo.
 
-Cada role do keycloak recebe a função do usuário e os filtros das tabelas são feitos de acordo com essas roles. Na parte de grupos do keycloak eu criei de modelo para um atentente que seja responsável por todos os setores e outro grupo para alguns setores, está de exemplo mas neste projeto os grupos não serão muito utilizados. Outro ponto importante será a regra a ser seguida: Informações relacionadas à vendas ou informativas serão públicas, por exemplo serviços oferecidos em geral(excluido médicos, pois exames ou tarefas médicas precisam passar por avaliação de um veterinario antes) e informações bonus como as contidas em breed e specie e product(só que neste caso alguns campos devem ser filtrados como preço de compra, photo_path e storage_location). Em user a logica é um pouco diferente, o superuser terá acesso a todos os recursos, o estagiários aos gets, mas na criação cada usuário só poderá modificar seus próprios dados. No geral os lists terão acesso publico mas limitado, ou seja, se fazer sentido o usuário terá acesso à aqueles dados que se relacionam de alguma forma com ele, e superusuarios ou outras funções definidas terão acesso total à todos os dados daquela tabela, se o token do usuario não tiver nenhum dado relacionado a lista retorada será vazia, e se por um acaso um usuario comum tentar acessar algum id que não seja relacionado ao dele uma mensagem de permissão negada será retornada
+```bash
+3.1: Criar o "Client Scope"**
+    * Na coleção do Postman, localize a pasta `Keycloak`.
+    * Execute a requisição **`ADMIN - CREATE django-uuid Scope`**. Certifique-se de estar utilizando um token de administrador do Keycloak para esta chamada.
 
-OBS.: É MUITO IMPORTANTE FALAR NO README SOBRE AS BRANCHS, POIS NÃO VOU TRABALHAR NA MAIN POR ENQUANTO ENTÃO ELA VAI FICAR DESATUALIZADA E É A QUE APARECE NO GITHUB, MUDAR A PADRÃO NÃO COMPENSA POR ENQUANTO, ENTÃO É MELHOR ESCREVER ATÉ QUE A PRIMEIRA PARTE DO PROJETO ESTEJA PRONTA!!!!!!!!!
+3.2: Habilitar Atributos Não Gerenciados**
+    * Acesse o painel de administração do Keycloak (`http://localhost:8080/`).
+    * No canto superior esquerdo, mude do realm `master` para o realm **`dev`**.
+    * No menu lateral, vá em **Realm Settings** > **General**.
+    * Ative a opção **Unmanaged Attributes** e salve.
 
+3.3: Adicionar o Scope ao Cliente**
+    * Ainda no realm `dev`, vá em **Clients** no menu lateral.
+    * Selecione o cliente **`rest-client`**.
+    * Vá para a aba **Client Scopes**.
+    * Clique no botão **Add client scope** e adicione o scope `django_uuid` que você criou no passo 3.1.
+```
 
-ANOTAÇÕES:
-- verificar seta para o bot(vai depender de como vou salvar os arquivos no minIO)
-- Seria interessante verificar na hora de adicionar serviços no appointment verificar se o produto para aquele produto possui estoque, se não retornar um erro.
-- as funções para lidar com o tempo no agendamento estão pronta e estão em functions e validations da app utils, quando for fazer a views lembrar de usar.
-- não quero deixar esse monte de migrations, pois foram ajustes e não melhorias, depois limpar no arquivo final e deixar uma única.
-- criar alguns dados para serem gerados junto com o docker-compose up, vai servir para facilitar se alguma pessoa quiser testar o projeto. As que devem receber estes valores são:
-
-saude: exam_type
-pet: breed, specie
-banho/tosa: product_used, service_type
-hotel: service
-produtos: product
-
-RESUMAO: log exception escreve o log sem fazer nada, usar quando quer acrescentar um extra do erro no log
-
-handle exception faz o log do erro e levanta a exceção, pra não quebrar deve ser chamado dentro de um try
-
-manage exception contem uma lista de responses para tipos predefindos de exception, você chama no except de uma resposta de requisição http, que ele irá tratar o erro que recebeu.
-
-se quiser uma resposta personalizada do erro, você precisa carregar o return até a função da requisição http e  retornar la a resposta.
-
-
-### Melhorias que um dia podem ser feitas (não prioritárias)
-- no app saúde verificar se o responsivel de um serviço é válido, por exemplo, um zelador não pode ser o resnponsável por uma cirurgia, então quando for criado o dado deve-se verificar isso
-- automatizar o tetment_cycle status de acordo com o serviço, por exemplo, uma vacina é aplicada e o ciclo já é finalizado????????? faz sentido?
-- Nas apps com muitas tabelas, criar uma rota com um resumo de informações para usuários comuns, fazer uma coleção de dados relacionado ao usuário e  retornar tudo de uma vez. Opção para escolher as informações entre um pet especifico ou de um usuário. É só criar um filtro com nome ou id do pet.
-- ver se consigo obrigar que o usuário só seja criado se um documento for adicionado junto, mesmo sendo tabelas separadas, tem a operação atomica (não serve pra isso), mas queria fazer no próprio models.
-- Fazer validação de formato com o regex nos outros documentos
-- Existem os Triggers em SQL para validações mais complexas, mas não vejo necessiadade de usar nesse projeto. É uma ação que daria mais segurança aos dados, mas pra um projeto de treino seria exagerado, futuramente posso fazer em alguma tabela para referencia.
-- Apesar de muitas rotas públicas, todas elas precisam de um token válido, ou seja, gerado pelo keycloak e que passe pela instrospecção. Se em algum momento precisar mudar isso para não exigir token é só mudar a regra de como o django verifica o token.
-- Implementar logs específicos para quando HasRolePermission permite ou nega acesso, e para quando KeyCloakAuthentication falha, pode ser útil para auditorias e para detectar possíveis tentativas de acesso não autorizado.
-- Caso queria criar senhas mais robusta é possivel ir na adminstração do keycloak, authentication e por fim policies e escolher as regras que deseja para a senha de usuário.
-- Criar uma branch demonstrando em alguma tabela como implementar o softdelete
-
-### Observações
-- O user foi modificado para salvar o id do usuário no keycloak, pois pode acontecer de inconsistencia nos dados, então para prevenir e deixar mais facil algum suporte vai ser necessário ter o id do user no keycloak sendo salvo
-- Foi melhor criar funções que chamam o keycloak ao inves de usar o keycloak diretamente, pois em caso de troca do serviço do keycloak por outro basta modificar a função ao inves de sair procurando em todo o código onde elas foram chamadas
-- Eu não criei regras de validação para a senha pelo fato de o keycloak ter opções personalizaveis para isso. Sendo dessa forma vou deixar como algo personalizável no projeto. Para saber como fazer esta configuração confira este vídeo tutorial: 
-
-[colocar url do video aqui, diferentemente do de configuração apenas o links sem o video]
-
-- Uma solução para prevenir erros na exclusão de arquivos foi utilizar o transaction.atomic deletando o user(ou o campo do django primeiro) e depois o objeto no minio, desta forma, se o user.delete() falhar o atomic volta os dados para a sua forma original do django e não acessa a parte de excluir os arquivos no minio. O que garante que se a imagem so será excluida se a informação não existir mais no banco do django. Além disso adicionei algumas mensagens de erros de exclusao no minio no log, pois assim, se necessaŕio, pode-se fazer uma varredura no log e uma limpeza de arquivos inuteis pode ser feita sem maiores problemas.
-
-### HardDelete vs SoftDelete
-Uma boa prática em projetos comerciais é evitar a exclusão definitiva de registros no banco de dados. Para isso, utiliza-se frequentemente a exclusão lógica (soft delete), que adiciona campos ao modelo, como is_active (booleano) e/ou deleted_at (datetime). O campo is_active indica se o registro está ativo, enquanto deleted_at registra a data e hora da exclusão para fins de auditoria.
-
-Para gerenciar soft delete com chaves estrangeiras, pode-se sobrescrever o método delete dos modelos. Ao chamar esse método, o campo is_active é definido como False, e o campo deleted_at recebe o valor atual com now(). Assim, é possível usar self.orders.update(deleted_at=now()) dentro do delete personalizado para que o soft delete afete todos os registros relacionados. No entanto, em projetos grandes, reescrever o método delete em cada modelo pode ser inconveniente. Uma solução é criar um modelo abstrato com essa lógica e herdar esse comportamento nos demais modelos, eliminando a repetição de código.
-
-Embora o Django ofereça ferramentas como pre_delete e post_delete, ainda não explorei como aplicá-las e quais seriam seus usos mais adequados.
-
-#### Motivos para Não Implementar Soft Delete Neste Projeto
-Optei por não implementar soft delete neste projeto por se tratar de um projeto não comercial, onde a manutenção de registros históricos não é essencial. Além disso, isso me permitiu explorar alternativas para rollback de usuários em conjunto com o Keycloak. Se o soft delete estivesse implementado, bastaria desativar o usuário tanto no Django quanto no Keycloak, o que simplificaria a solução. No entanto, encarei isso como um desafio e decidi buscar uma abordagem que exigisse maior criatividade.
-
-#### Como Implementar o Soft Delete Neste Projeto
-Se fosse necessário implementar o soft delete, as alterações seriam as seguintes:
-
-Modificação do Modelo Base:
-Localizado em utils.models, o modelo base seria atualizado para incluir os campos deleted_at (datetime) e, opcionalmente, is_active (booleano). O campo deleted_at registraria o momento da exclusão. Um registro com deleted_at diferente de null seria considerado "excluído". O método delete também seria sobrescrito para atualizar esses campos em vez de remover o registro.
-
-Atualização dos Querysets:
-Os querysets padrão precisariam filtrar apenas os registros com is_active=True ou deleted_at=null. Dependendo da regra de negócio, seria possível criar diferentes categorias de acesso, permitindo ou restringindo a visualização de registros marcados como excluídos.
-
-Rollbacks e Integração com Keycloak:
-No Keycloak, seria utilizado o campo enabled para indicar a exclusão. Em vez de remover usuários, bastaria alterar o status para desativado. Isso simplificaria a lógica, evitando recriações desnecessárias de usuários durante rollbacks. Para restaurar um usuário, bastaria reativá-lo.
-
-Gerenciamento de Dados no Bucket:
-Dependendo da regra de negócio, os dados relacionados no bucket poderiam ser mantidos temporariamente. Uma solução genérica seria implementar um "agente de limpeza", que verificaria registros com deleted_at preenchido e, após um período configurado, removeria os dados tanto do banco quanto do bucket. Essa abordagem equilibraria a necessidade de auditoria com a prevenção de sobrecarga de dados inativos.
-
-Regra para Restauração de Contas:
-Ao restaurar contas excluídas, seriam consideradas três opções:
-
-- Reativar o usuário com os dados existentes.
-- Reativar o usuário atualizando seus dados.
-- Criar um novo usuário, mantendo os dados antigos como excluídos (o que poderia causar conflitos com campos únicos, como CPF e nome de usuário, mas garantiria um histórico completo).
-
-Para este projeto em particular, as duas primeiras opções seriam mais adequadas, já que evitam duplicidades e conflitos.
-
-
-
-### Extra
+#### 4. Finalização
 <p align="justify">
-Apenas para fins de anotações, vou deixar uma lista de tecnologias que desejo estudar, embora nem todas se encaixem necessariamente neste projeto. Mantendo essa lista aqui, servirá como um lembrete, uma vez que pretendo revisitar este projeto com certa frequência:
-</p> 
+Pronto! Seu ambiente está totalmente configurado. Agora você já pode utilizar as rotas da <strong>PetshopAPI</strong> para criar usuários, produtos e interagir com todas as funcionalidades do sistema.
+</p>
 
-- [ ] Kafka
-- [ ] RabbitMQ
-- [ ] Spark
-- [ ] FastAPI
+---
+## 🎥 Demonstração em Vídeo
+
+> Em breve: um vídeo será disponibilizado aqui mostrando como clonar, configurar e testar o projeto localmente em sua máquina.
+
+O vídeo abordará:
+
+- Clonagem do repositório
+- Configuração do ambiente (`.env`)
+- Inicialização com `docker-compose`
+- Acesso aos serviços (Swagger, Keycloak, MinIO, etc.)
+- Exemplos de requisições autenticadas
+---
+
+## 📄 Documentação da API
+
+<p align="justify">
+Para facilitar a exploração e os testes dos endpoints, foi criada uma coleção completa no Postman. Você pode visualizar a documentação online ou importar a coleção e o ambiente de desenvolvimento para o seu aplicativo clicando no botão abaixo:
+</p>
+
+<div align="center">
+
+[<img src="https://run.pstmn.io/button.svg" alt="Run In Postman" style="width: 128px; height: 32px;">](https://app.getpostman.com/run-collection/26401442-a9363828-79c6-4216-81f2-6ad70efd50ec?action=collection%2Ffork&source=rip_markdown&collection-url=entityId%3D26401442-a9363828-79c6-4216-81f2-6ad70efd50ec%26entityType%3Dcollection%26workspaceId%3Dc2450012-cccd-4464-bccc-4e4c5da8ccd1#?env%5Benvpetshopproject%5D=W3sia2V5IjoiYWRtaW5hY2Nlc3NUb2tlbiIsInZhbHVlIjoiIiwiZW5hYmxlZCI6dHJ1ZSwidHlwZSI6InRleHQiLCJzZXNzaW9uVmFsdWUiOiJleUpoYkdjaU9pSlNVekkxTmlJc0luUjVjQ0lnT2lBaVNsZFVJaXdpYTJsa0lpQTZJQ0pNV1Y5Q05sWllSV2M1YWpJd2NqWmFYMGhRVkdGcE0xY3lTbFZrZUVSTFVVZHZWVFJqUWpBNFNDMDBJbjAuZXlKbGVIQWlPakUzTlRRMU1UY3pNVFlzSS4uLiIsImNvbXBsZXRlU2Vzc2lvblZhbHVlIjoiZXlKaGJHY2lPaUpTVXpJMU5pSXNJblI1Y0NJZ09pQWlTbGRVSWl3aWEybGtJaUE2SUNKTVdWOUNObFpZUldjNWFqSXdjalphWDBoUVZHRnBNMWN5U2xWa2VFUkxVVWR2VlRSalFqQTRTQzAwSW4wLmV5SmxlSEFpT2pFM05UUTFNVGN6TVRZc0ltbGhkQ0k2TVRjMU5EVXhOVFV4Tml3aWFuUnBJam9pWVRJMFpHSXhNalV0TkdFNE5TMDBNekZrTFdKbU16Y3RObU5tTVRVek5EQTFZVE0xSWl3aWFYTnpJam9pYUhSMGNEb3ZMMnh2WTJGc2FHOXpkRG80TURnd0wzSmxZV3h0Y3k5a1pYWWlMQ0poZFdRaU9sc2ljbVZoYkcwdGJXRnVZV2RsYldWdWRDSXNJbUZqWTI5MWJuUWlYU3dpYzNWaUlqb2laVFUwTXprMk5HSXRZVGd5TmkwME1USTFMV0UzTm1ZdE1EYzJOVFl4TTJGak1tRmxJaXdpZEhsd0lqb2lRbVZoY21WeUlpd2lZWHB3SWpvaWNtVnpkQzFqYkdsbGJuUWlMQ0p6WlhOemFXOXVYM04wWVhSbElqb2lZelk0T1dSbE16SXRPREU0TWkwME5EVXlMV0ZtWmpFdE9XSXlOemN6WXpOa01EY3pJaXdpWVdOeUlqb2lNU0lzSW5KbFlXeHRYMkZqWTJWemN5STZleUp5YjJ4bGN5STZXeUprWldaaGRXeDBMWEp2YkdWekxXUmxkaUlzSW05bVpteHBibVZmWVdOalpYTnpJaXdpZFcxaFgyRjFkR2h2Y21sNllYUnBiMjRpTENKemRYQmxjblZ6WlhJaVhYMHNJbkpsYzI5MWNtTmxYMkZqWTJWemN5STZleUp5WldGc2JTMXRZVzVoWjJWdFpXNTBJanA3SW5KdmJHVnpJanBiSW5acFpYY3RjbVZoYkcwaUxDSjJhV1YzTFdsa1pXNTBhWFI1TFhCeWIzWnBaR1Z5Y3lJc0ltMWhibUZuWlMxcFpHVnVkR2wwZVMxd2NtOTJhV1JsY25NaUxDSnBiWEJsY25OdmJtRjBhVzl1SWl3aWNtVmhiRzB0WVdSdGFXNGlMQ0pqY21WaGRHVXRZMnhwWlc1MElpd2liV0Z1WVdkbExYVnpaWEp6SWl3aWNYVmxjbmt0Y21WaGJHMXpJaXdpZG1sbGR5MWhkWFJvYjNKcGVtRjBhVzl1SWl3aWNYVmxjbmt0WTJ4cFpXNTBjeUlzSW5GMVpYSjVMWFZ6WlhKeklpd2liV0Z1WVdkbExXVjJaVzUwY3lJc0ltMWhibUZuWlMxeVpXRnNiU0lzSW5acFpYY3RaWFpsYm5Seklpd2lkbWxsZHkxMWMyVnljeUlzSW5acFpYY3RZMnhwWlc1MGN5SXNJbTFoYm1GblpTMWhkWFJvYjNKcGVtRjBhVzl1SWl3aWJXRnVZV2RsTFdOc2FXVnVkSE1pTENKeGRXVnllUzFuY205MWNITWlYWDBzSW1GalkyOTFiblFpT25zaWNtOXNaWE1pT2xzaWJXRnVZV2RsTFdGalkyOTFiblFpTENKdFlXNWhaMlV0WVdOamIzVnVkQzFzYVc1cmN5SXNJblpwWlhjdGNISnZabWxzWlNKZGZYMHNJbk5qYjNCbElqb2laVzFoYVd3Z2NISnZabWxzWlNJc0luTnBaQ0k2SW1NMk9EbGtaVE15TFRneE9ESXRORFExTWkxaFptWXhMVGxpTWpjM00yTXpaREEzTXlJc0ltVnRZV2xzWDNabGNtbG1hV1ZrSWpwbVlXeHpaU3dpYm1GdFpTSTZJa0ZrYldsdUlGUmxjM1JsSWl3aWNISmxabVZ5Y21Wa1gzVnpaWEp1WVcxbElqb2lZV1J0YVc0aUxDSm5hWFpsYmw5dVlXMWxJam9pUVdSdGFXNGlMQ0ptWVcxcGJIbGZibUZ0WlNJNklsUmxjM1JsSWl3aVpXMWhhV3dpT2lKaFpHMXBia0IwWlhOMFpTNWpiMjB1WW5JaWZRLmszWllfTzJjMGhRWV9LM2tQQkhvQ1VGMVVhRVdWaTE0U281cHVSR1lqbWdoQzdqeEc5a1Q2SHF6UmUtQUc3UXdxSXRQcGc3Vm5ybl95QVZSNWFLQVV2MDZ6bXBPRmF2czVxMFo1QldSNUpTS19BVjc0dS1nWTlPNVk4TjlMeWlJMnZJc00tcGdzTTY5U0RiVmFEaTNNZWpSck9GTTJHOGVXMGMtTFpWNURSdTlaTGpFWFp4NXNEMndRX253Mlc1S0NzMldLZHk0cUM1aGJoZlVXUVBGSFNuN3JWaWt0bWN6TEZEOTEwSkY3ZVlRUmlzSUhoTVIxQnlmU1paakdxd3RXTHdVOHlWUmRGTng1T3ppdXZjcUdKZ3lFQ1NrTlp3ZFk0M3RJX05Qb0xTVUdJOWxDRVRVb0VOTzN0YU1HZUJXSVl1TFpUdG85OThtVGJYaGlTa2kxdyIsInNlc3Npb25JbmRleCI6MH0seyJrZXkiOiJ1c2VyYWNjZXNzVG9rZW4iLCJ2YWx1ZSI6IiIsImVuYWJsZWQiOnRydWUsInR5cGUiOiJkZWZhdWx0Iiwic2Vzc2lvblZhbHVlIjoibnVsbCIsImNvbXBsZXRlU2Vzc2lvblZhbHVlIjoibnVsbCIsInNlc3Npb25JbmRleCI6MX0seyJrZXkiOiJtZWR2ZXRhY2Nlc3NUb2tlbiIsInZhbHVlIjoiIiwiZW5hYmxlZCI6dHJ1ZSwidHlwZSI6ImRlZmF1bHQiLCJzZXNzaW9uVmFsdWUiOiJleUpoYkdjaU9pSlNVekkxTmlJc0luUjVjQ0lnT2lBaVNsZFVJaXdpYTJsa0lpQTZJQ0pNV1Y5Q05sWllSV2M1YWpJd2NqWmFYMGhRVkdGcE0xY3lTbFZrZUVSTFVVZHZWVFJqUWpBNFNDMDBJbjAuZXlKbGVIQWlPakUzTlRRMU1UY3pNVFlzSS4uLiIsImNvbXBsZXRlU2Vzc2lvblZhbHVlIjoiZXlKaGJHY2lPaUpTVXpJMU5pSXNJblI1Y0NJZ09pQWlTbGRVSWl3aWEybGtJaUE2SUNKTVdWOUNObFpZUldjNWFqSXdjalphWDBoUVZHRnBNMWN5U2xWa2VFUkxVVWR2VlRSalFqQTRTQzAwSW4wLmV5SmxlSEFpT2pFM05UUTFNVGN6TVRZc0ltbGhkQ0k2TVRjMU5EVXhOVFV4Tml3aWFuUnBJam9pTjJOaFpEazBNemt0TVRjM09TMDBaak16TFRrMFpUY3RZekl4TURSalpqTmtORGxtSWl3aWFYTnpJam9pYUhSMGNEb3ZMMnh2WTJGc2FHOXpkRG80TURnd0wzSmxZV3h0Y3k5a1pYWWlMQ0poZFdRaU9pSmhZMk52ZFc1MElpd2ljM1ZpSWpvaVlXSmlNMkpoT1RVdE1EVmxNeTAwTVdFM0xUZ3pZakV0WmpFME5UUm1aalEzTWpJNUlpd2lkSGx3SWpvaVFtVmhjbVZ5SWl3aVlYcHdJam9pY21WemRDMWpiR2xsYm5RaUxDSnpaWE56YVc5dVgzTjBZWFJsSWpvaVl6RmlabUV4T0dJdE5UQTVOUzAwWkdZNUxUa3dZV010TldFMVlqVTFNVFZoWW1Oaklpd2lZV055SWpvaU1TSXNJbkpsWVd4dFgyRmpZMlZ6Y3lJNmV5SnliMnhsY3lJNld5SnRaV1JwWTI5ZmRtVjBaWEpwYm1GeWFXOGlMQ0prWldaaGRXeDBMWEp2YkdWekxXUmxkaUlzSW05bVpteHBibVZmWVdOalpYTnpJaXdpZFcxaFgyRjFkR2h2Y21sNllYUnBiMjRpWFgwc0luSmxjMjkxY21ObFgyRmpZMlZ6Y3lJNmV5SmhZMk52ZFc1MElqcDdJbkp2YkdWeklqcGJJbTFoYm1GblpTMWhZMk52ZFc1MElpd2liV0Z1WVdkbExXRmpZMjkxYm5RdGJHbHVhM01pTENKMmFXVjNMWEJ5YjJacGJHVWlYWDE5TENKelkyOXdaU0k2SW1WdFlXbHNJSEJ5YjJacGJHVWlMQ0p6YVdRaU9pSmpNV0ptWVRFNFlpMDFNRGsxTFRSa1pqa3RPVEJoWXkwMVlUVmlOVFV4TldGaVkyTWlMQ0psYldGcGJGOTJaWEpwWm1sbFpDSTZabUZzYzJVc0ltUnFZVzVuYjE5MWRXbGtJam9pWVRBeVptSTBOMlV0WkRJME15MDBaVFprTFRrd05XUXRaR1U1TkRkbU4yWTVZakl5SWl3aWJtRnRaU0k2SWsxbFpHbGpieUJXWlhSbGNtbHVZWEpwYnlJc0luQnlaV1psY25KbFpGOTFjMlZ5Ym1GdFpTSTZJbTFsWkdsamIzWmxkQ0lzSW1kcGRtVnVYMjVoYldVaU9pSk5aV1JwWTI4aUxDSm1ZVzFwYkhsZmJtRnRaU0k2SWxabGRHVnlhVzVoY21sdklpd2laVzFoYVd3aU9pSnRaV1JwWTI5MlpYUkFaVzFoYVd3dVkyOXRJbjAuSjNWVjFrTEozN3ZqdzByLTFWT3ZNYU9WMnVJUnNlWWczMXZvdzRCcWRYbEhPQXN0akdRYTZRSnhkemJOWVhDNkhQLVczS1hBM2pyVi1TRWhUSEJHbjVJbU1tNFd5WEhvMXVmVFhaaC1mUDR6T3JMQnZlcFgtcGNqRG93TjBxcWNPZG5USmhFSk03QkxTLW04R3ZaY0tpTXMybEVTUjk3WXRPTU9Ba0MycFZyb3MxeGZPNUZTQXpKWWZKYkhCNDVjaDgtR1ZFZjFtNENNcGhvUEtybmFKdVd2T3NxNGZlSFhYSEJjNkp0MXVqSTlDQl9QZFlEM1ZHaW5lNnlWemZBeWNpS1YtWUtYUHBxUE1TcHpaRTRfSlRES001X015U1hQMWtWUXhsRVB2UUNudW5RYmxyejZvalFXNlN0Q1JOTUdBS1J2eWlKNVZHbEYxcS0zYXFrN1FRIiwic2Vzc2lvbkluZGV4IjoyfSx7ImtleSI6Imdyb29tZXJhY2Nlc3NUb2tlbiIsInZhbHVlIjoiIiwiZW5hYmxlZCI6dHJ1ZSwidHlwZSI6ImFueSIsInNlc3Npb25WYWx1ZSI6ImV5SmhiR2NpT2lKU1V6STFOaUlzSW5SNWNDSWdPaUFpU2xkVUlpd2lhMmxrSWlBNklDSk1XVjlDTmxaWVJXYzVhakl3Y2paYVgwaFFWR0ZwTTFjeVNsVmtlRVJMVVVkdlZUUmpRakE0U0MwMEluMC5leUpsZUhBaU9qRTNOVFExTVRjek1UWXNJLi4uIiwiY29tcGxldGVTZXNzaW9uVmFsdWUiOiJleUpoYkdjaU9pSlNVekkxTmlJc0luUjVjQ0lnT2lBaVNsZFVJaXdpYTJsa0lpQTZJQ0pNV1Y5Q05sWllSV2M1YWpJd2NqWmFYMGhRVkdGcE0xY3lTbFZrZUVSTFVVZHZWVFJqUWpBNFNDMDBJbjAuZXlKbGVIQWlPakUzTlRRMU1UY3pNVFlzSW1saGRDSTZNVGMxTkRVeE5UVXhOaXdpYW5ScElqb2lZMlEwTTJRME5XWXRNR1F3WVMwMFlXVTFMV0UxWW1ZdE9HSTRPREV3TUdNMVpqVXlJaXdpYVhOeklqb2lhSFIwY0RvdkwyeHZZMkZzYUc5emREbzRNRGd3TDNKbFlXeHRjeTlrWlhZaUxDSmhkV1FpT2lKaFkyTnZkVzUwSWl3aWMzVmlJam9pTmpsbU1XRTNOVGN0WXpjek9TMDBPV1UyTFdFNFpEVXRZV0kwWVRNd05HRTRNRGxqSWl3aWRIbHdJam9pUW1WaGNtVnlJaXdpWVhwd0lqb2ljbVZ6ZEMxamJHbGxiblFpTENKelpYTnphVzl1WDNOMFlYUmxJam9pTW1VeVlqZ3dZbUV0T1RWbU55MDBPV1l5TFdJd016TXRPRFF4WlRJNFpXWXpZalkySWl3aVlXTnlJam9pTVNJc0luSmxZV3h0WDJGalkyVnpjeUk2ZXlKeWIyeGxjeUk2V3lKa1pXWmhkV3gwTFhKdmJHVnpMV1JsZGlJc0ltZHliMjl0WlhJaUxDSnZabVpzYVc1bFgyRmpZMlZ6Y3lJc0luVnRZVjloZFhSb2IzSnBlbUYwYVc5dUlsMTlMQ0p5WlhOdmRYSmpaVjloWTJObGMzTWlPbnNpWVdOamIzVnVkQ0k2ZXlKeWIyeGxjeUk2V3lKdFlXNWhaMlV0WVdOamIzVnVkQ0lzSW0xaGJtRm5aUzFoWTJOdmRXNTBMV3hwYm10eklpd2lkbWxsZHkxd2NtOW1hV3hsSWwxOWZTd2ljMk52Y0dVaU9pSmxiV0ZwYkNCd2NtOW1hV3hsSWl3aWMybGtJam9pTW1VeVlqZ3dZbUV0T1RWbU55MDBPV1l5TFdJd016TXRPRFF4WlRJNFpXWXpZalkySWl3aVpXMWhhV3hmZG1WeWFXWnBaV1FpT21aaGJITmxMQ0prYW1GdVoyOWZkWFZwWkNJNklqY3pZems0TTJNMUxUSXhNRFF0TkRJMlppMWlaRGRqTFRjd1pEQXlPREV6T1RJd09TSXNJbTVoYldVaU9pSm5jbTl2YldWeUlHSmhibWh2SUhSdmMyRWlMQ0p3Y21WbVpYSnlaV1JmZFhObGNtNWhiV1VpT2lKbmNtOXZiV1Z5SWl3aVoybDJaVzVmYm1GdFpTSTZJbWR5YjI5dFpYSWlMQ0ptWVcxcGJIbGZibUZ0WlNJNkltSmhibWh2SUhSdmMyRWlMQ0psYldGcGJDSTZJbWR5YjI5dFpYSkFaVzFoYVd3dVkyOXRJbjAuT00zaXpQaTRCOHh4X2pXckhaWlNMeGFiTldZRWVsY2pESV96eG1fNDFMQ2lkY2VLMUdJR3pObTNvZFhKY0hEQnM2VGh3QXMtSlJIdEU0NWF4UkVrR3FpTDIxcFFoRWpCVlNoSmpkRVl5OEtSVVk4dFVCU0ZHNlFiUVpySVZBUmRWanpxaVh0OGZtV2hjNEIyeUk0eXMwQzRMQWotVTBJY2pFWWE4TFBrOWFNRFdpcHFKOTlaM2dTUHV5aGYzQ2IwQ1dGZ3hZNEVZY2dhWEU1X2FUTW94cUl2TDlkQS1zcTd2NUh3VDBfTXIwTHhDejhEUU9qZGQwa2daYUd3V0U4VnE1SVFyV1hIY2N1LXVSdHA3Y3l0SXBMRTVrd0pncFZFS2NrYTMzMGo3ZHk0dEpUdWttMEhhX3BhaFNLdWRrQTNSNlhueUxQNE1SNHpOQjhmMjd3YlhBIiwic2Vzc2lvbkluZGV4IjozfSx7ImtleSI6ImF0ZW5kZW50ZWxvamFjY2Vzc1Rva2VuIiwidmFsdWUiOiIiLCJlbmFibGVkIjp0cnVlLCJ0eXBlIjoiYW55Iiwic2Vzc2lvblZhbHVlIjoibnVsbCIsImNvbXBsZXRlU2Vzc2lvblZhbHVlIjoibnVsbCIsInNlc3Npb25JbmRleCI6NH0seyJrZXkiOiJhdGVuZGVudGVob3RlbGNjZXNzVG9rZW4iLCJ2YWx1ZSI6IiIsImVuYWJsZWQiOnRydWUsInR5cGUiOiJhbnkiLCJzZXNzaW9uVmFsdWUiOiJleUpoYkdjaU9pSlNVekkxTmlJc0luUjVjQ0lnT2lBaVNsZFVJaXdpYTJsa0lpQTZJQ0pNV1Y5Q05sWllSV2M1YWpJd2NqWmFYMGhRVkdGcE0xY3lTbFZrZUVSTFVVZHZWVFJqUWpBNFNDMDBJbjAuZXlKbGVIQWlPakUzTlRRMU1UY3pNVGNzSS4uLiIsImNvbXBsZXRlU2Vzc2lvblZhbHVlIjoiZXlKaGJHY2lPaUpTVXpJMU5pSXNJblI1Y0NJZ09pQWlTbGRVSWl3aWEybGtJaUE2SUNKTVdWOUNObFpZUldjNWFqSXdjalphWDBoUVZHRnBNMWN5U2xWa2VFUkxVVWR2VlRSalFqQTRTQzAwSW4wLmV5SmxlSEFpT2pFM05UUTFNVGN6TVRjc0ltbGhkQ0k2TVRjMU5EVXhOVFV4Tnl3aWFuUnBJam9pTjJFeE1HWm1aR1V0T1RabE5DMDBZamRqTFdGaE5ERXRPREExTW1WbFpHSXpOREV4SWl3aWFYTnpJam9pYUhSMGNEb3ZMMnh2WTJGc2FHOXpkRG80TURnd0wzSmxZV3h0Y3k5a1pYWWlMQ0poZFdRaU9pSmhZMk52ZFc1MElpd2ljM1ZpSWpvaU5URXdOVFEzWm1VdE9EaGhNeTAwWVRRM0xXSTBZV1l0TW1GaFpUUmlNMlE0WkdVNUlpd2lkSGx3SWpvaVFtVmhjbVZ5SWl3aVlYcHdJam9pY21WemRDMWpiR2xsYm5RaUxDSnpaWE56YVc5dVgzTjBZWFJsSWpvaU0yVTRZVEV5WVdRdE1tWTVNUzAwTm1VMUxUZzJabVV0TlRaa05EQTRNek5rTlRBMUlpd2lZV055SWpvaU1TSXNJbkpsWVd4dFgyRmpZMlZ6Y3lJNmV5SnliMnhsY3lJNld5SmtaV1poZFd4MExYSnZiR1Z6TFdSbGRpSXNJbTltWm14cGJtVmZZV05qWlhOeklpd2lkVzFoWDJGMWRHaHZjbWw2WVhScGIyNGlMQ0poZEdWdVpHVnVkR1ZmYUc5MFpXd2lYWDBzSW5KbGMyOTFjbU5sWDJGalkyVnpjeUk2ZXlKaFkyTnZkVzUwSWpwN0luSnZiR1Z6SWpwYkltMWhibUZuWlMxaFkyTnZkVzUwSWl3aWJXRnVZV2RsTFdGalkyOTFiblF0YkdsdWEzTWlMQ0oyYVdWM0xYQnliMlpwYkdVaVhYMTlMQ0p6WTI5d1pTSTZJbVZ0WVdsc0lIQnliMlpwYkdVaUxDSnphV1FpT2lJelpUaGhNVEpoWkMweVpqa3hMVFEyWlRVdE9EWm1aUzAxTm1RME1EZ3pNMlExTURVaUxDSmxiV0ZwYkY5MlpYSnBabWxsWkNJNlptRnNjMlVzSW1ScVlXNW5iMTkxZFdsa0lqb2lOamxqTTJSbU9Ua3RPR0l3WVMwMFpUTm1MV0U1TURjdE9USmtZekZoTUdSbE5qYzJJaXdpYm1GdFpTSTZJa0YwWlc1a1pXNTBaU0JJYjNSbGJDSXNJbkJ5WldabGNuSmxaRjkxYzJWeWJtRnRaU0k2SW1GMFpXNTBaVzUwWldodmRHVnNJaXdpWjJsMlpXNWZibUZ0WlNJNklrRjBaVzVrWlc1MFpTSXNJbVpoYldsc2VWOXVZVzFsSWpvaVNHOTBaV3dpTENKbGJXRnBiQ0k2SW1GMFpXNWtaVzUwWldodmRHVnNRR1Z0WVdsc0xtTnZiU0o5LnVBdGdqQUdVZk5tOHNacGhhS3RScnVKc2pyNUlYLUJyNWExaU9jdDBmOXRxUkoySE1UVWUwZWpjc1VxNmZOTzl5MkJmNnVJbW1pX0xPd0JJdnZKc1YzTnBoVEs3akxBcUMyMk44QXprbTVGMWNQWTB0aWpYT3VmMDVQODVvbEpYZGh0QUJ4YTNUX2tvdWI3NDd4TVdlOWlqM2MtQmZ0QmxRM2JZMnpVdlBUSlVpektZenlaY0VxRWZyR0RPRFVNRVJZUHlSUFVPa3FlN2ktTUlXNkpUSks5OGE3NXhqSVhacXg5NTFLaGtuaG1GSVdXcjJRMVdKTjlGTFB0d0FPM0hWa1dVaEFpSFdFTlRjeHpFUk5WbjlJd0tGVjhmOFRHMUFnUExsYmtmcUhnelRvRVJadndGTTFYNk5jM1NTeGtvRDZsSFhPNGtNWmJPRXlWRWlnTkJ3ZyIsInNlc3Npb25JbmRleCI6NX0seyJrZXkiOiJhdGVuZGVudGViYW5ob3Rvc2FUb2tlbiIsInZhbHVlIjoiIiwiZW5hYmxlZCI6dHJ1ZSwidHlwZSI6ImFueSIsInNlc3Npb25WYWx1ZSI6ImV5SmhiR2NpT2lKU1V6STFOaUlzSW5SNWNDSWdPaUFpU2xkVUlpd2lhMmxrSWlBNklDSk1XVjlDTmxaWVJXYzVhakl3Y2paYVgwaFFWR0ZwTTFjeVNsVmtlRVJMVVVkdlZUUmpRakE0U0MwMEluMC5leUpsZUhBaU9qRTNORFl6TURjME9EZ3NJLi4uIiwiY29tcGxldGVTZXNzaW9uVmFsdWUiOiJleUpoYkdjaU9pSlNVekkxTmlJc0luUjVjQ0lnT2lBaVNsZFVJaXdpYTJsa0lpQTZJQ0pNV1Y5Q05sWllSV2M1YWpJd2NqWmFYMGhRVkdGcE0xY3lTbFZrZUVSTFVVZHZWVFJqUWpBNFNDMDBJbjAuZXlKbGVIQWlPakUzTkRZek1EYzBPRGdzSW1saGRDSTZNVGMwTmpNd05UWTRPQ3dpYW5ScElqb2lNMlUwTWpVMlptUXRNVEk1T0MwME5qZGxMV0UwWlRFdFpqWmtNVE5qTURRek5UZ3lJaXdpYVhOeklqb2lhSFIwY0RvdkwyeHZZMkZzYUc5emREbzRNRGd3TDNKbFlXeHRjeTlrWlhZaUxDSmhkV1FpT2lKaFkyTnZkVzUwSWl3aWMzVmlJam9pTmpsak5UQTBNVE10TXpKaFpTMDBNMlptTFRrM1pEZ3RabUZoWkdRd1pEazJNemhqSWl3aWRIbHdJam9pUW1WaGNtVnlJaXdpWVhwd0lqb2ljbVZ6ZEMxamJHbGxiblFpTENKelpYTnphVzl1WDNOMFlYUmxJam9pTUROaU9HTmlPVFF0T0RobU5TMDBPVGxrTFRnMFlXUXROVFU0T0dFNE56WTNaV1l6SWl3aVlXTnlJam9pTVNJc0luSmxZV3h0WDJGalkyVnpjeUk2ZXlKeWIyeGxjeUk2V3lKa1pXWmhkV3gwTFhKdmJHVnpMV1JsZGlJc0ltOW1abXhwYm1WZllXTmpaWE56SWl3aVlYUmxibVJsYm5SbFgySmhibWh2ZEc5ellTSXNJblZ0WVY5aGRYUm9iM0pwZW1GMGFXOXVJbDE5TENKeVpYTnZkWEpqWlY5aFkyTmxjM01pT25zaVlXTmpiM1Z1ZENJNmV5SnliMnhsY3lJNld5SnRZVzVoWjJVdFlXTmpiM1Z1ZENJc0ltMWhibUZuWlMxaFkyTnZkVzUwTFd4cGJtdHpJaXdpZG1sbGR5MXdjbTltYVd4bElsMTlmU3dpYzJOdmNHVWlPaUpsYldGcGJDQndjbTltYVd4bElpd2ljMmxrSWpvaU1ETmlPR05pT1RRdE9EaG1OUzAwT1Rsa0xUZzBZV1F0TlRVNE9HRTROelkzWldZeklpd2laVzFoYVd4ZmRtVnlhV1pwWldRaU9tWmhiSE5sTENKa2FtRnVaMjlmZFhWcFpDSTZJalpoWTJRNU1UQmtMVEV5TnprdE5HVTNOUzA0WTJKakxUbG1NalprTkRFMlpESTJNQ0lzSW01aGJXVWlPaUpCZEdWdVpHVnVkR1VnUW1GdWFHOTBiM05oSWl3aWNISmxabVZ5Y21Wa1gzVnpaWEp1WVcxbElqb2lZWFJsYm5SbGJuUmxZbUZ1YUc5MGIzTmhJaXdpWjJsMlpXNWZibUZ0WlNJNklrRjBaVzVrWlc1MFpTSXNJbVpoYldsc2VWOXVZVzFsSWpvaVFtRnVhRzkwYjNOaElpd2laVzFoYVd3aU9pSmhkR1Z1WkdWdWRHVmlZVzVvYjNSdmMyRkFaVzFoYVd3dVkyOXRJbjAubGEwMEZFbkcxUXZKaXZpVVVBaXQwM2V4UnNubENMcldIMWpmZ0FPRW8zcFc0TUNhWGpldENoX2pZTVhvRXhPSjVFQkxtemtZYzkxN2NTTWlNLVpucHFUelJwbDZNeVdqVGhtZFJERGpSSzJmYUJybV92TlB1SWE4bDNVbFI5a1J1bHpVLTVLUnFFOVBLOWZubXRDMV94Nm11TWxRQi1GVVJyLXZtTXctYTZUZWV0RVA3TVh4M0dzM1hXajFHcFRVcG1OU1d0ajNiRDctTWpBMm9PcUhGcWtWcFcxQ2hUN3VpTVhQQjczUldkWjExaHYyNXQ4UjRNQ3F0bTlIaWk2NGtOaVJMUll2SFN2RlBfOVN5UW5LdXlhOERUS2FLd0lDRk5LWVNDNUVQOGRKcGk1dHk4OEliZzRyamZaekp2M3dvX21POHdxclBXM0N4UDRTWjJETHZRIiwic2Vzc2lvbkluZGV4Ijo2fSx7ImtleSI6ImF0ZW5kZW50ZWJhbmhvdG9zYWNjZXNzVG9rZW4iLCJ2YWx1ZSI6IiIsImVuYWJsZWQiOnRydWUsInR5cGUiOiJhbnkiLCJzZXNzaW9uVmFsdWUiOiJleUpoYkdjaU9pSlNVekkxTmlJc0luUjVjQ0lnT2lBaVNsZFVJaXdpYTJsa0lpQTZJQ0pNV1Y5Q05sWllSV2M1YWpJd2NqWmFYMGhRVkdGcE0xY3lTbFZrZUVSTFVVZHZWVFJqUWpBNFNDMDBJbjAuZXlKbGVIQWlPakUzTlRRMU1UY3pNVGNzSS4uLiIsImNvbXBsZXRlU2Vzc2lvblZhbHVlIjoiZXlKaGJHY2lPaUpTVXpJMU5pSXNJblI1Y0NJZ09pQWlTbGRVSWl3aWEybGtJaUE2SUNKTVdWOUNObFpZUldjNWFqSXdjalphWDBoUVZHRnBNMWN5U2xWa2VFUkxVVWR2VlRSalFqQTRTQzAwSW4wLmV5SmxlSEFpT2pFM05UUTFNVGN6TVRjc0ltbGhkQ0k2TVRjMU5EVXhOVFV4Tnl3aWFuUnBJam9pWW1ObE1EbGpNekV0TXpKaU9TMDBOMkZrTFRreFltUXRNalF3TXpJd05HUmpZakJsSWl3aWFYTnpJam9pYUhSMGNEb3ZMMnh2WTJGc2FHOXpkRG80TURnd0wzSmxZV3h0Y3k5a1pYWWlMQ0poZFdRaU9pSmhZMk52ZFc1MElpd2ljM1ZpSWpvaU1tUmhOelZsT0RZdE5UbGtNQzAwT1RNNExXSTVNR0l0Tm1SbU1EWXlZelJoT1dNMUlpd2lkSGx3SWpvaVFtVmhjbVZ5SWl3aVlYcHdJam9pY21WemRDMWpiR2xsYm5RaUxDSnpaWE56YVc5dVgzTjBZWFJsSWpvaU16VXpaakkzTURBdFpqSmlaUzAwTmpFd0xUZzRZalV0TTJZME1tVTNNV1ZrTnpSbElpd2lZV055SWpvaU1TSXNJbkpsWVd4dFgyRmpZMlZ6Y3lJNmV5SnliMnhsY3lJNld5SmtaV1poZFd4MExYSnZiR1Z6TFdSbGRpSXNJbTltWm14cGJtVmZZV05qWlhOeklpd2lZWFJsYm1SbGJuUmxYMkpoYm1odmRHOXpZU0lzSW5WdFlWOWhkWFJvYjNKcGVtRjBhVzl1SWwxOUxDSnlaWE52ZFhKalpWOWhZMk5sYzNNaU9uc2lZV05qYjNWdWRDSTZleUp5YjJ4bGN5STZXeUp0WVc1aFoyVXRZV05qYjNWdWRDSXNJbTFoYm1GblpTMWhZMk52ZFc1MExXeHBibXR6SWl3aWRtbGxkeTF3Y205bWFXeGxJbDE5ZlN3aWMyTnZjR1VpT2lKbGJXRnBiQ0J3Y205bWFXeGxJaXdpYzJsa0lqb2lNelV6WmpJM01EQXRaakppWlMwME5qRXdMVGc0WWpVdE0yWTBNbVUzTVdWa056UmxJaXdpWlcxaGFXeGZkbVZ5YVdacFpXUWlPbVpoYkhObExDSmthbUZ1WjI5ZmRYVnBaQ0k2SW1NeVpqTXhaREZrTFdNNFpESXROR1UzWkMwNU1USXdMV001TlRobFl6Y3laakJqWVNJc0ltNWhiV1VpT2lKQmRHVnVaR1Z1ZEdVZ1FtRnVhRzkwYjNOaElpd2ljSEpsWm1WeWNtVmtYM1Z6WlhKdVlXMWxJam9pWVhSbGJuUmxiblJsWW1GdWFHOTBiM05oSWl3aVoybDJaVzVmYm1GdFpTSTZJa0YwWlc1a1pXNTBaU0lzSW1aaGJXbHNlVjl1WVcxbElqb2lRbUZ1YUc5MGIzTmhJaXdpWlcxaGFXd2lPaUpoZEdWdVpHVnVkR1ZpWVc1b2IzUnZjMkZBWlcxaGFXd3VZMjl0SW4wLms2b3RMLTRYanVQb3VSUEttWHBobDdXY09LX3F0R0R6OVQxTllaM1F6OWxCRDNCQ3Z0R19lSEZmb3Fkc1dmX2d3QTlzWUNPZmYtUnhBeXFIWXhnNHU4MXBBcGRwcXM0UTVTQVBXMEw1WlJlcnNHb2hveEZDRVRyeVRDM3RESC1FWHNWRW12UEIyaU1WcDlQQUp5V202VU0xcWNRZHl1N0IweGo0eEM3akc0T1pVY0R1Rmd6T0VvMUtsdjY4WHZ5cEdQaTNRd3pjdUZVd09kaEVFY3I1ZExrTkhIRXd1QzdnVmkyN2tMMzNxa2ExdjlWTGpCOGs1ZVl5MG8yOVhWSTZ6eFdEXy1qRGZCVXlheXZJYVZLODNGOFhBX3BlUDJMLXJ2ZU84RFJncHdwY2NFTXVTOXJqM3JTZFJzWkZja2Fza19raWpSNkl5ZV85LWphTmpGZkpSQSIsInNlc3Npb25JbmRleCI6N31d)
+
+</div>
+<br>
+
+<p align="justify">
+Além da coleção do Postman, após iniciar o projeto localmente, a documentação interativa via Swagger UI também estará disponível em <code>http://localhost:'porta'/swagger/</code>.
+</p>
+
+---
+
+<div align="justify">
+
+## 🌿 Estratégia de Branches
+
+Este projeto utiliza uma estratégia de branches para organizar o desenvolvimento e manter um histórico limpo e estável:
+
+* **`main`**:
+    * Contém a versão estável e mais recente do projeto.
+    * É a branch recomendada para testes ou implementações de produção.
+    * O histórico de commits é mantido limpo e significativo através do uso de *squash commits*.
+
+* **`apisimplificada`**:
+    * Branch de desenvolvimento principal onde o modelo simplificado (Figura 1) está sendo construído.
+    * Contém o trabalho em andamento antes de ser considerado estável para a `main`.
+
+* **`Branches de Features`** (ex: `feat/user-auth`, `fix/login-bug`):
+    * Novas funcionalidades, melhorias e correções de bugs são desenvolvidas em branches separadas, partindo da `apisimplificada`.
+    * Isso permite o desenvolvimento paralelo e isolado de cada tarefa.
+
+> **Nota sobre Squash Commit:**
+> Ao finalizar uma feature, os múltiplos commits da sua branch (ex: "WIP", "fix typo", "final adjustments") são agrupados (*squashed*) em um único commit descritivo antes de serem mesclados na branch `apisimplificada` ou `main`. Esta prática é fundamental para manter o histórico do projeto legível e fácil de auditar.
+
+---
+
+## 🛣️ Roadmap e Status do Projeto
+<p align="justify">
+Este projeto está em desenvolvimento contínuo. Abaixo está uma visão geral das tarefas.
+</p>
+
+### ✅ Concluído
+* **Estruturação e Configuração do Ambiente:**
+    * [x] Modelagem completa dos serviços do projeto e do banco de dados relacional.
+    * [x] Configuração do ambiente de desenvolvimento com Docker, incluindo `docker-compose.yml` e `Dockerfile` para o serviço da API.
+    * [x] Inicialização do projeto Django com configurações iniciais e gestão de variáveis de ambiente (`.env`).
+
+* **Integração e Autenticação:**
+    * [x] Integração com o Keycloak para gerenciamento de autenticação e autorização baseada em `roles`.
+    * [x] Configuração inicial do realm do Keycloak via JSON para automação.
+    * [x] Sincronização do ID do usuário entre Django e Keycloak para garantir consistência de dados.
+    * [x] Integração com o MinIO para armazenamento de objetos, incluindo funções de upload, update e delete de arquivos.
+
+* **Desenvolvimento do Core da API:**
+    * [x] Implementação de todos os `models`, `serializers` e `views` (CRUD inicial) para as 7 aplicações.
+    * [x] Adição de documentação interativa da API com Swagger/OpenAPI.
+    * [x] Personalização completa das rotas em todas as aplicações (`produtos`, `usuarios`, `pet`, `loja`, `hotel`, `banhotosa` e `saude`).
+    * [x] Implementação de filtros avançados com `django-filter` nos endpoints de listagem.
+
+* **Regras de Negócio e Validações:**
+    * [x] Implementação de validações complexas, como unicidade de documentos por tipo e regras de negócio para criação e exclusão de dados de usuários.
+    * [x] Criação de exclusão atômica (`transaction.atomic`), garantindo que os dados no banco e os arquivos no MinIO sejam removidos de forma segura e simultânea.
+    * [x] Adição de regras nos `models` para garantir a integridade relacional entre `roles` de usuários e suas áreas de atuação.
+    * [x] Adição de proteção na exclusão de serviços com agendamentos futuros.
+
+* **Qualidade, Manutenibilidade e Correções:**
+    * [x] Implementação de um sistema de logging e aprimoramento do tratamento de exceções em toda a aplicação.
+    * [x] Criação de funções utilitárias para centralizar as chamadas ao Keycloak, facilitando a manutenção.
+    * [x] Resolução de bugs críticos, incluindo a dissociação do username do Keycloak do e-mail, a consistência de UUIDs no token JWT e a prevenção de salvamento de arquivos órfãos no MinIO.
 
 
+### ⏳ Em Execução
+- [ ] Revisão e organização final do README para a primeira versão estável.
+- [ ] Verificação e atualização das imagens e diagramas do projeto.
 
+### 🗺️ Backlog e Melhorias Futuras
+- **Testes:** Implementar testes unitários e de integração com `pytest`.
+- **Bot de Preços:** Desenvolver e integrar o serviço de coleta de preços.
+- **Integração com Kong:** Adicionar o Kong à arquitetura como API Gateway.
+- **IA para Geração de Conteúdo:** Integrar a API com um modelo de linguagem (como Llama 3) para gerar automaticamente descrições de raças.
+- **Logs de Auditoria de Segurança:** Implementar logs detalhados para registrar sucessos e falhas de autenticação (`KeyCloakAuthentication`) e autorização (`HasRolePermission`), facilitando auditorias e a detecção de atividades suspeitas.
+- **Soft Delete:** Criar uma branch para demonstrar a implementação de exclusão lógica.
+- **Validação de Competência por Função:** Implementar uma regra de negócio na `APP Saúde` para validar se o usuário designado como responsável por um serviço (como uma cirurgia) possui a função (`role`) apropriada (ex: `Veterinário`), garantindo a integridade e a lógica dos dados.
+- **Refatoração de Filtros:** Otimizar os filtros do `django-filter` para uma sintaxe mais declarativa e limpa.
+- **Sistema de Filas Assíncronas:** Implementar um sistema de gerenciamento de filas (ex: com **RabbitMQ** + **Celery**) para processar tarefas em segundo plano, como o envio de e-mails ou a geração de relatórios do `Bot de Preços`.
+- **Banco NoSQL (MongoDB):** Adicionar suporte a banco de dados NoSQL (ex: MongoDB) para armazenar dados não relacionais, como logs, histórico ou cache.
 
-OBS.: Revisar os editable = false nos models, lembrando que ele apenas retira o campo do formulário e não que torna falso a edição do campo
+> 💡 A ideia de usar um banco NoSQL como o MongoDB é complementar o PostgreSQL, armazenando dados que não exigem estrutura relacional rígida. Isso pode incluir logs, dados históricos, documentos grandes ou até estatísticas geradas automaticamente.
+- **Vídeo Tutorial:** Gravar e disponibilizar um vídeo demonstrando como clonar, configurar e executar o projeto localmente.
 
-Editar no postman os token de user, qnd eu reiniciar o docker. Criar uma pasta com todos os tipos de user no postman, para facilitar os testes com token
-Mudar os digitos para o preço do hotel, pelo menos 4 digitos mais 2 decimais
-A lógica que eu vou seguir é que os usuários podem ver muitas coisas mas em questão de vendas precisa passar na mão de um funcionário, pois não há um sistema de pagamento implementado, então precissa passar na mão de um funcionário...
-Verificar a criação de breed se eu colocar vira lata em especies diferentes não é permitido, analisa se preciso verificar a combinação ao inves de apenas um campo
-Outra melhoria futura é em relação ao tratamento de preços, é possível observar no uml da app banho/tosa foi feita uma correção para manter o histórico de preço dos
-serviços, onde existe um preço para o serviço e outro para quando o serviço executado foi salvo, assim, se o preço do serviço for atualizado outros já feitos
-terão um hitórico de preço correto. Sendo assim, seria necessaŕio fazer o mesmo nas outras apps. A situação não está errada, pois quando criei não considerei que os preços seriam atualizados, então nesse modelo estava correto, entretanto a opção de ter atualização é muito mais realista, portanto, vão ser tarefas adicionadas para melhorias futuras, pois o foco no momento é terminar a primeira versão.
+- **Atualização Automática de Estoque (via Signals):** Implementar `signals` do Django para atualizar o estoque de produtos automaticamente ao realizar vendas ou reservas.
 
-modificar respostas que tenham arquivos/imagens -> Manter a abordagem atual, mas com URLs assinadas (presigned URLs).
-MinIO permite gerar presigned URLs, com tempo limitado, segurança e sem deixar os arquivos públicos.
+> 💡 O uso de `signals` no Django garante que a lógica de atualização de estoque esteja acoplada ao fluxo de negócio da aplicação, mantendo o controle e a rastreabilidade dentro do código.
 
-Preciso conferir se os updates precisam fazer a verificação também
+- **Acesso Seguro a Arquivos com "Presigned URLs":** Refatorar a forma como a API retorna links para arquivos no MinIO. Em vez de links diretos, a API gerará *Presigned URLs* — links temporários e seguros com tempo de expiração limitado. Isso garante que apenas usuários autorizados possam acessar os arquivos, e somente por um curto período, sem a necessidade de tornar os arquivos públicos.
 
-fazer uma rota que retorna os horários filtrando pelo pet, dono, e groomer
+---
 
-consertar o campo id em appointmentservice, esqueci de colocar id como um uuid
+## 📝 Decisões de Design e Anotações Técnicas
 
-bug ** - Existe um problema critico na att de Services do banho/tosa, pois ao atualizar o campo de execution_time ele iria bagunçar completamente a agenda. Neste caso a att de tempo do serviço deveria ser feita criando um novo serviço e não atualizando o antigo. Colocar para calcular isso ficaria muito complexo na agenda e tornaria dificil para o usuário, pois já existe os horário definidos e se um tempo maior for necessário, um serviço "encavalaria" em outro horário e se tornaria um caos. A melhor opção, pelo menos no momento, é obrigar um novo serviço com um novo tempo a ser criado. Entretanto, ainda preciso poder att o campo de base_price. o que posso fazer? Bloquear a edição do campo execution_time e permitir que o resto seja editado. Para melhorar a experiência posso verificar no create do service se o nome do mesmo já existe, se já existir ele vai pegar o antigo e adicionar ao nome "desatualizado" ai futuramente posso criar um método que esporadicamente busca os serviços desatualizados e limpam do banco sem comprometer os novos. Essa estratégia funcionária ainda melhor se eu estivesse usando o soft delete, mas como este projeto não é para ser vendido, não faz diferença.
-Comentar sobre a regra do delete no services de banho/tosa
-criar tarefa para resolver a att do execution_time de servicos em banho/tosa!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>
-Qual seria uma boa abordagem para a fç de limpar serviços inativos? buscar pela palavra inativa no nome do serviço e verificar se esse serviço não está selecionado para uma data futura do da solicitação do delete, se as condições forem satisfeitas a rotina pode limpar esses serviços desatualizados.
-A mesma coisa para o delete de serviço:
-Para melhorar o destroy, preciso verificar se o serviço está vinculado a algum agendamento posterior a tentativa de exclusão, por exemplo se tento excluir no dia 02/MAR mas existe um agenda para 03/MAR eu não posso fazer o delete, se sim, não posso deletar. Se fosse com soft delete, poderia apenas desativar o mesmo.
+- **Sincronização de IDs de Usuário (Django & Keycloak):**
+<p align="justify">
+Inicialmente, o sistema utilizava UUIDs distintos para um mesmo usuário no banco de dados do Django e no Keycloak. Isso exigia uma consulta extra ao banco para validar permissões, gerando um potencial gargalo de desempenho e um risco de segurança em uma aplicação de maior escala. Para resolver isso, o ID do usuário do Django foi adicionado como um atributo customizado (`custom attribute`) ao token JWT gerado pelo Keycloak. Dessa forma, ao decodificar o token na API, temos acesso imediato a ambos os identificadores, eliminando a necessidade de consultas extras e tornando a verificação de permissões mais segura e eficiente.
+</p>
 
-💡 Nota de Design (exemplo para horá de escrever no readme)
-O campo execution_time do modelo ServiceType não pode ser alterado após a criação. Essa decisão foi tomada para garantir a integridade da agenda, já que o tempo de execução impacta diretamente a alocação de horários dos funcionários.
-Para atualizar o tempo de um serviço, o sistema exige a criação de um novo tipo de serviço, mantendo o histórico dos agendamentos passados. Isso evita conflitos, sobreposição de horários e inconsistência nos dados.
+- **Proteção de Agendamentos Futuros na Exclusão de Serviços:**
+<p align="justify">
+Foi implementada uma validação para impedir a exclusão de um tipo de serviço (ex: 'Tosa Higiênica') se ele estiver associado a qualquer agendamento com data futura. Essa regra de negócio é crucial para garantir a integridade da agenda e evitar que clientes tenham seus serviços cancelados inesperadamente. A exclusão só é permitida se não houver compromissos futuros vinculados àquele serviço.
+</p>
 
+- **Hard Delete vs. Soft Delete:**
+<p align="justify">
+Atualmente, o projeto utiliza exclusão física (hard delete). Esta abordagem foi escolhida por ser um projeto de portfólio, permitindo explorar desafios como o rollback de exclusões em conjunto com o Keycloak. Para um projeto comercial, a implementação de soft delete seria a prática recomendada.
+</p>
 
+- **Atualização de Serviços com Tempo Fixo:**
+> 💡 Para garantir a integridade da agenda, o campo `execution_time` em um serviço de banho/tosa não pode ser alterado após a criação. Para modificar o tempo, um **novo tipo de serviço** deve ser criado. Isso evita conflitos e sobreposição de horários. Para gerenciar a transição, ao criar um novo serviço com um nome já existente, o antigo é renomeado para `"<nome>-desativado"`.
 
+- **Uso de `BaseViewSet`:**
+<p align="justify">
+Muitas views utilizam `ModelViewSet` para agilizar o desenvolvimento. Em um ambiente de produção, é recomendado o uso de `mixins` mais específicos ou a declaração explícita dos métodos para expor apenas os endpoints estritamente necessários.
+</p>
 
-↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓
-Depois de um tempo parado sem mexer no projeto voltei para o mesmo e na primeira mudança fui adicionar um arquivo de filtros e notei que seria melhor
+- **Garantia de Consistência na Exclusão de Arquivos:**
+<p align="justify">
+Para evitar a existência de arquivos órfãos no MinIO (um arquivo que existe no armazenamento, mas sem referência no banco de dados), a lógica de exclusão foi envolvida em um bloco <code>transaction.atomic</code> do Django. Isso garante que o arquivo no bucket só seja removido se, e somente se, o registro correspondente no banco de dados for excluído com sucesso. Se a operação no banco falhar, a transação inteira é revertida (rollback), e o arquivo permanece intacto, mantendo a consistência dos dados.
+</p>
 
-Ao inves de criar o filtro desta forma:
-```
-...
-pet_name = django_filters.CharFilter(method='filter_pet_name')
-def filter_pet_name(self, queryset, name, value): 
-        """
-        Filtra as raças com base no nome do pet.
-        """
-        return queryset.filter(pet_id__name__iexact=value)
-...
-```
-Fica muito mais elegante fazer:
-```
-...
-pet_name2 = django_filters.CharFilter(field_name='pet_id__name', lookup_expr='icontains')
-...
-```
+---
 
-Logo seria uma refatoração interessante, modificar todos sos filtros simples como esse para a forma reduzida, pois a leitura fica simplificada e mantem o outro estilo apenas para filtros mais complexos
+<p align="justify">
+<em>Este README será atualizado continuamente à medida que o projeto evolui. Sinta-se à vontade para explorar, testar e contribuir!</em>
+</p>
