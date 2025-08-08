@@ -1,0 +1,52 @@
+# Ignorar a pasta do virtualenv
+petshopenv/
+
+# Ignorar arquivos de ambiente
+.env
+
+# Ignorar diretórios e arquivos de compilação Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Ignorar arquivos de log
+*.log
+
+# Ignorar arquivos de migração Django
+**/migrations/
+!**/migrations/__init__.py
+
+# Ignorar arquivos de teste
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+
+# Ignorar arquivos temporários e de backup
+*~
+*.tmp
+*.bak
+*.swp
+
+# Ignorar arquivos de configuração de IDEs
+.idea/
+.vscode/
+
+# Ignorar outros arquivos gerados
+*.egg-info/
+dist/
+build/
+*.egg
+.Python
+
+# Ignorar diretórios específicos de ferramentas
+# (Adicione outras ferramentas específicas que você não deseja incluir)

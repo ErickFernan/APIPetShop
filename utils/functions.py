@@ -1,0 +1,131 @@
+import os
+import magic
+import uuid
+
+from rest_framework import status
+from rest_framework.response import Response
+
+from datetime import time, timedelta
+
+
+def generate_time_choices(start_hour=6, end_hour=22, interval_minutes=30):
+    """
+    Gera uma lista de horários baseado no tempo funcionamento do estabelecimento e de um intervalo
+    padrão pré-definido, em resumo se assemelha aos horários para marcação de uma agenda física 
+    """
+    times = []
+    current_time = time(start_hour, 0)
+    end_time = time(end_hour, 0)
+    
+    while current_time <= end_time:
+        time_label = current_time.strftime('%H:%M')
+        times.append((current_time, time_label))
+        
+        current_datetime = (timedelta(hours=current_time.hour, minutes=current_time.minute) 
+                            + timedelta(minutes=interval_minutes))
+        current_time = (time(current_datetime.seconds // 3600, 
+                             (current_datetime.seconds // 60) % 60))
+        
+    return times
+
+def convert_hours_units_to_time(unit):
+    """
+    Transforma unidades de tempo em horas e minutos,
+    neste caso está prefedinido que o inteiro representa 30 min
+    """
+    if unit < 0 or unit > 32:
+        raise ValueError("O número deve ser um inteiro positivo menor que 32.")
+    
+    total_minutes = unit * 30
+    hours, minutes = divmod(total_minutes, 60)
+
+    return time(hours, minutes)
+
+def change_file_name(file_name):
+    """
+    troca o nome do arquivo original por um uuid
+    """
+    return f'{uuid.uuid4()}{os.path.splitext(file_name)[1]}'
+
+def extract_file_photo_details(file, product=None):
+    """
+    Retira informações referentes ao arquivo enviado para que o minio possa utilizar
+    """
+    file_name = product.photo_path.split('/')[-1] if product and product.photo_path else change_file_name(file.name)
+    content_type = file.content_type
+    return file_name, content_type
+
+def extract_file_photo_pdf_details(file, product=None):
+    """
+    Extrai o nome base do arquivo e corrige a extensão com base no conteúdo real do arquivo.
+    """
+    # Detecta MIME type real do conteúdo
+    mime_type = magic.from_buffer(file.read(1024), mime=True)
+    file.seek(0)  # reposiciona para não atrapalhar leitura posterior
+
+    # Mapeia MIME para extensão correta
+    extension_map = {
+        'application/pdf': 'pdf',
+        'image/jpeg': 'jpg',
+        'image/png': 'png',
+    }
+
+    try:
+        extension = extension_map[mime_type]
+    except KeyError:
+        raise ValueError(f"MIME type não suportado: {mime_type}")
+
+    # Define nome base do arquivo (sem extensão)
+    if product and product.result_path:
+        base_name = os.path.splitext(os.path.basename(product.result_path))[0]
+    else:
+        base_name = os.path.splitext(change_file_name(file.name))[0]
+
+    # Monta nome final com extensão correta
+    file_name = f"{base_name}.{extension}"
+
+    return file_name, mime_type
+
+def extract_file_audio_details(file, product=None):
+    """
+    Retira informações referentes ao arquivo enviado para que o minio possa utilizar
+    """
+    file_name = product.audio_path.split('/')[-1] if product and product.audio_path else change_file_name(file.name)
+    content_type = file.content_type
+    return file_name, content_type
+
+def has_permission(request, pk, roles):
+    # print(any(role in roles for role in request.roles) or str(request.current_user_id) == pk)
+    return any(role in roles for role in request.roles) or str(request.current_user_id) == pk
+
+
+# def validate_required_fields(data, required_fields):
+#     """
+#     Verifica se os campos obrigatórios estão presentes e não estão vazios.
+#     """
+#     errors = {}
+#     for field in required_fields:
+#         if field not in data or not str(data[field]).strip():
+#             errors[field] = f"This field is required and cannot be empty."
+#     return errors
+
+# Versão melhorada
+def validate_required_fields(data, required_fields):
+    """
+    Verifica se os campos obrigatórios estão presentes e não estão vazios.
+    Retorna um dicionário com os campos que apresentam erro.
+    """
+    return {
+        field: "This field is required and cannot be empty."
+        for field in required_fields
+        if not str(data.get(field, "")).strip()
+    }
+
+
+"""Aqui preciso criar a função que vai ser responsável por buscar os servicços desatualizados do banho/tosa e, se possivel, 
+fazer a exclusão dos mesmos. A ideia por tras dessa função dever ser: faz a busca de todos os serviços que possuem a flag de desatualizado,
+no nome, algo como nome_do_serviço desatualizado(ou outro nome melhor). Depois de obtido o resultado ele verifica se os mesmos possuem
+alogum serviço agendado numa data futura desta consulta, se houver ele ignora se não ele exclui do registo.
+Uma outra ideia que pode-se fazer futuramente para melhorar ainda mais pode ser o bot fazer a pesquisa e criar agendamentos para a excluão
+em conjunto com um sistema que não permita que os serviços que possuam o nome desatualizado sejam utilizados, retornando um erro 
+ou algo do tipo. Se necessário, nas buscas, pode-se usar expressões regulares para encontrar os serviços desatualizados."""

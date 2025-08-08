@@ -1,0 +1,100 @@
+{
+  "realm": "dev",
+  "enabled": true,
+  "smtpServer": {
+    "host": "172.18.0.1",
+    "port": "1025",
+    "from": "noreply@apipetshop.com.br",
+    "fromDisplayName": "DevKeycloak",
+    "replyTo": "suporte@apipetshop.com.br",
+    "replyToDisplayName": "SuportDevAPIPetshop",
+    "ssl": false,
+    "starttls": true,
+    "auth": false
+  },
+  "roles": {
+    "realm": [
+      { "name": "medico_veterinario" },
+      { "name": "groomer" },
+      { "name": "atendente_saude" },
+      { "name": "atendente_hotel" },
+      { "name": "atendente_loja" },
+      { "name": "atendente_banhotosa" },
+      { "name": "assistente_veterinario" },
+      { "name": "estagiario" },
+      { "name": "caixa" },
+      { "name": "zelador" },
+      { "name": "entregador" },
+      { "name": "superuser" },
+      { "name": "user" },
+      { "name": "outro" } 
+    ]
+  },
+  "groups": [
+    {
+      "name": "Atendende_geral",
+      "realmRoles": ["atendente_saude", "atendente_hotel", "atendente_loja", "atendente_banhotosa"]
+    },
+    {
+      "name": "Atendente_saude_banhotosa_loja",
+      "realmRoles": ["atendente_saude", "atendente_loja", "atendente_banhotosa"]
+    }
+  ],
+  "users": [
+    {
+      "username": "admin",
+      "enabled": true,
+      "email": "admin@teste.com.br",
+      "firstName": "Admin",
+      "lastName": "Teste",
+      "createdTimestamp": 1686494678000,
+      "credentials": [{ "type": "password", "value": "password" }],
+      "clientRoles": {
+        "realm-management": ["realm-admin"]
+      },
+      "realmRoles": ["superuser", "default-roles-dev"]
+    },
+    {
+      "username": "user",
+      "enabled": true,
+      "email": "user@example.com",
+      "firstName": "User",
+      "lastName": "Example",
+      "createdTimestamp": 1686494678000,
+      "credentials": [{ "type": "password", "value": "password" }],
+      "groups": ["Atendende_geral"],
+      "realmRoles": ["default-roles-dev"]
+    },
+    {
+      "username": "medico_vet",
+      "enabled": true,
+      "email": "medico_vet@example.com",
+      "firstName": "medico",
+      "lastName": "Example",
+      "createdTimestamp": 1686494678000,
+      "credentials": [{ "type": "password", "value": "password" }],
+      "realmRoles": ["medico_vet", "default-roles-dev"],
+      "requiredActions": ["UPDATE_PASSWORD"]
+    }
+  ],
+  "clients": [
+    {
+      "clientId": "rest-client",
+      "enabled": true,
+      "publicClient": true,
+      "standardFlowEnabled": false,
+      "directAccessGrantsEnabled": true,
+      "clientAuthenticatorType": "none",
+      "frontchannelLogout": true
+    },
+    {
+      "clientId": "admin-rest-client",
+      "enabled": true,
+      "publicClient": false,
+      "standardFlowEnabled": false,
+      "serviceAccountsEnabled": true,
+      "clientAuthenticatorType": "client-secret",
+      "frontchannelLogout": true
+    }
+  ]
+}
