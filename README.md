@@ -56,7 +56,7 @@ A visão final do projeto inclui o <strong>Kong</strong> como um API Gateway. El
 | **Keycloak** | Gerenciador de identidade e acesso, responsável pela autenticação e autorização (OAuth 2.0 / OIDC). As regras de segurança, como complexidade de senhas, são centralizadas e configuráveis diretamente nele. |
 | **MinIO** | Bucket de armazenamento S3-compatível para imagens, documentos e outros arquivos. |
 | **Docker & Docker-compose**| Contentorização de todo o ambiente, garantindo portabilidade e facilidade na configuração. |
-| **FakeSMTP** | Servidor SMTP de desenvolvimento para simular e testar o envio de e-mails. |
+| **FakeSMTP** | Servidor SMTP de desenvolvimento para simular e testar o envio de e-mails. (Vai ser substituitdo pelo plano gratuito do Brevo)|
 | **Kong (Planejado)** | API Gateway para orquestrar e proteger a comunicação entre os microsserviços. |
 | **Flask & BeautifulSoup (Planejado)** | Utilizados no desenvolvimento do `Bot de Preços`. |
 | **MongoDB (Planejado)** | Banco de dados NoSQL para armazenar dados não relacionais, como logs, cache e estatísticas. |
@@ -254,14 +254,14 @@ Este projeto está em desenvolvimento contínuo. Abaixo está uma visão geral d
     * [x] Adição de proteção na exclusão de serviços com agendamentos futuros.
 
 * **Qualidade, Manutenibilidade e Correções:**
-    * [x] Implementação de um sistema de logging e aprimoramento do tratamento de exceções em toda a aplicação.
+    * [x] Implementação de um sistema de logging e aprimoramento do tratamento de exceções em toda a aplicação. (Precisa ser aprimorado)
     * [x] Criação de funções utilitárias para centralizar as chamadas ao Keycloak, facilitando a manutenção.
     * [x] Resolução de bugs críticos, incluindo a dissociação do username do Keycloak do e-mail, a consistência de UUIDs no token JWT e a prevenção de salvamento de arquivos órfãos no MinIO.
+    * [x] Verificação e atualização das imagens e diagramas do projeto.
 
 
 ### ⏳ Em Execução
-- [ ] Revisão e organização final do README para a primeira versão estável.
-- [ ] Verificação e atualização das imagens e diagramas do projeto.
+   * [ ] Revisão e organização final do README para a primeira versão estável.
 
 ### 🗺️ Backlog e Melhorias Futuras
 - **Testes:** Implementar testes unitários e de integração com `pytest`.
